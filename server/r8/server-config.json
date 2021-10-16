@@ -1,0 +1,26 @@
+{
+    "shared": {
+        "mongodb": {
+            "url": "{r8MongoUrl}"
+        },
+        "session_options": {
+            "saveUninitialized": false,
+            "resave": false,
+            "secret": "{session_secret}",
+            "name": "r8session",
+            "proxy": true,
+            "resave": false,
+            "saveUninitialized": false
+        },
+        "session_store_options": {
+            "uri": "{r8MongoUrl}",
+            "collection": "sessions",
+            "expires": 2592000000
+        }
+    },
+    "env_specific": {
+        "development": {
+
+        }
+    }
+}
