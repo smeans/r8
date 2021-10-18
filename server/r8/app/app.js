@@ -44,7 +44,11 @@ const sessionStore = new MongoDBStore(config.session_store_options);
 const sessionOptions = Object.assign({}, config.session_options);
 sessionOptions.store = sessionStore;
 
+// set up locals (really application globals)
 app.locals.sessionParser = session(sessionOptions);
+// for use in EJS templates
+app.locals.require = require;
+
 app.use(app.locals.sessionParser);
 
 // request middleware

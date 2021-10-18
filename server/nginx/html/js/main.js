@@ -1,21 +1,36 @@
+'use strict';
+
+import * as r8 from '/js/r8.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('spa.enterPage', (e) => {
         notifyWidgets('enter', e.detail);
         setupNotifyListener();
     });
+
     document.addEventListener('spa.exitPage', (e) => {
         notifyWidgets('exit', e.detail);
     });
+
+    phInit();
 });
 
 function notifyWidgets(eventName, detail) {
     detail.page && detail.page.querySelectorAll('*[data-id]')
         .forEach( (el) => {
             const id = el.getAttribute('data-id');
-            const notifyFnName = ['handle', eventName, id].join('_');
+            const notifyFnName = [eventName, id].join('_');
 
-            window[notifyFnName] && window[notifyFnName](detail);
+            console.debug('notifyWidgets', notifyFnName);
+            widgetHandlers[notifyFnName] && widgetHandlers[notifyFnName](detail);
         });
+}
+
+const widgetHandlers = {
+    "enter_dashboard": (detail) => {
+        const packages = document.querySelector('rc-packages');
+        packages.host = r8.R8HostLocal.host;
+    }
 }
 
 let notifySocket = null;

@@ -1,5 +1,71 @@
+/*
+    https://theemer.com/?colors=778899-8ea32f-8ea3af-0e236f-0e23ef-0ea36f-000000-ffffff-8b0000-ff0000-eeeeee-fafad2-ff4500
+*/
+:root{
+    --border: #778899;
+    --ok-text: #0ea36f;
+    --err-text: #ff0000;
+    --dead-text: #8ea3af;
+    --accent-text: #0e23ef;
+    --accent-attention: #ff4500;
+    --accent-bg: #87cefa;
+    --accent-bg-lt: #87cefa94;
+    --menu-text: #111111;
+    --menu-hilight: #eeeeee;
+    --focus-bg: #fafad2;
+    --thin: 1pt;
+    --med: 2pt;
+    --thick: 3pt;
+    --margin: 2pt;
+    --small: 1.5em;
+    --large: 4em;
+    --card-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    --big-tile-h: 10em;
+    --big-tile-w: 16em;
+
+    --fastest: .2s;
+    --faster: .3s;
+    --fast: .5s;
+}
+
+html, body {
+    background: var(--main-bg);
+    font-family: "Source Code Pro", monospace;
+}
+
+header x-input  {
+    font-size: 4vh;
+    font-weight: 500;
+}
+
+rc-packages {
+    display: flex;
+    max-width: 120em;
+}
+
+button.round {
+    border: none;
+    border-radius: 25%;
+}
+
+x-page>header {
+    display: flex;
+    grid-area: header;
+}
+
+x-page>x-sidebar {
+    display: flex;
+    flex-direction: column;
+
+    grid-area: sidebar;
+}
+
+x-page>x-content {
+    display: flex;
+
+    grid-area: content;
+}
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 

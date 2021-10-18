@@ -1,3 +1,6 @@
+<%
+    const gravatar = require('gravatar');
+%>
 <x-page data-title="<%= title %>">
     <!-- This example requires Tailwind CSS v2.0+ -->
     <div class="h-screen flex overflow-hidden bg-white">
@@ -54,7 +57,7 @@
               <div class="px-2 space-y-1">
                 <% if (loginSession && loginSession.valid) { %>
                 <!-- Current: "bg-gray-100 text-gray-900", Default: "text-gray-600 hover:bg-gray-50 hover:text-gray-900" -->
-                <a href="#" class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md">
+                <a href="#/" class="bg-gray-100 text-gray-900 group flex items-center px-2 py-2 text-base font-medium rounded-md">
                   <!--
                     Heroicon name: outline/home
 
@@ -146,7 +149,7 @@
                 <div class="px-2 space-y-1">
                 <% if (loginSession && loginSession.valid) { %>
                   <!-- Current: "bg-gray-200 text-gray-900", Default: "text-gray-600 hover:bg-gray-50 hover:text-gray-900" -->
-                  <a href="#" class="bg-gray-200 text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                  <a href="#/" class="bg-gray-200 text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
                     <!--
                       Heroicon name: outline/home
 
@@ -201,15 +204,16 @@
                 </div>
               </nav>
             </div>
+            <% if (loginSession && loginSession.valid) { %>
             <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
-              <a href="#" class="flex-shrink-0 w-full group block">
+              <a href="#/profile" class="flex-shrink-0 w-full group block">
                 <div class="flex items-center">
                   <div>
-                    <img class="inline-block h-9 w-9 rounded-full" src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
+                    <img class="inline-block h-9 w-9 rounded-full" src="<%- gravatar.url(loginSession.user.email, {s: '256', r: 'pg', protocol: req.protocol}) %>" alt="<%= loginSession.user.name%>">
                   </div>
                   <div class="ml-3">
                     <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                      Whitney Francis
+                      <%= loginSession.user.name %>
                     </p>
                     <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">
                       View profile
@@ -218,6 +222,7 @@
                 </div>
               </a>
             </div>
+            <% } %>
           </div>
         </div>
       </div>
