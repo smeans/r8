@@ -1,0 +1,810 @@
+<script>
+class ExpressiveElement extends PhElement {
+    static currentMenu = null;
+
+    static checkMenuCancel(e) {
+        switch (e.type) {
+            case 'keyup': {
+                if (e.code == 'Escape') {
+                    ExpressiveElement.hideContextMenu();
+                }
+            } break;
+
+            case 'mousedown': {
+                if (!e.target.closest('x-menu')) {
+                    ExpressiveElement.hideContextMenu();
+                }
+            } break;
+        }
+    }
+
+    static hideContextMenu() {
+        const menu = ExpressiveElement.currentMenu;
+        if (!menu) {
+            return;
+        }
+
+        menu.ownerDocument.body.removeEventListener('mousedown', ExpressiveElement.checkMenuCancel, true);
+        menu.ownerDocument.body.removeEventListener('keyup', ExpressiveElement.checkMenuCancel);
+
+        menu.remove();
+        ExpressiveElement.currentMenu = null;
+    }
+
+    static showContextMenu(e, menu) {
+        ExpressiveElement.hideContextMenu();
+
+        ExpressiveElement.currentMenu = menu;
+
+        document.body.appendChild(menu);
+        menu.classList.add('active');
+        const x = Math.max(0, Math.min(e.clientX,
+                document.body.offsetWidth-menu.offsetWidth));
+        const y = Math.max(0, Math.min(e.clientY,
+                document.body.offsetHeight-menu.offsetHeight));
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+
+        menu.ownerDocument.body.addEventListener('mousedown', ExpressiveElement.checkMenuCancel, true);
+        menu.ownerDocument.body.addEventListener('keyup', ExpressiveElement.checkMenuCancel);
+    }
+
+    constructor() {
+        super();
+
+        this.addEventListener('contextmenu', (e) => {
+            this.handleContextMenu(e);
+        }, true);
+    }
+
+    get selection() {
+        return this.shadowRoot.getSelection();
+    }
+
+    get defaultSlot() {
+        return this.sq('//slot');
+    }
+
+    get actualParent() {
+        return this.parentElement || this.shadowRoot.host;
+    }
+
+    handleContextMenu(e) {
+        const menu = this.buildContextMenu();
+
+        if (!menu) {
+            return;
+        }
+
+        ExpressiveElement.hideContextMenu();
+
+        e.preventDefault();
+
+        ExpressiveElement.showContextMenu(e, menu);
+
+        return false;
+    }
+
+    fireEvent(eventName, detail=null) {
+        const e = new CustomEvent(eventName, {
+            bubbles: true,
+            composed: true,
+            detail: detail
+        });
+
+        this.dispatchEvent(e);
+    }
+
+    buildContextMenu() {
+        const menuDefinitions = [];
+        let el = this;
+
+        while (el)  {
+            const md = el.menuDefinition;
+
+            while (md && md.length) {
+                menuDefinitions.unshift(md.pop());
+            }
+
+            el = el.actualParent;
+        }
+
+        if (!menuDefinitions.length) {
+            return null;
+        }
+
+        let menu = document.createElement('x-menu');
+
+        menuDefinitions.forEach(i => {
+            const menuItem = document.createElement('x-menuitem');
+            menuItem.definition = i;
+            menu.appendChild(menuItem);
+        });
+
+        return menu;
+    }
+}
+
+function clearElement(el) {
+    el.innerText = '';
+}
+</script>
+<ph-components>
+    <template name="x-hbox">
+        <style>
+            :host {
+                display: flex;
+                flex-direction: row;
+            }
+        </style>
+        <slot></slot>
+        <script>
+            class XHbox extends ExpressiveElement {
+
+            }
+        </script>
+    </template>
+
+    <template name="x-vbox">
+        <style>
+            :host {
+                display: flex;
+                flex-direction: column;
+            }
+        </style>
+        <slot></slot>
+        <script>
+            class XVbox extends ExpressiveElement {
+
+            }
+        </script>
+    </template>
+
+    <template name="x-menuitem">
+        <style>
+            :host {
+                padding: .1rem .25rem;
+            }
+
+            :host-context(.menusep) ::slotted(*) {
+                border-top: .1rem solid var(--menu-text);
+            }
+
+            * {
+                padding: .1rem .25rem;
+            }
+
+            x-icon,
+            x-content,
+            x-accel,
+            x-action {
+                display: table-cell;
+            }
+
+            x-icon {
+                min-width: 1em;
+            }
+
+            x-label {
+                min-width: 12em;
+            }
+
+            x-accel {
+                text-align: right;
+                font-size: 80%;
+            }
+
+            x-widget {
+            }
+        </style>
+        <x-icon></x-icon>
+        <x-label></x-label>
+        <x-accel></x-accel>
+        <x-widget></x-widget>
+        <script>
+            class XMenuitem extends ExpressiveElement {
+                _definition = null;
+
+                constructor() {
+                    super();
+
+                    this.addEventListener('click', (e) => {
+                        this._definition
+                                && this._definition.action
+                                && this._definition.action(e);
+
+                        ExpressiveElement.hideContextMenu();
+                    });
+                }
+
+                get definition() {
+                    return this._definition;
+                }
+
+                set definition(newDefinition) {
+                    this._definition = newDefinition;
+                    this._syncDisplay();
+                }
+
+                _syncDisplay() {
+                    this.sq('x-icon').innerHTML = this._definition.icon || '&nbsp;';
+                    this.sq('x-label').innerHTML = this._definition.label;
+                    this.sq('x-accel').innerHTML = this._definition.accel || '';
+                    this.sq('x-widget').innerHTML = this._definition.widget || '';
+                }
+            }
+        </script>
+    </template>
+
+    <template name="x-svg">
+      <style>
+        div, svg {
+          width: 100%;
+          height: -moz-available;
+          height: -webkit-fill-available;
+          height: fill-available;
+      }
+      </style>
+      <div></div>
+      <script>
+        class XSvg extends ExpressiveElement {
+          static mappedAttributes = {"src":"src"};
+          static svgCache = {};
+
+          constructor() {
+            super();
+
+            var src = this.getAttribute('src');
+            if (src) {
+              this.loadSvg(src);
+            }
+          }
+
+          get src() {
+              return this._src;
+          }
+
+          set src(newSrc) {
+              this._src = newSrc;
+
+              if (this.src) {
+                  this.loadSvg(this.src)
+              } else {
+
+              }
+          }
+
+          get baseName() {
+            var src = this.getAttribute('src');
+
+            if (!src) {
+              return null;
+            }
+
+            var pa = src.split('/');
+
+            if (pa.length > 0) {
+              return pa[pa.length-1].split('.')[0];
+            }
+
+            return null;
+          }
+
+          set svg(newSvg) {
+            var sd = this.sq('div');
+
+            clearElement(sd);
+            if (newSvg) {
+                sd.appendChild(newSvg.cloneNode(true));
+            }
+          }
+
+          get svg() {
+            return this.sq('svg');
+          }
+
+          async loadSvg(src) {
+            var _this = this;
+            var sd = _this.sq('div');
+
+            if (src in XSvg.svgCache) {
+              var o = XSvg.svgCache[src];
+
+              if (Array.isArray(o)) {
+                o.push(_this);
+              } else {
+                _this.svg = o;
+              }
+
+              return;
+            }
+
+            XSvg.svgCache[src] = [_this];
+
+            const headers = new Headers();
+            headers.append('X-AllowCache', 'yes');
+
+            fetch(src, {
+                method: 'GET',
+                headers: headers
+            }).then(async (res) => {
+                      var td = document.createElement('div');
+
+                      td.innerHTML = await res.text();
+
+                      var svg = td.querySelector('svg');
+
+                      if (!svg.hasAttribute('viewBox') && (svg.hasAttribute('width')
+                          && svg.hasAttribute('height'))) {
+                        var w = svg.getAttribute('width');
+                        var h = svg.getAttribute('height');
+                        svg.setAttribute('viewBox', "0 0 " + parseInt(w) + ' '
+                            + parseInt(h));
+                        svg.removeAttribute('height');
+                        svg.removeAttribute('width');
+                      }
+
+                      var pel = XSvg.svgCache[src];
+
+                      pel.forEach((el) => {
+                        el.svg = svg;
+                      });
+
+                      XSvg.svgCache[src] = svg;
+                  });
+              }
+        }
+      </script>
+    </template>
+
+    <template name="x-menu">
+        <style>
+            :host {
+                display: none;
+            }
+
+            :host-context(.active) {
+                position: absolute;
+                display: table;
+                background: var(--main-bg);
+                border: .1rem solid var(--menu-text);
+                border-radius: .25rem;
+                box-shadow: .25rem .25rem .125rem grey;
+                font-family: serif;
+                user-select: none;
+            }
+
+            ::slotted(*) {
+                color: var(--menu-text);
+                text-decoration: none !important;
+            }
+
+            ::slotted(x-menuitem) {
+                display: table-row;
+            }
+
+            ::slotted(x-menuitem:hover) {
+                background: var(--menu-hilight);
+            }
+        </style>
+        <slot></slot>
+        <script>
+            class XMenu extends ExpressiveElement {
+            }
+        </script>
+    </template>
+
+    <template name="x-input">
+        <style>
+          x-entry {
+              display: inline-block;
+              outline: none;
+              min-width: 5em;
+          }
+        </style>
+
+        <x-entry autocorrect="false" spellcheck="false" contenteditable="true"><slot></slot></x-entry>
+
+        <script>
+        class XInput extends ExpressiveElement {
+            constructor() {
+                super();
+            }
+        }
+        </script>
+    </template>
+
+    <template name="x-token">
+        <style>
+            :host  {
+            }
+
+            :host-context(.undefined) x-value {
+                text-decoration: underline wavy var(--accent-attention);
+            }
+        </style>
+
+        <x-value></x-value>
+
+        <script>
+            class XToken extends ExpressiveElement  {
+                _type = null;
+                _package = null;
+
+                get type() {
+                    return this._type;
+                }
+
+                set type(newType) {
+                    if (this._type) {
+                        this.classList.remove(this._type);
+                    }
+
+                    this._type = newType;
+                    this.classList.add(this._type);
+                }
+
+                get package() {
+                    return this._package;
+                }
+
+                set package(newPackage) {
+                    this._package = newPackage;
+                    this._syncDisplay();
+                }
+
+                get value() {
+                    return this.sq('x-value').innerText;
+                }
+
+                set value(newValue) {
+                    this.sq('x-value').innerText = newValue;
+                    this._syncDisplay();
+                }
+
+                _syncDisplay() {
+                    this.classList.toggle('undefined',
+                            this.type == 'name' && this.package
+                            && !this.package[this.value]);
+                }
+
+                get menuDefinition() {
+                    if (this.type != 'name') {
+                        return [];
+                    }
+
+                    return [
+                        {
+                            "icon": "&#129146;",
+                            "label": "input parameter",
+                            "widget": "&#10003;",
+                            "action": (e) => {
+                                console.log(this, 'mark input');
+                            }
+                        },
+                        {
+                            "icon": "&#129144;",
+                            "label": "output parameter",
+                            "action": (e) => {
+                                console.log(this, 'mark output');
+                            }
+                        }
+                    ];
+                }
+            }
+        </script>
+    </template>
+
+    <template name="x-expression">
+        <style>
+            x-workarea {
+                display: block;
+                position: relative;
+                width: 100%;
+
+                min-height: 6em;
+                border-radius: 1rem;
+                border: .25rem solid var(--border);
+                font-size: 3.5vh;
+                font-weight: 500;
+                outline: none;
+                box-sizing: border-box;
+
+                overflow-x:auto;
+            }
+
+            x-editpane, x-displaypane {
+                position: absolute;
+                top: 0;
+                left:  0;
+                min-width: 90%;
+                outline: none;
+                padding: .75rem;
+            }
+
+            x-editpane {
+                display: block;
+                color: #0000;
+                caret-color: #000;
+                pointer-events: all;
+
+                transition: 0s pointer-events;
+            }
+
+            x-displaypane {
+                display: block;
+            }
+
+            x-editpane:hover {
+                pointer-events: none;
+                transition-delay: .4s;
+            }
+
+            x-token.name {
+                transition: 0s background;
+            }
+
+            x-token.name:hover {
+                background: var(--focus-bg);
+                transition-delay: .45s;
+            }
+
+            x-token.name {
+                color: var(--ok-text);
+            }
+
+            x-token.operator {
+                color: var(--accent-text);
+            }
+
+            x-token.number {
+                color: var(--dead-text);
+            }
+
+            x-token.error {
+                color: var(--err-text);
+            }
+        </style>
+        <x-workarea>
+            <x-displaypane></x-displaypane>
+            <x-editpane autocorrect="false" spellcheck="false"
+                  contenteditable="true"></x-editpane>
+        </x-workarea>
+        <script>
+            class XExpression extends ExpressiveElement  {
+                static _lexRules = [
+                    ['ws', /\s+/],
+                    ['name', /[a-zA-Z]\w*/],
+                    ['operator', /[=\+\-\*\/%\(\)\[\]]/],
+                    ['error', /./]
+                ];
+
+                static _lexRegex = '(?:' + XExpression._lexRules.map(v => '(?<' + v[0] + '>' + v[1].toString().substr(1, v[1].toString().length-2) + ')').join('|') + ')';
+
+                _package = null;
+
+                constructor() {
+                    super();
+
+                    this.editpane.addEventListener('input', e => this._handleInput(e));
+                    this.sq('x-workarea').addEventListener('dblclick', e => this._handleDblClick(e));
+                }
+
+                get editpane() {
+                    return this.sq('x-editpane');
+                }
+
+                get displaypane() {
+                    return this.sq('x-displaypane');
+                }
+
+                get package() {
+                    return this._package;
+                }
+
+                set package(newPackage) {
+                    this._package = newPackage;
+
+                    this._syncDisplay();
+                }
+
+                get value() {
+                    return this.editpane.innerText;
+                }
+
+                set value(newValue) {
+                    this.editpane.innerText = newValue;
+
+                    this._syncDisplay();
+                }
+
+                _handleInput(e) {
+                    this._syncDisplay();
+                }
+
+                _handleDblClick(e) {
+                    const ael = this.shadowRoot.elementsFromPoint(e.clientX, e.clientY);
+                    const token = ael.find(v => v.tagName == 'X-TOKEN');
+
+                    if (token) {
+                        this.fireEvent('x.openToken', {token});
+                    }
+                }
+
+                _syncDisplay() {
+                    const tokens = this.ownerDocument.createDocumentFragment();
+                    const src = this.editpane.innerText;
+
+                    for (const match of src.matchAll(XExpression._lexRegex)) {
+                        for (const group in match.groups) {
+                            if (match.groups[group]) {
+                                const token = this.ownerDocument.createElement('x-token');
+                                token.context = this.package;
+                                token.type = group;
+                                token.value = match.groups[group];
+
+                                tokens.appendChild(token);
+
+                                break;
+                            }
+                        }
+                    }
+
+                    this.displaypane.innerText = '';
+                    this.displaypane.appendChild(tokens);
+                }
+            }
+        </script>
+    </template>
+
+    <template name="x-breadcrumb">
+        <style>
+            :host {
+                display: block;
+                min-height: 1em;
+            }
+
+            x-hbox *:not(:first-child):before {
+                content:  ">";
+            }
+
+            x-crumb {
+                display: inline-block;
+            }
+
+            x-crumb:hover {
+                background: var(--focus-bg);
+            }
+        </style>
+        <x-hbox></x-hbox>
+        <script>
+            class XBreadcrumb extends ExpressiveElement {
+                constructor() {
+                    super();
+
+                    this.sq('x-hbox').addEventListener('click', e => this._handleClick(e));
+                }
+
+                push(crumb) {
+                    const el = this.ownerDocument.createElement('x-crumb');
+                    el.innerText = crumb;
+                    this.sq('x-hbox').appendChild(el);
+                }
+
+                get current() {
+                    const lastCrumb = this.sq('x-hbox').lastElementChild;
+
+                    return lastCrumb ? lastCrumb.innerText : null;
+                }
+
+                _handleClick(e) {
+                    const crumb = e.target.closest('x-crumb');
+
+                    if (!crumb) {
+                        return;
+                    }
+
+                    this.fireEvent('x.crumbPopping');
+
+                    while (crumb.nextElementSibling) {
+                        crumb.nextElementSibling.remove();
+                    }
+
+                    this.fireEvent('x.crumbPopped');
+                }
+            }
+        </script>
+    </template>
+
+    <template name="x-editor">
+        <style>
+            x-workarea {
+                display: block;
+                position: relative;
+                width: 100%;
+            }
+        </style>
+        <x-workarea>
+            <x-breadcrumb></x-breadcrumb>
+            <x-expression></x-expression>
+        </x-workarea>
+        <script>
+            class XEditor extends ExpressiveElement {
+                _package = null;
+
+                constructor() {
+                    super();
+
+                    this.package = new ExpressivePackage();
+
+                    this.shadowRoot.addEventListener('x.openToken', e => {
+                        this.pushName(e.detail.token.value);
+                    });
+
+                    this.shadowRoot.addEventListener('x.crumbPopping', e => {
+                        if (this.bc.current) {
+                            this.save();
+                        }
+                    });
+
+                    this.shadowRoot.addEventListener('x.crumbPopped', e => {
+                        this.openName(this.bc.current);
+                    });
+
+                    this.pushName('(root)');
+                }
+
+                get package() {
+                    return this._package;
+                }
+
+                set package(newPackage) {
+                    this._package = newPackage;
+                    this.expression.package = this.package;
+                    this.openName('(root)');
+                }
+
+                get expression() {
+                    return this.sq('x-expression');
+                }
+
+                get bc() {
+                    return this.sq('x-breadcrumb');
+                }
+
+                pushName(name) {
+                    if (this.bc.current){
+                        this.save();
+                    }
+
+                    this.bc.push(name);
+
+                    this.openName(name);
+                }
+
+                openName(name) {
+                    const term = this.package.getTerm(name);
+
+                    if (!term || term.type !='expression') {
+                        this.expression.value = '';
+
+                        return;
+                    }
+
+                    this.expression.value = term.value;
+                }
+
+                save() {
+                    const name = this.bc.current;
+                    if (!name) {
+                        return;
+                    }
+
+                    this.package.defineExpression(name, this.expression.value);
+
+                    this.fireEvent('x.contextUpdated', {context: this.package});
+                }
+            }
+        </script>
+    </template>
+</ph-components>
