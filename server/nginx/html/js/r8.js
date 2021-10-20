@@ -370,7 +370,9 @@ export class R8Host {
         return this._theHost;
     }
 
-    get packages() {
+    async getPackages() {
+        await this._syncStore();
+
         return this._packages;
     }
 
@@ -400,11 +402,11 @@ export class R8Host {
         return Object.keys(this.packages).find(key => this.packages[key] === pkg);
     }
 
-    _syncStore() {}
+    async _syncStore() {}
 }
 
 export class R8HostLocal extends R8Host  {
-    get packages() {
+    async getPackages() {
         if (this._packages === undefined) {
             this._packages = JSON.parse(localStorage.getItem('r8_packages') || '{}');
             for  (const name in this._packages) {
@@ -422,5 +424,12 @@ export class R8HostLocal extends R8Host  {
         }
 
         localStorage.setItem('r8_packages', storeData);
+    }
+}
+
+export class R8HostApi extends R8Host  {
+    async _syncStore() {
+        const resp = await fetch('/api/packages');
+        this._packages = await resp.json();
     }
 }

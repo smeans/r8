@@ -16,6 +16,18 @@ function isInternalLocation(location) {
             && location.hash.indexOf('#/') == 0;
 }
 
+function toFormData(o) {
+    const formData = new FormData();
+
+    for (const k in o) {
+        if (o.hasOwnProperty(k)) {
+            formData.append(k, o[k]);
+        }
+    }
+
+    return formData;
+}
+
 function initState() {
     renderRequest('GET', window.location, null,
         updateState='replaceState');
@@ -96,6 +108,10 @@ function renderRequest(method, url, body=null, updateState=null) {
         url = new URL(url, location.href);
     }
 
+    if (body && !(body instanceof FormData)) {
+        body = toFormData(body);
+    }
+
     const options = {
         method,
         body
@@ -139,8 +155,14 @@ function renderRequest(method, url, body=null, updateState=null) {
 
                         const href = url.href;
                         if (updateState) {
-                            history[updateState]({method, href, body}, document.title,
-                                    url);
+                            try {
+                                history[updateState]({method, href, body}, document.title,
+                                        url);
+                            } catch {
+                                // !!!TBD!!! deal with unserializable bodies
+                                history[updateState]({method, href}, document.title,
+                                        url);
+                            }
                         }
                     });
             } else if (res) {

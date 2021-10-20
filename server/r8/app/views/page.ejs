@@ -1,7 +1,7 @@
 <%
     const gravatar = require('gravatar');
 %>
-<x-page data-title="<%= title %>">
+<x-page data-title="<%= title %>" data-csrf="<%- req.csrfToken() %>">
     <!-- This example requires Tailwind CSS v2.0+ -->
     <div class="h-screen flex overflow-hidden bg-white">
       <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->

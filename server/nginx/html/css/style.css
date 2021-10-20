@@ -72,3 +72,39 @@ body {
 a {
   color: #00B7FF;
 }
+
+/* dashboard styles */
+
+#packages x-tile.addNew {
+    align-items: center;
+    justify-content: center;
+}
+
+#packages rc-package-tile:hover {
+    background: var(--focus-bg);
+}
+
+#packages rc-package-tile:active {
+    box-shadow: none;
+}
+
+#packages rc-package-tile.editing:hover {
+    background: inherit;
+}
+
+#packages rc-package-tile.editing:hover,
+#packages rc-package-tile.editing:active
+{
+    background: inherit;
+    box-shadow: var(--card-shadow);
+}
+
+#packages x-tile h1 {
+    font-size: 200%;
+}
+
+#packages x-tile.addNew:hover,
+#packages x-tile.addNew:active {
+    background: inherit;
+    box-shadow: var(--card-shadow);
+}

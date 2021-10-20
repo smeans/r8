@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -8,33 +10,75 @@ const notify = require('notify');
 
 const { User, LoginSession } = require('db');
 
-async function render(req, res, next) {
-    const templateName = req.params[0] || 'home';
+async function validateUiUser(req, res, next) {
     const loginSessionId = req.session && req.session.loginSessionId;
 
-    const loginSession = (loginSessionId
-            && await LoginSession.findById(loginSessionId)) || {};
+    if (loginSessionId) {
+        const loginSession = (loginSessionId
+                && await LoginSession.findById(loginSessionId));
+        if (loginSession && loginSession.valid) {
+            await loginSession.user.populate();
+
+            req.loginSession = loginSession
+        }
+    }
+
+    // !!!TBD!!! here is where we can enforce user roles
+    // (e.g. don't allow API users to use the UI)
+    return next();
+}
+
+async function render(req, res, next) {
+    const templateName = req.params[0] || 'home';
+    const loginSession = req.loginSession || {};
+    const packageList = loginSession && await loginSession.user.getPackageList()
 
     res.render('render/' +  templateName, {
         req,
         res,
         loginSession,
+        packageList,
         next
     });
+}
+
+const serviceActions = {
+    createPackage: (req, res, next) => {
+        const packageName = req.body.packageName;
+        const organization = req.loginSession && req.loginSession.user.organization;
+
+        if (!organization) {
+            res.status(400);
+
+            return next();
+        }
+
+        organization.createPackage(packageName);
+
+        return next();
+    }
+};
+
+async function renderServiceAction(req, res, next) {
+    const  serviceAction =  req.body.serviceAction;
+
+    console.debug('renderServiceAction', serviceAction);
+    if (serviceActions.hasOwnProperty(serviceAction)) {
+        return serviceActions[serviceAction](req, res, next);
+    }
+
+    return next();
 }
 
 async function renderLogin(req, res, next) {
     const email = req.body.email;
     const session = req.session;
-    let loginSession = null;
+    let loginSession = req.loginSession;
 
-    console.debug('login: session ID', session.id);
+    if (loginSession) {
+        log.verbose('login: deleting existing loginSession: ID', loginSession.id);
 
-    if (session.loginSessionId) {
-        log.verbose('login: deleting existing loginSession: ID', session.loginSessionId);
-
-        loginSession = await LoginSession.findById(session.loginSessionId);
-        loginSession && await loginSession.user.cancelLogin(session.loginSessionId);
+        await loginSession.user.cancelLogin(session.loginSessionId);
 
         delete session.loginSessionId;
     }
@@ -84,13 +128,13 @@ async function renderLogin(req, res, next) {
 
 async function renderLogout(req, res, next) {
     const session = req.session;
-    const loginSessionId = session && session.loginSessionId;
+    const loginSession = req.loginSession;
+    const loginSessionId = loginSession && loginSession.id;
 
-    if (loginSessionId) {
-        log.verbose('logout: deleting existing loginSession: ID', loginSessionId);
+    if (loginSession) {
+        log.verbose('logout: deleting existing loginSession: ID', loginSession.id);
 
-        loginSession = await LoginSession.findById(loginSessionId);
-        loginSession && await loginSession.user.cancelLogin(loginSessionId);
+        await loginSession.user.cancelLogin(loginSessionId);
 
         delete session.loginSessionId;
     }
@@ -102,19 +146,21 @@ async function renderLogout(req, res, next) {
 
 async function renderPendingLogin(req, res, next) {
     const session = req.session;
-    let loginSession = null;
+    let loginSessionId = session.loginSessionId;
+    let loginSession = loginSessionId && await LoginSession.findById(loginSessionId);
 
-    console.debug('confirmlogin: session ID', session.id);
-
-    if (session.loginSessionId) {
-        loginSession = await LoginSession.findById(session.loginSessionId);
-
+    if (loginSession) {
         if (loginSession && loginSession.valid) {
             res.render('render/redirect', {url: '#/'});
         }
     }
 
-    render(req, res, next);
+    res.render('render/pendinglogin', {
+        req,
+        res,
+        loginSession,
+        next
+    });
 }
 
 /**
@@ -137,8 +183,8 @@ async function renderPendingLogin(req, res, next) {
 async function renderConfirmLogin(req, res, next) {
     const confirmSecret = req.query.t;
     const session = req.session;
-    const loginSessionId = session && session.loginSessionId;
-    let loginSession = await LoginSession.findById(loginSessionId);
+    const loginSessionId = session.loginSessionId;
+    let loginSession = loginSessionId && await LoginSession.findById(loginSessionId);
     const args = {req, res, next, loginSession};
     args.badSession = false;
 
@@ -187,6 +233,10 @@ router.post(/\/(logout)/, renderLogout);
 router.get(/\/(pendinglogin)/, renderPendingLogin);
 router.get(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/(confirmlogin)/, renderConfirmLogin);
-router.get(/\/(\w*)/, render);
+router.post(/\/?(\w*)/, renderServiceAction);
+router.all(/\/?(\w*)/, render);
 
-module.exports = router;
+module.exports = {
+    validateUiUser,
+    router
+};

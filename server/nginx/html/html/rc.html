@@ -90,6 +90,30 @@
         <style>
             :host {
                 display: flex;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            ::slotted(x-tile) {
+                display: flex;
+                width: var(--big-tile-w);
+                height: var(--big-tile-h);
+                border: var(--med) solid var(--border);
+                box-shadow: var(--card-shadow);
+
+                margin: 1em;
+            }
+
+            ::slotted(x-tile:hover) {
+                background: var(--focus-bg);
+            }
+
+            ::slotted(x-tile:active) {
+                box-shadow: none;
+            }
+
+            ::slotted(x-tile.editing:hover) {
+                background: inherit;
             }
         </style>
         <slot></slot>
@@ -103,22 +127,14 @@
     <template name="x-tile">
         <style>
             :host {
-                display: flex;
-            }
-        </style>
-        <slot></slot>
-        <script>
-            class XTile extends ExpressiveElement {
-
-            }
-        </script>
-    </template>
-
-    <template name="rc-package-tile">
-        <style>
-            :host {
                 align-items: center;
                 justify-content: center;
+
+                height: var(--big-tile-h);
+                width: var(--big-tile-w);
+
+                align-items: center;
+                justify-items: center;
 
                 opacity: 1;
             }
@@ -181,6 +197,37 @@
             #close {
                 display: none;
             }
+        </style>
+        <slot></slot>
+        <script>
+            class XTile extends ExpressiveElement {
+
+            }
+        </script>
+    </template>
+
+    <template name="rc-package-tile">
+        <style>
+            :host {
+                align-items: center;
+                justify-items: center;
+
+                display: flex;
+                width: var(--big-tile-w);
+                height: var(--big-tile-h);
+                border: var(--med) solid var(--border);
+                box-shadow: var(--card-shadow);
+
+                margin: 1em;
+            }
+
+            input, #close {
+                display: none;
+            }
+
+            h1  {
+                text-align: center;
+            }
 
             :host(.editing) input,
             :host(.editing) #close {
@@ -189,14 +236,6 @@
 
             :host(.editing) h1 {
                 display: none;
-            }
-
-            x-tile {
-                height: 100%;
-                width: 100%;
-
-                align-items: center;
-                justify-items: center;
             }
 
             #leftside, #rightside {
@@ -216,22 +255,75 @@
             #close  {
                 margin: var(--margin);
             }
+
+            :host(.closing),
+            :host(.closing) x-tile {
+                animation-duration: var(--faster);
+                animation-timing-function: ease-in;
+                animation-name: closing;
+            }
+
+            @keyframes closing {
+                from  {
+                    opacity: 1;
+                }
+
+                20% {
+                    max-height: var(--big-tile-h);
+                    max-width: var(--big-tile-w);
+                    transform: scale(1);
+                }
+
+                to {
+                    opacity: 0;
+                    max-height: 0;
+                    max-width: 0;
+                    transform: scale(0);
+                }
+            }
+
+            :host(.opening),
+            :host(.opening) x-tile {
+                animation-duration: var(--faster);
+                animation-timing-function: ease-out;
+                animation-name: opening;
+
+                opacity: 0;
+                max-height: 0;
+                max-width: 0;
+                transform: scale(0);
+            }
+
+            @keyframes opening {
+                from  {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                    max-height: var(--big-tile-h);
+                    max-width: var(--big-tile-w);
+                    transform: scale(1);
+                }
+            }
         </style>
-        <x-tile>
-            <x-vbox id="leftside">
-                &nbsp;
-            </x-vbox>
-            <x-vbox id="center">
-                <input name="name" placeholder="(package name)"/>
-                <h1></h1>
-            </x-vbox>
-            <x-vbox id="rightside">
-                <x-button id="close" class="sm-round"><x-svg src="svg/x.svg"></x-svg></x-button>
-            </x-vbox>
-        </x-tile>
+        <x-vbox id="leftside">
+            &nbsp;
+        </x-vbox>
+        <x-vbox id="center">
+            <input name="name" placeholder="(package name)"/>
+            <h1></h1>
+        </x-vbox>
+        <x-vbox id="rightside">
+            <x-button id="close" class="sm-round"><x-svg src="svg/x.svg"></x-svg></x-button>
+        </x-vbox>
         <script>
             class RcPackageTile extends RcElement {
-                mappedAttributes = {"editing":"editing"}
+                mappedAttributes = {
+                    "editing":"editing",
+                    "packageName": "packageName",
+                    "packageId": "packageId"
+                }
                 constructor() {
                     super();
 
@@ -265,26 +357,35 @@
 
                     this.addEventListener('click', e => {
                         if (!this.classList.contains('editing')) {
-                            this.fireEvent('rc.openPackage', {package: this.package});
+                            this.fireEvent('rc.openPackage');
                         }
                     });
 
                     this.addEventListener('animationend', e => {
-                        if (e.animationName == 'closing') {
-                            this.parentElement.removeChild(this);
+                        switch (e.animationName) {
+                            case 'closing': {
+                                this.parentElement.removeChild(this);
+                            } break;
+
+                            case 'opening': {
+                                if (this.classList.contains('editing')) {
+                                    this.sq('input').focus();
+                                }
+                            } break;
                         }
 
                         this.classList.remove(e.animationName);
                     });
                 }
 
-                get package() {
-                    return this._package;
+                get packageName() {
+                    return this.editing ? this.sq('input').value :
+                            this.sq('h1').innerText;
                 }
-
-                set package(newPackage) {
-                    this._package = newPackage;
-                    this._syncDisplay();
+                
+                set packageName(newPackageName) {
+                    this.sq('input').value = newPackageName;
+                    this.sq('h1').innerText = newPackageName;
                 }
 
                 endEditing(cancel=false) {
@@ -294,23 +395,13 @@
                             return;
                         }
                     } else {
-                        const rcPackages = this.closestElement('rc-packages');
-                        const packageName = this.sq('input[name=name]').value;
-
-                        if (!this.package) {
-                            this.package = rcPackages.host.createPackage(packageName);
-                        } else {
-                            // !!!TBD!!! rename the package
-                        }
+                        const newName = this.sq('input').value;
+                        this.sq('h1').innerText = newName;
+                        this.fireEvent('rc.endPackageTileEditing', {newName});
                     }
 
                     this.classList.remove('new');
                     this.classList.remove('editing');
-                }
-
-                _syncDisplay() {
-                    this.sq('input').value = this.package.name;
-                    this.sq('h1').innerText = this.package.name;
                 }
             }
         </script>
@@ -392,13 +483,15 @@
                 }
 
                 set host(newHost) {
+                    console.debug('setting new host', newHost);
                     this._host = newHost;
 
                     this._syncDisplay();
                 }
 
-                _syncDisplay() {
-                    for (const pkg in this.host.packages) {
+                async _syncDisplay() {
+                    console.debug('in _syncDisplay');
+                    for await (const pkg of this.host.getPackages()) {
                         const newPackage = document.createElement('rc-package-tile');
 
                         newPackage.package = pkg;

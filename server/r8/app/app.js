@@ -1,3 +1,5 @@
+'use strict';
+
 const process = require('process');
 const createError = require('http-errors');
 
@@ -16,6 +18,7 @@ const logger = require('web-logger');
 
 const indexRouter = require('./routes/index');
 const renderRouter = require('./routes/render');
+const apiRouter = require('./routes/api');
 
 const ejs = require('ejs');
 
@@ -61,11 +64,13 @@ app.use(csurf({ cookie: false }));
 
 // set up routers
 app.use('/', indexRouter);
-app.use('/render', renderRouter);
+app.use('/render', renderRouter.validateUiUser, renderRouter.router);
+app.use('/api', apiRouter.validateApiUser, apiRouter.router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+    console.debug(req);
+    next(createError(404));
 });
 
 // error handler
