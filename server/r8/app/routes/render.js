@@ -4,11 +4,47 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer();
+const { URL } = require('url');
 
-const log = require('log');
 const notify = require('notify');
 
 const { User, LoginSession } = require('db');
+
+class SPAURL extends URL {
+    static RELATIVE_BASE_URL = new URL('http://localhost');
+    isRelative = false;
+
+    constructor(url, base) {
+        try {
+            super(url, base);
+        } catch(e) {
+            if (e.code != 'ERR_INVALID_URL' || base) {
+                throw e;
+            }
+
+            super(url, SPAURL.RELATIVE_BASE_URL);
+            this.isRelative = true;
+        }
+
+        if (this.isRelative) {
+            this.hash = this.pathname;
+            this.pathname = '/';
+        }
+    }
+
+    toString() {
+        if (this.isRelative) {
+            let out = this.pathname;
+            if (this.searchParams) {
+                out += '?' + this.searchParams;
+            }
+
+            return out + this.hash;
+        } else {
+            return super.toString();
+        }
+    }
+}
 
 async function validateUiUser(req, res, next) {
     const loginSessionId = req.session && req.session.loginSessionId;
@@ -56,6 +92,22 @@ const serviceActions = {
         organization.createPackage(packageName);
 
         return next();
+    },
+
+    addProduct: async (req, res, next) => {
+        const parsedUrl = req._parsedUrl || new URL(req.url);
+        const packageId = parsedUrl.pathname.split('/')[2];
+        const loginSession = req.loginSession;
+        const organization = loginSession.user.organization;
+        const pkg = await organization.getPackage(packageId);
+
+        const term = pkg.createTerm('expression');
+        term.isPublic = true;
+        pkg.defineTerm(req.body.newProductName, term);
+
+        await organization.savePackage(pkg);
+
+        return next();
     }
 };
 
@@ -76,8 +128,6 @@ async function renderLogin(req, res, next) {
     let loginSession = req.loginSession;
 
     if (loginSession) {
-        log.verbose('login: deleting existing loginSession: ID', loginSession.id);
-
         await loginSession.user.cancelLogin(session.loginSessionId);
 
         delete session.loginSessionId;
@@ -101,7 +151,7 @@ async function renderLogin(req, res, next) {
 
         loginSession = await user.initiateLogin(session.id)
             .catch(e => {
-                log.error('unable to initiate login', e);
+                console.error('unable to initiate login', e);
 
                 render(req, res, next);
             });
@@ -228,12 +278,51 @@ async function renderConfirmLogin(req, res, next) {
     res.render('render/confirmLogin', args);
 }
 
+async function renderPackageHome(req, res, next) {
+    const packageId = req.params[0];
+    const loginSession = req.loginSession;
+    const organization = loginSession.user.organization;
+    const pkg = await organization.getPackage(packageId);
+    let termStack = req.query.ts || [];
+    if (!(Array.isArray(termStack))) {
+        termStack = [termStack];
+    }
+    termStack = termStack.map(termName => pkg.getTerm(termName))
+            .filter(term => !!term);
+
+    const breadCrumbTrail = [];
+    const bcUrl = new SPAURL(req.url);
+    bcUrl.searchParams.delete('ts');
+    breadCrumbTrail.push({
+        url: bcUrl.toString(),
+        label: pkg.packageName
+    });
+    for (let i = 0; i < termStack.length; i++) {
+        bcUrl.searchParams.append('ts', termStack[i].name);
+        breadCrumbTrail.push({
+            url: bcUrl.toString(),
+            label: termStack[i].name
+        });
+    }
+
+    res.render('render/packagehome', {
+        req,
+        res,
+        loginSession,
+        termStack,
+        breadCrumbTrail,
+        pkg,
+        next
+    });
+}
+
 router.post(/\/(login)/, renderLogin);
 router.post(/\/(logout)/, renderLogout);
 router.get(/\/(pendinglogin)/, renderPendingLogin);
 router.get(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/?(\w*)/, renderServiceAction);
+router.all(/\/package\/([0-9a-f]+)/, renderPackageHome);
 router.all(/\/?(\w*)/, render);
 
 module.exports = {

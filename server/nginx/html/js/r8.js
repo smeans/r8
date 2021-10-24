@@ -359,7 +359,7 @@ class R8Package {
     }
 }
 
-export class R8Host {
+class R8Host {
     _packages = {};
 
     static get host() {
@@ -405,7 +405,7 @@ export class R8Host {
     async _syncStore() {}
 }
 
-export class R8HostLocal extends R8Host  {
+class R8HostLocal extends R8Host  {
     async getPackages() {
         if (this._packages === undefined) {
             this._packages = JSON.parse(localStorage.getItem('r8_packages') || '{}');
@@ -427,7 +427,7 @@ export class R8HostLocal extends R8Host  {
     }
 }
 
-export class R8HostApi extends R8Host  {
+class R8HostApi extends R8Host  {
     async _syncStore() {
         const resp = await fetch('/api/packages');
         this._packages = await resp.json();

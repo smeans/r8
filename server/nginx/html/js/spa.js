@@ -104,9 +104,7 @@ function getPageTitle() {
 }
 
 function renderRequest(method, url, body=null, updateState=null) {
-    if (!(url instanceof URL)) {
-        url = new URL(url, location.href);
-    }
+    const renderUrl = new URL(url, location.href);
 
     if (body && !(body instanceof FormData)) {
         body = toFormData(body);
@@ -117,8 +115,10 @@ function renderRequest(method, url, body=null, updateState=null) {
         body
     };
 
-    const renderUrl = '/render' + url.hash.replace(/^\#/, '');
+    renderUrl.pathname = '/render' + renderUrl.hash.replace(/^\#/, '');
+    renderUrl.searchParams._hash = renderUrl.hash;
 
+    // !!!TBD!!! lock the  UI while we're waiting (add a CSS class)
     clearErrors();
     const promise = fetch(renderUrl, options)
         .catch((error) => {

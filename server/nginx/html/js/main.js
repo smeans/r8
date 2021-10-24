@@ -41,7 +41,6 @@ const widgetHandlers = {
             const csrf = e.target.closest('x-page').getAttribute('data-csrf');
 
             if (!packageId) {
-                // !!!TBD!!! lock the  UI while we're waiting (add a CSS class)
                 return renderRequest('POST', location.href, {
                         serviceAction: 'createPackage',
                         _csrf: csrf,
@@ -51,6 +50,38 @@ const widgetHandlers = {
             }
 
             console.log(e);
+        });
+        packages.addEventListener('click', (e) => {
+            const target = e.target;
+
+            if (!target.closest('#packages')) {
+                return;
+            }
+
+            const tile = target.closest('x-tile[data-packageid]');
+            if (tile) {
+                e.preventDefault();
+
+                renderRequest('GET', '#/package/' + tile.getAttribute('data-packageid'), null, updateState='pushState');
+
+                return false;
+            }
+        });
+    },
+    "enter_packagehome": async (detail) => {
+        function pushEditTerm(termName) {
+            const url = new URL(location.href);
+            url.searchParams.append('ts', termName);
+
+            renderRequest('GET', url, null, updateState="replaceState");
+        }
+
+        products.addEventListener('x.tileClicked', (e) => {
+            const termName = e.target.getAttribute('data-termname');
+
+            if (termName) {
+                pushEditTerm(termName);
+            }
         });
     }
 }

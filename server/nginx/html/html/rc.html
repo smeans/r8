@@ -201,7 +201,13 @@
         <slot></slot>
         <script>
             class XTile extends ExpressiveElement {
+                constructor() {
+                    super();
 
+                    this.addEventListener('click', (e) => {
+                        this.fireEvent('x.tileClicked');
+                    });
+                }
             }
         </script>
     </template>
@@ -382,7 +388,7 @@
                     return this.editing ? this.sq('input').value :
                             this.sq('h1').innerText;
                 }
-                
+
                 set packageName(newPackageName) {
                     this.sq('input').value = newPackageName;
                     this.sq('h1').innerText = newPackageName;

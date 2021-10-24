@@ -75,7 +75,11 @@ a {
 
 /* dashboard styles */
 
-#packages x-tile.addNew {
+x-tiles {
+    user-select: none;
+}
+
+.large x-tile.addNew {
     align-items: center;
     justify-content: center;
 }
@@ -99,12 +103,33 @@ a {
     box-shadow: var(--card-shadow);
 }
 
-#packages x-tile h1 {
+.large x-tile h1 {
     font-size: 200%;
 }
 
-#packages x-tile.addNew:hover,
-#packages x-tile.addNew:active {
+.large x-tile.addNew:hover,
+.large x-tile.addNew:active {
     background: inherit;
     box-shadow: var(--card-shadow);
+}
+
+#addProduct {
+    stroke: #fff;
+    fill: #fff;
+}
+
+x-svg {
+    display: inline-block;
+    width: 1em;
+    height: fit-content;
+}
+
+h1 x-svg {
+    display: inline-block;
+    margin-right: .25em;
+}
+
+#terms .iconarea x-svg {
+    fill: #fff;
+    stroke: #fff;
 }
