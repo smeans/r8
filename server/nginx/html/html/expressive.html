@@ -123,6 +123,15 @@ class ExpressiveElement extends PhElement {
 
         return menu;
     }
+
+    _syncDisplay() {
+        this.querySelectorAll('*').forEach((el) => {
+            el._syncDisplay && el._syncDisplay();
+        });
+        this.sqa('*').forEach((el) => {
+            el._syncDisplay && el._syncDisplay();
+        });
+    }
 }
 
 function clearElement(el) {
@@ -227,6 +236,7 @@ function clearElement(el) {
                 }
 
                 _syncDisplay() {
+                    super._syncDisplay();
                     this.sq('x-icon').innerHTML = this._definition.icon || '&nbsp;';
                     this.sq('x-label').innerHTML = this._definition.label;
                     this.sq('x-accel').innerHTML = this._definition.accel || '';
@@ -429,7 +439,10 @@ function clearElement(el) {
         <script>
             class XToken extends ExpressiveElement  {
                 _type = null;
-                _package = null;
+
+                connectedCallback() {
+                    this._syncDisplay();
+                }
 
                 get type() {
                     return this._type;
@@ -445,12 +458,9 @@ function clearElement(el) {
                 }
 
                 get package() {
-                    return this._package;
-                }
+                    const expression = this.closestElement('x-expression');
 
-                set package(newPackage) {
-                    this._package = newPackage;
-                    this._syncDisplay();
+                    return expression && expression.package;
                 }
 
                 get value() {
@@ -463,9 +473,11 @@ function clearElement(el) {
                 }
 
                 _syncDisplay() {
+                    super._syncDisplay();
+
                     this.classList.toggle('undefined',
                             this.type == 'name' && this.package
-                            && !this.package[this.value]);
+                            && !this.package.getTerm(this.value));
                 }
 
                 get menuDefinition() {
@@ -501,29 +513,22 @@ function clearElement(el) {
                 display: block;
                 position: relative;
                 width: 100%;
-
-                min-height: 6em;
-                border-radius: 1rem;
-                border: .25rem solid var(--border);
-                font-size: 3.5vh;
-                font-weight: 500;
-                outline: none;
-                box-sizing: border-box;
+                height: 100%;
 
                 overflow-x:auto;
             }
 
             x-editpane, x-displaypane {
+                display: block;
                 position: absolute;
                 top: 0;
                 left:  0;
-                min-width: 90%;
+                width: 100%;
+                height: 100%;
                 outline: none;
-                padding: .75rem;
             }
 
             x-editpane {
-                display: block;
                 color: #0000;
                 caret-color: #000;
                 pointer-events: all;
@@ -572,6 +577,11 @@ function clearElement(el) {
         </x-workarea>
         <script>
             class XExpression extends ExpressiveElement  {
+                static mappedAttributes = {
+                    "initialvalue": "initialValue",
+                    "value": "value"
+                };
+
                 static _lexRules = [
                     ['ws', /\s+/],
                     ['name', /[a-zA-Z]\w*/],
@@ -608,6 +618,15 @@ function clearElement(el) {
                     this._syncDisplay();
                 }
 
+                get initialValue() {
+                    return this._initialValue;
+                }
+
+                set initialValue(newInitialValue) {
+                    this._initialValue = newInitialValue;
+                    this.value = this.initialValue;
+                }
+
                 get value() {
                     return this.editpane.innerText;
                 }
@@ -616,6 +635,11 @@ function clearElement(el) {
                     this.editpane.innerText = newValue;
 
                     this._syncDisplay();
+                }
+
+                get isDirty() {
+                    return this._initialValue === undefined ?
+                        !!this.value : this.value != this._initialValue;
                 }
 
                 _handleInput(e) {
@@ -639,7 +663,6 @@ function clearElement(el) {
                         for (const group in match.groups) {
                             if (match.groups[group]) {
                                 const token = this.ownerDocument.createElement('x-token');
-                                token.context = this.package;
                                 token.type = group;
                                 token.value = match.groups[group];
 
@@ -734,8 +757,6 @@ function clearElement(el) {
 
                 constructor() {
                     super();
-
-                    this.package = new ExpressivePackage();
 
                     this.shadowRoot.addEventListener('x.openToken', e => {
                         this.pushName(e.detail.token.value);

@@ -119,9 +119,11 @@ function renderRequest(method, url, body=null, updateState=null) {
     renderUrl.searchParams._hash = renderUrl.hash;
 
     // !!!TBD!!! lock the  UI while we're waiting (add a CSS class)
+    document.body.classList.add('loading');
     clearErrors();
     const promise = fetch(renderUrl, options)
         .catch((error) => {
+            document.body.classList.remove('loading');
             log.debug(error);
             reportError(error);
         });
@@ -130,6 +132,8 @@ function renderRequest(method, url, body=null, updateState=null) {
 
     if (promise) {
         promise.then(res => {
+            document.body.classList.remove('loading');
+
             if (res && res.ok) {
                 fireCustomEvent('exitPage', {
                     page: main.querySelector('x-page')

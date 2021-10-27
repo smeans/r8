@@ -65,9 +65,6 @@ x-page>x-content {
 
     grid-area: content;
 }
-body {
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
 
 a {
   color: #00B7FF;
@@ -132,4 +129,22 @@ h1 x-svg {
 #terms .iconarea x-svg {
     fill: #fff;
     stroke: #fff;
+}
+
+x-expression {
+    display: block;
+    min-width: 40em;
+    max-width: 60em;
+    height: 3em;
+    background: #eee;
+}
+
+#saveButton {
+    pointer-events: none;
+    filter: grayscale(80%);
+}
+
+.dirty #saveButton {
+    pointer-events: inherit;
+    filter: inherit;
 }

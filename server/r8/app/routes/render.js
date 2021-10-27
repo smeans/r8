@@ -67,8 +67,10 @@ async function validateUiUser(req, res, next) {
 async function render(req, res, next) {
     const templateName = req.params[0] || 'home';
     const loginSession = req.loginSession || {};
-    const packageList = loginSession && await loginSession.user.getPackageList()
+    const packageList = loginSession && loginSession.user
+            && await loginSession.user.getPackageList();
 
+    console.log(req.loginSession);
     res.render('render/' +  templateName, {
         req,
         res,
@@ -105,6 +107,49 @@ const serviceActions = {
         term.isPublic = true;
         pkg.defineTerm(req.body.newProductName, term);
 
+        await organization.savePackage(pkg);
+
+        return next();
+    },
+    saveTerm: async (req, res, next) => {
+        const parsedUrl = req._parsedUrl || new URL(req.url);
+        const packageId = parsedUrl.pathname.split('/')[2];
+        const loginSession = req.loginSession;
+        const organization = loginSession.user.organization;
+        const pkg = await organization.getPackage(packageId);
+
+        const termName = req.body.termName;
+        let term = pkg.getTerm(termName);
+
+        if (term) {
+            // !!!TBD!!! add versioning support here
+            term.value = req.body.value;
+
+            await organization.savePackage(pkg);
+        } else {
+            console.warn('unable to save term', termName, 'term does not exist');
+        }
+
+        return next();
+    },
+    createTerm: async (req, res, next) => {
+        const parsedUrl = req._parsedUrl || new URL(req.url);
+        const packageId = parsedUrl.pathname.split('/')[2];
+        const loginSession = req.loginSession;
+        const organization = loginSession.user.organization;
+        const pkg = await organization.getPackage(packageId);
+
+        const termName = req.body.termName;
+        const termType = req.body.termType;
+
+        if (pkg.getTerm(termName)) {
+            res.status(400);
+
+            return next();
+        }
+
+        const term = pkg.createTerm(termType);
+        pkg.defineTerm(termName, term);
         await organization.savePackage(pkg);
 
         return next();
@@ -159,11 +204,9 @@ async function renderLogin(req, res, next) {
         if (loginSession) {
             session.loginSessionId = loginSession.id;
 
-            const confirmUrl = `${req.protocol}://${req.hostname}#/confirmlogin?t=${loginSession.confirmSecret}`;
+            const confirmUrl = `${req.protocol}://${req.hostname}?t=${loginSession.confirmSecret}#/confirmlogin`;
 
-            if (log.debugging) {
-                log.debug(`user ${loginSession.user.id}: confirm url ${confirmUrl}`);
-            }
+            console.debug(`user ${loginSession.user.id}: confirm url ${confirmUrl}`);
 
             // !!!TBD!!! send confirmation email here
 
@@ -238,6 +281,8 @@ async function renderConfirmLogin(req, res, next) {
     const args = {req, res, next, loginSession};
     args.badSession = false;
 
+    console.debug(args);
+
     switch (req.method) {
         case 'GET': {
             if (loginSession && loginSession.confirmLogin(confirmSecret)) {
@@ -289,27 +334,34 @@ async function renderPackageHome(req, res, next) {
     }
     termStack = termStack.map(termName => pkg.getTerm(termName))
             .filter(term => !!term);
+    const focusTerm = termStack.length > 0 ? termStack[termStack.length-1]
+        : null;
 
     const breadCrumbTrail = [];
     const bcUrl = new SPAURL(req.url);
     bcUrl.searchParams.delete('ts');
     breadCrumbTrail.push({
         url: bcUrl.toString(),
-        label: pkg.packageName
+        label: pkg.packageName,
+        icon: '/svg/package.svg'
     });
     for (let i = 0; i < termStack.length; i++) {
         bcUrl.searchParams.append('ts', termStack[i].name);
+        // !!!TBD!!! fix icon fill by removing fill from SVG files and using CSS
         breadCrumbTrail.push({
             url: bcUrl.toString(),
-            label: termStack[i].name
+            label: termStack[i].name,
+            icon: `/svg/term-icon-${termStack[i].termTypeName}.svg`
         });
     }
+    console.debug('bct', breadCrumbTrail);
 
     res.render('render/packagehome', {
         req,
         res,
         loginSession,
         termStack,
+        focusTerm,
         breadCrumbTrail,
         pkg,
         next

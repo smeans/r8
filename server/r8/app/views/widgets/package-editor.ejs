@@ -1,0 +1,120 @@
+<div data-widgetid="package_editor" class="py-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <h1 class="text-1xl font-semibold text-gray-900"><x-svg src="/svg/globe.svg"></x-svg>Products</h1>
+  </div>
+</div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <x-tiles class="large" id="products">
+        <% for (const termName in pkg.terms) {
+            const term = pkg.terms[termName];
+            if (term.isPublic) { %>
+            <x-tile data-termname="<%= termName %>">
+                <h1><%= termName %></h1>
+            </x-tile>
+        <%  }%>
+        <% } %>
+        <x-tile class="addNew">
+            <form method="POST">
+                <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
+                <input type="hidden" name="serviceAction" value="addProduct"/>
+                <input class="mr-1" type="text" name="newProductName" placeholder="ProductName" required/>
+                <button id="addProduct" type="submit" class="inline-flex items-center border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <x-svg src="/svg/plus.svg"></x-svg>
+                </button>
+            </form>
+        </x-tile>
+    </x-tiles>
+</div>
+<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 md:px-8">
+    <h1 class="text-1xl font-semibold text-gray-900"><x-svg src="/svg/questionmark.svg"></x-svg>Terms</h1>
+    <!-- This example requires Tailwind CSS v2.0+ -->
+    <% if (false) { %>
+    <div id="terms">
+      <ul role="list" class="mt-3 grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <li class="col-span-1 flex shadow-sm rounded-md">
+          <div class="iconarea flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
+            <x-svg src="/svg/sigma.svg"></x-svg>
+          </div>
+          <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
+            <div class="flex-1 px-4 py-2 text-sm truncate">
+              <a href="#" class="text-gray-900 font-medium hover:text-gray-600">TotalPremium</a>
+              <p class="text-gray-500">16 Members</p>
+            </div>
+            <div class="flex-shrink-0 pr-2">
+              <button type="button" class="w-8 h-8 bg-white inline-flex items-center justify-center text-gray-400 rounded-full bg-transparent hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <span class="sr-only">Open options</span>
+                <!-- Heroicon name: solid/dots-vertical -->
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li class="col-span-1 flex shadow-sm rounded-md">
+          <div class="flex-shrink-0 flex items-center justify-center w-16 bg-purple-600 text-white text-sm font-medium rounded-l-md">
+            CD
+          </div>
+          <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
+            <div class="flex-1 px-4 py-2 text-sm truncate">
+              <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Component Design</a>
+              <p class="text-gray-500">12 Members</p>
+            </div>
+            <div class="flex-shrink-0 pr-2">
+              <button type="button" class="w-8 h-8 bg-white inline-flex items-center justify-center text-gray-400 rounded-full bg-transparent hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <span class="sr-only">Open options</span>
+                <!-- Heroicon name: solid/dots-vertical -->
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li class="col-span-1 flex shadow-sm rounded-md">
+          <div class="flex-shrink-0 flex items-center justify-center w-16 bg-yellow-500 text-white text-sm font-medium rounded-l-md">
+            T
+          </div>
+          <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
+            <div class="flex-1 px-4 py-2 text-sm truncate">
+              <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Templates</a>
+              <p class="text-gray-500">16 Members</p>
+            </div>
+            <div class="flex-shrink-0 pr-2">
+              <button type="button" class="w-8 h-8 bg-white inline-flex items-center justify-center text-gray-400 rounded-full bg-transparent hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <span class="sr-only">Open options</span>
+                <!-- Heroicon name: solid/dots-vertical -->
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li class="col-span-1 flex shadow-sm rounded-md">
+          <div class="flex-shrink-0 flex items-center justify-center w-16 bg-green-500 text-white text-sm font-medium rounded-l-md">
+            RC
+          </div>
+          <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
+            <div class="flex-1 px-4 py-2 text-sm truncate">
+              <a href="#" class="text-gray-900 font-medium hover:text-gray-600">React Components</a>
+              <p class="text-gray-500">8 Members</p>
+            </div>
+            <div class="flex-shrink-0 pr-2">
+              <button type="button" class="w-8 h-8 bg-white inline-flex items-center justify-center text-gray-400 rounded-full bg-transparent hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <span class="sr-only">Open options</span>
+                <!-- Heroicon name: solid/dots-vertical -->
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <% } %>
+</div>
