@@ -138,13 +138,3 @@ x-expression {
     height: 3em;
     background: #eee;
 }
-
-#saveButton {
-    pointer-events: none;
-    filter: grayscale(80%);
-}
-
-.dirty #saveButton {
-    pointer-events: inherit;
-    filter: inherit;
-}

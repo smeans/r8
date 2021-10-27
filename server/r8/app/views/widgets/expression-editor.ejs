@@ -1,15 +1,12 @@
-<div data-widgetid="expression_editor" data-termname="<%= focusTerm.name %>" class="py-4">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-    <h1 class="text-1xl font-semibold text-gray-900"><x-svg src="/svg/term-icon-expression.svg"></x-svg>
-        <%= focusTerm.name %>
-        <button id="saveButton" disabled type="button" class="inline-flex items-center justify-items-center border border-transparent rounded-full shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-            <x-svg style="fill: var(--ok-text); width: 100%;" src="/svg/save.svg"></x-svg>
-        </button>
-    </h1>
-  </div>
-</div>
+<div class="hidden" data-widgetid="expression_editor"></div>
+<%- include('term-editor-header') %>
 <div class="py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <x-expression id="editor" class="bg-gray-50" initialvalue="<%= focusTerm.expressionSource %>"></x-expression>
     </div>
 </div>
+<%- include('terms-grid', {
+    title: "Referenced Terms",
+    terms: focusTerm.referencedTerms
+}) %>
+<%- include('new-term-dialog') %>

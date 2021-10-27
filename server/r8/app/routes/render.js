@@ -122,8 +122,15 @@ const serviceActions = {
         let term = pkg.getTerm(termName);
 
         if (term) {
+            console.debug('saving term', term.name);
             // !!!TBD!!! add versioning support here
-            term.value = req.body.value;
+            for (const p in req.body) {
+                console.debug('property', p);
+                if (p in term.constructor.prototype) {
+                    console.debug('updating', p);
+                    term[p] = req.body[p];
+                }
+            }
 
             await organization.savePackage(pkg);
         } else {
@@ -362,6 +369,7 @@ async function renderPackageHome(req, res, next) {
         loginSession,
         termStack,
         focusTerm,
+        SPAURL,
         breadCrumbTrail,
         pkg,
         next

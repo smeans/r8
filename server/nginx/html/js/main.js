@@ -1,7 +1,21 @@
 'use strict';
 
+function isPageDirty() {
+    return document.body.classList.contains('dirty');
+}
+
+function setPageDirty(isDirty) {
+    if (isPageDirty() == isDirty) {
+        return;
+    }
+
+    document.body.classList.toggle('dirty', isDirty);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('spa.enterPage', (e) => {
+        document.body.classList.remove('dirty');
+
         notifyWidgets('enter', e.detail);
         setupNotifyListener();
     });
@@ -12,9 +26,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.addEventListener('click', (e) => {
         const a = e.target.closest('a');
-        const isDirty = document.body.classList.contains('dirty');
 
-        if (a && isDirty) {
+        if (a && isPageDirty()) {
             if (!confirm(`Abandon your changes?`)) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -25,9 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, {capture: true});
 
     addEventListener('beforeunload', (e) => {
-        const isDirty = document.body.classList.contains('dirty');
-
-        if (isDirty) {
+        if (isPageDirty()) {
             e.preventDefault();
             return e.returnValue = `Abandon your changes?`;
         }
@@ -121,10 +132,18 @@ const widgetHandlers = {
     "enter_update_package": async (detail) => {
         const json = eval(packageJson.innerText)();
         window.focusPackage = R8Package.fromJson(json);
-        'editor' in window && (editor.package = focusPackage);
     },
     "exit_update_package": async (detail) => {
         focusPackage && delete window.focusPackage;
+    },
+    "enter_package_home": async (detail) => {
+        if ('cancelButton' in window)  {
+            cancelButton.addEventListener('click', (e) => {
+                if (confirm('Abandon your changes and reload?')) {
+                    renderRequest('GET', location.href, null, updateState='replaceState');
+                }
+            });
+        }
     },
     "enter_package_editor": async (detail) => {
         products.addEventListener('x.tileClicked', (e) => {
@@ -136,17 +155,24 @@ const widgetHandlers = {
         });
     },
     "enter_expression_editor": async (detail) => {
-        document.body.classList.remove('dirty');
+        console.assert(focusPackage);
+        editor.package = focusPackage;
+        
+        function hasTermChanged() {
+            return editor.isDirty
+                || description.value != description.getAttribute('data-initialvalue');
+        }
 
-        editor.addEventListener('input', (e) => {
-            document.body.classList.toggle('dirty', e.target.isDirty);
-            saveButton.disabled = !e.target.isDirty;
+        document.querySelector('x-page').addEventListener('input', (e) => {
+            setPageDirty(hasTermChanged());
+            saveButton.disabled = !isPageDirty();
+            cancelButton.disabled = !isPageDirty();
         });
 
         editor.addEventListener('x.openToken', (e) => {
             const token = e.detail.token;
 
-            if (editor.isDirty) {
+            if (isPageDirty()) {
                 // !!!TBD!!! this is very ugly, but it's quick and dirty
                 // need to come up with a better plan
                 alert('Save or abort your changes before editing another term.');
@@ -170,6 +196,7 @@ const widgetHandlers = {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
+                'description': description.value,
                 'value': editor.value
             }, updateState='replaceState');
         });
@@ -187,13 +214,15 @@ const widgetHandlers = {
         });
     },
     "enter_constant_editor": async (detail) => {
-        document.body.classList.remove('dirty');
+        function hasTermChanged() {
+            return constantValue.value != constantValue.getAttribute('data-originalvalue')
+                || description.value != description.getAttribute('data-initialvalue');
+        }
 
-        constantValue.addEventListener('input', (e) => {
-            const isDirty = constantValue.value != constantValue.getAttribute('data-originalvalue');
-
-            document.body.classList.toggle('dirty', isDirty);
-            saveButton.disabled = !isDirty;
+        document.querySelector('x-page').addEventListener('input', (e) => {
+            document.body.classList.toggle('dirty', hasTermChanged());
+            saveButton.disabled = !hasTermChanged();
+            cancelButton.disabled = !hasTermChanged();
         });
 
         saveButton.addEventListener('click', (e) => {
@@ -204,6 +233,7 @@ const widgetHandlers = {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
+                'description': description.value,
                 'value': constantValue.value
             }, updateState='replaceState');
         });
