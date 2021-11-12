@@ -14,63 +14,6 @@
     }
 </script>
 <ph-components>
-    <template name="x-button">
-        <style>
-            :host {
-                display: inline-block;
-            }
-
-            button {
-                width: 100%;
-                height: 100%;
-                font-family: inherit;
-                font-size: 100%;
-                background: #0000;
-                line-height: 1.15;
-                margin: 0;
-                overflow: visible;
-                text-transform: none;
-                -webkit-appearance: button;
-                border: none;
-            }
-
-            :host(.round),
-            :host(.sm-round),
-            :host(.lg-round) {
-                background: var(--accent-bg);
-                border-radius: 50%;
-            }
-
-            :host(.round:hover),
-            :host(.sm-round:hover),
-            :host(.lg-round:hover) {
-                background: var(--accent-bg-lt);
-            }
-
-            :host(.sm-round) {
-                width: var(--small);
-                height: var(--small);
-            }
-
-            :host(.lg-round) {
-                width: var(--large);
-                height: var(--large);
-            }
-
-            :host(.round) button,
-            :host(.sm-round) button,
-            :host(.lg-round) button {
-                fill: #fff;
-            }
-        </style>
-        <button><slot></slot></button>
-        <script>
-            class XButton extends ExpressiveElement {
-
-            }
-        </script>
-    </template>
-
     <template name="x-tiles">
         <style>
             :host {

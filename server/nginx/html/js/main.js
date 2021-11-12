@@ -12,6 +12,20 @@ function setPageDirty(isDirty) {
     document.body.classList.toggle('dirty', isDirty);
 }
 
+function initNewTermDialog() {
+    newTermDialog.addEventListener('click', (e) => {
+        if (e.target.name == 'cancel'
+                || e.target.classList.contains('cancelBackground')) {
+            cancelNewTermDialog();
+        }
+        const li = e.target.closest('li');
+        if (li) {
+            const newTermType = li.innerText.trim().toLowerCase();
+            pushCreateTerm(newTermName.innerText, newTermType);
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('spa.enterPage', (e) => {
         document.body.classList.remove('dirty');
@@ -157,7 +171,7 @@ const widgetHandlers = {
     "enter_expression_editor": async (detail) => {
         console.assert(focusPackage);
         editor.package = focusPackage;
-        
+
         function hasTermChanged() {
             return editor.isDirty
                 || description.value != description.getAttribute('data-initialvalue');
@@ -201,17 +215,7 @@ const widgetHandlers = {
             }, updateState='replaceState');
         });
 
-        newTermDialog.addEventListener('click', (e) => {
-            if (e.target.name == 'cancel'
-                    || e.target.classList.contains('cancelBackground')) {
-                cancelNewTermDialog();
-            }
-            const li = e.target.closest('li');
-            if (li) {
-                const newTermType = li.innerText.trim().toLowerCase();
-                pushCreateTerm(newTermName.innerText, newTermType);
-            }
-        });
+        initNewTermDialog();
     },
     "enter_constant_editor": async (detail) => {
         function hasTermChanged() {
@@ -237,6 +241,62 @@ const widgetHandlers = {
                 'value': constantValue.value
             }, updateState='replaceState');
         });
+    },
+    "enter_table_editor": async (detail) => {
+        const page = document.querySelector('x-page');
+        const csrf = page.getAttribute('data-csrf');
+        const termName = page.querySelector('*[data-termname]').getAttribute('data-termname');
+
+        function hasTermChanged() {
+            return description.value != description.getAttribute('data-initialvalue');
+        }
+
+        document.querySelector('x-page').addEventListener('input', (e) => {
+            document.body.classList.toggle('dirty', hasTermChanged());
+            saveButton.disabled = !hasTermChanged();
+            cancelButton.disabled = !hasTermChanged();
+        });
+
+        saveButton.addEventListener('click', (e) => {
+            renderRequest('POST', location.href, {
+                '_csrf': csrf,
+                'serviceAction': 'saveTerm',
+                'termName': termName,
+                'description': description.value
+            }, updateState='replaceState');
+        });
+
+        termTable.addEventListener('x.addKeyTerm', (e) => {
+            renderRequest('POST', location.href, {
+                '_csrf': csrf,
+                'serviceAction': 'addKeyTerm',
+                'termName': termName,
+                'keyTermName': e.detail.keyTermName
+            }, updateState='replaceState');
+        });
+
+        termTable.addEventListener('x.openToken', (e) => {
+            const token = e.detail.token;
+
+            if (isPageDirty()) {
+                // !!!TBD!!! this is very ugly, but it's quick and dirty
+                // need to come up with a better plan
+                alert('Save or abort your changes before editing another term.');
+
+                return;
+            }
+
+            const term = focusPackage.getTerm(token.value);
+            if (!term) {
+                openNewTermDialog(token.value);
+            } else {
+                pushEditTerm(term.name);
+            }
+        });
+
+        termTable.term = focusPackage.getTerm(termName);
+
+        initNewTermDialog();
     }
 }
 

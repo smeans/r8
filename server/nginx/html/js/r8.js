@@ -16,6 +16,10 @@ class R8Term {
         this._package = pkg;
     }
 
+    get package() {
+        return this._package;
+    }
+
     get value() {
         throw "not implemented";
     }

@@ -169,6 +169,63 @@ function clearElement(el) {
         </script>
     </template>
 
+    <template name="x-button">
+        <style>
+            :host {
+                display: inline-block;
+            }
+
+            button {
+                width: 100%;
+                height: 100%;
+                font-family: inherit;
+                font-size: 100%;
+                background: #0000;
+                line-height: 1.15;
+                margin: 0;
+                overflow: visible;
+                text-transform: none;
+                -webkit-appearance: button;
+                border: none;
+            }
+
+            :host(.round),
+            :host(.sm-round),
+            :host(.lg-round) {
+                background: var(--accent-bg);
+                border-radius: 50%;
+            }
+
+            :host(.round:hover),
+            :host(.sm-round:hover),
+            :host(.lg-round:hover) {
+                background: var(--accent-bg-lt);
+            }
+
+            :host(.sm-round) {
+                width: var(--small);
+                height: var(--small);
+            }
+
+            :host(.lg-round) {
+                width: var(--large);
+                height: var(--large);
+            }
+
+            :host(.round) button,
+            :host(.sm-round) button,
+            :host(.lg-round) button {
+                fill: #fff;
+            }
+        </style>
+        <button><slot></slot></button>
+        <script>
+            class XButton extends ExpressiveElement {
+
+            }
+        </script>
+    </template>
+
     <template name="x-menuitem">
         <style>
             :host {
@@ -248,12 +305,15 @@ function clearElement(el) {
 
     <template name="x-svg">
       <style>
+        :host {
+            display: inline-block;
+        }
         div, svg {
-          width: 100%;
-          height: -moz-available;
-          height: -webkit-fill-available;
-          height: fill-available;
-      }
+            width: 100%;
+            height: -moz-available;
+            height: -webkit-fill-available;
+            height: fill-available;
+        }
       </style>
       <div></div>
       <script>
@@ -427,10 +487,40 @@ function clearElement(el) {
     <template name="x-token">
         <style>
             :host  {
+                display: inline-block;
             }
 
             :host-context(.undefined) x-value {
                 text-decoration: underline wavy var(--accent-attention);
+            }
+
+            :host(.name) {
+                transition: 0s background;
+            }
+
+            :host(.name):hover {
+                background: var(--focus-bg);
+                transition-delay: .45s;
+            }
+
+            :host(.name) {
+                color: var(--ok-text);
+            }
+
+            :host(.operator) {
+                color: var(--accent-text);
+            }
+
+            :host(.number) {
+                color: var(--dead-text);
+            }
+
+            :host(.error) {
+                color: var(--err-text);
+            }
+
+            x-value {
+                display: inline-block;
             }
         </style>
 
@@ -438,6 +528,11 @@ function clearElement(el) {
 
         <script>
             class XToken extends ExpressiveElement  {
+                static mappedAttributes = {
+                    "type": "type",
+                    "value": "value"
+                };
+
                 _type = null;
 
                 connectedCallback() {
@@ -458,9 +553,18 @@ function clearElement(el) {
                 }
 
                 get package() {
+                    if (this._package) {
+                        return this._package;
+                    }
+
                     const expression = this.closestElement('x-expression');
 
                     return expression && expression.package;
+                }
+
+                set package(newPackage) {
+                    this._package = newPackage;
+                    this._syncDisplay();
                 }
 
                 get value() {
@@ -468,6 +572,7 @@ function clearElement(el) {
                 }
 
                 set value(newValue) {
+                    console.log('setting value', newValue);
                     this.sq('x-value').innerText = newValue;
                     this._syncDisplay();
                 }
@@ -543,31 +648,6 @@ function clearElement(el) {
             x-editpane:hover {
                 pointer-events: none;
                 transition-delay: .4s;
-            }
-
-            x-token.name {
-                transition: 0s background;
-            }
-
-            x-token.name:hover {
-                background: var(--focus-bg);
-                transition-delay: .45s;
-            }
-
-            x-token.name {
-                color: var(--ok-text);
-            }
-
-            x-token.operator {
-                color: var(--accent-text);
-            }
-
-            x-token.number {
-                color: var(--dead-text);
-            }
-
-            x-token.error {
-                color: var(--err-text);
             }
         </style>
         <x-workarea>
@@ -824,6 +904,155 @@ function clearElement(el) {
                     this.package.defineExpression(name, this.expression.value);
 
                     this.fireEvent('x.contextUpdated', {context: this.package});
+                }
+            }
+        </script>
+    </template>
+
+    <template name="x-term-table">
+        <style>
+            :host {
+                display: block;
+            }
+
+            x-svg {
+                width: 1em;
+                height: fit-content;
+            }
+
+            table {
+                border-spacing: 0;
+            }
+
+            th:not(:first-child)  {
+                border-left: var(--thin) solid var(--border);
+            }
+
+            td:not(:first-child) {
+                border-left: var(--thin) solid var(--border);
+            }
+
+            th, td {
+                padding: .25rem;
+            }
+
+            td {
+                border-top: var(--thin) solid var(--border);
+            }
+
+            select:invalid {
+                color: var(--dead-text);
+            }
+
+            x-template {
+                display: none;
+            }
+        </style>
+        <table id="table">
+            <thead>
+                <tr>
+                    <th class="valueCol">
+                        <x-svg src="/svg/left-arrow.svg"></x-svg>
+                        <x-token id="termHeader" type="name"></x-token>
+                    </th>
+                    <th id="addColHeader" class="addCol">
+                        <x-svg src="/svg/key.svg"></x-svg>
+                        <input id="keyTerm" placeholder="(lookup term)" list="freeTerms">
+                        <x-button id="addKeyTerm" class="round">
+                            <x-svg src="svg/plus.svg"></x-svg>
+                        </x-button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="addRow">
+                    <td class="valueCol"></td>
+                    <td class="addCol"></td>
+                </tr>
+            </tbody>
+        </table>
+        <datalist id="freeTerms">
+        </datalist>
+        <template id="keyColHeader">
+            <th class="keyCol" data-termname="">
+                <x-svg src="/svg/key.svg"></x-svg>
+                <x-token type="name"></x-token>
+            </th>
+        </template>
+        <script>
+            class XTermTable extends ExpressiveElement {
+                constructor() {
+                    super();
+
+                    console.log('xtermtable');
+
+                    this.g.table.addEventListener('dblclick', (e) => {
+                        console.log('dblclick');
+                        const token = e.target.closest('x-token');
+
+                        if (token) {
+                            this.fireEvent('x.openToken', {token});
+                        }
+                    });
+
+                    this.g.addKeyTerm.addEventListener('click', (e) => {
+                        this.fireEvent('x.addKeyTerm', {keyTermName: this.g.keyTerm.value});
+                    });
+                }
+
+                get term() {
+                    return this._term;
+                }
+
+                set term(newTerm) {
+                    this._term = newTerm;
+                    this._syncDisplay();
+                }
+
+                _syncDisplay() {
+                    this.g.termHeader.package =  this.term.package;
+                    this.g.termHeader.value = this.term.name;
+
+                    this._syncKeyColumns();
+
+                    const freeTermNames = Object.keys(this.term.package.terms)
+                        .filter(v => v != this.term.name && !this.term.keyTermNames.has(v));
+
+                    const freeTerms = this.g.freeTerms;
+                    freeTerms.innerHTML = '';
+
+                    freeTermNames.forEach((termName) => {
+                        const option = document.createElement('option');
+                        option.innerText = termName;
+                        freeTerms.appendChild(option);
+                    });
+                }
+
+                _syncKeyColumns() {
+                    const thList = Array.from(this.sqa('thead th[data-termname]'));
+                    const thDict = {};
+                    thList.forEach((th) => { thDict[th.getAttribute('data-termname')] = th.remove()});
+
+                    console.log('_syncKeyColumns', thList, thDict);
+
+                    const tr = this.g.addColHeader.parentElement;
+
+                    Array.from(this.term.keyTermNames).forEach((termName) => {
+                        let th = thDict[termName];
+
+                        if (!th) {
+                            console.log('cloneTemplate');
+                            let token = this.ownerDocument.createElement('x-token');
+                            th = this.g.keyColHeader.content.children[0].cloneNode(true);
+                        }
+
+                        tr.insertBefore(th, this.g.addColHeader);
+                        th.setAttribute('data-termname', termName);
+
+                        const token = th.querySelector('x-token');
+                        token.value = termName;
+                        token.package = this.term.package;
+                    });
                 }
             }
         </script>

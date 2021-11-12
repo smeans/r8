@@ -66,10 +66,6 @@ class PhElement extends HTMLElement {
         return this.shadowRoot.querySelectorAll(query);
     }
 
-    get templateElement() {
-        return this.constructor.template;
-    }
-
     // credit https://stackoverflow.com/a/54532941/149407
     // but I feel this code is needlessly tricky
     closestElement(
@@ -83,6 +79,22 @@ class PhElement extends HTMLElement {
                     : __Closest(el.getRootNode().host) // recursion!! break out to parent DOM
     ) {
         return __Closest(base);
+    }
+
+    get templateElement() {
+        return this.constructor.template;
+    }
+
+    get g() {
+        if (!this._g) {
+            this._g = new Proxy({}, {
+                get: (o, p) => {
+                    return this.sq('#' + p);
+                }
+            });
+        }
+
+        return this._g;
     }
 }
 

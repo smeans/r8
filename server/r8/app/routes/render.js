@@ -95,7 +95,6 @@ const serviceActions = {
 
         return next();
     },
-
     addProduct: async (req, res, next) => {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
@@ -158,6 +157,32 @@ const serviceActions = {
         const term = pkg.createTerm(termType);
         pkg.defineTerm(termName, term);
         await organization.savePackage(pkg);
+
+        return next();
+    },
+    addKeyTerm: async (req, res, next) => {
+        const parsedUrl = req._parsedUrl || new URL(req.url);
+        const packageId = parsedUrl.pathname.split('/')[2];
+        const loginSession = req.loginSession;
+        const organization = loginSession.user.organization;
+        const pkg = await organization.getPackage(packageId);
+
+        const termName = req.body.termName;
+        let term = pkg.getTerm(termName);
+
+        if (term) {
+            if (term.termTypeName != 'table') {
+                res.status(400);
+
+                return next();
+            }
+
+            term.keyTermNames.add(req.body.keyTermName);
+
+            await organization.savePackage(pkg);
+        } else {
+            res.status(404);
+        }
 
         return next();
     }
