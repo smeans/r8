@@ -168,6 +168,28 @@ const widgetHandlers = {
             }
         });
     },
+    "enter_term_editor": (detail) => {
+        deleteButton.addEventListener('click', (e) => {
+            if (confirm('Delete this term?')) {
+                const csrf = e.target.closest('x-page').getAttribute('data-csrf');
+                const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
+
+                renderRequest('POST', location.href, {
+                    '_csrf': csrf,
+                    'serviceAction': 'deleteTerm',
+                    'termName': termName
+                }).then(res => {
+                    if (res && res.ok) {
+                        const url = new URL('', location.href);
+                        url.searchParams.delete('ts');
+                        url.hash = location.hash;
+
+                        renderRequest('GET', url, null, updateState="replaceState");
+                    }
+                })
+            }
+        });
+    },
     "enter_expression_editor": async (detail) => {
         console.assert(focusPackage);
         editor.package = focusPackage;

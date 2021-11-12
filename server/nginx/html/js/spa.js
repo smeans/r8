@@ -124,7 +124,7 @@ function renderRequest(method, url, body=null, updateState=null) {
     const promise = fetch(renderUrl, options)
         .catch((error) => {
             document.body.classList.remove('loading');
-            log.debug(error);
+            console.debug(error);
             reportError(error);
         });
 

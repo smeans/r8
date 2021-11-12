@@ -160,6 +160,23 @@ const serviceActions = {
 
         return next();
     },
+    deleteTerm: async (req, res, next) => {
+        const parsedUrl = req._parsedUrl || new URL(req.url);
+        const packageId = parsedUrl.pathname.split('/')[2];
+        const loginSession = req.loginSession;
+        const organization = loginSession.user.organization;
+        const pkg = await organization.getPackage(packageId);
+
+        const termName = req.body.termName;
+
+        if (pkg.deleteTerm(termName)) {
+            console.debug('deleting term', termName);
+
+            await organization.savePackage(pkg);
+        }
+
+        return next();
+    },
     addKeyTerm: async (req, res, next) => {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
