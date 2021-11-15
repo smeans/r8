@@ -5,8 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('click', handlePageClick);
-
-    initState();
 });
 
 function isInternalLocation(location) {
@@ -28,7 +26,7 @@ function toFormData(o) {
     return formData;
 }
 
-function initState() {
+function refreshPage() {
     renderRequest('GET', window.location, null,
         updateState='replaceState');
 }

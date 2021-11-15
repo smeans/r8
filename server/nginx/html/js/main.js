@@ -58,6 +58,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }, {capture: true});
 
+    document.addEventListener('ph-loaded', (e) => {
+        refreshPage();
+    });
+
     phInit();
 });
 
@@ -123,8 +127,6 @@ const widgetHandlers = {
                     },
                     updateState='replaceState');
             }
-
-            console.log(e);
         });
         packages.addEventListener('click', (e) => {
             const target = e.target;
@@ -263,6 +265,33 @@ const widgetHandlers = {
                 'value': constantValue.value
             }, updateState='replaceState');
         });
+    },
+    "enter_input_editor": async (detail) => {
+        const page = document.querySelector('x-page');
+        const csrf = page.getAttribute('data-csrf');
+        const termName = page.querySelector('*[data-termname]').getAttribute('data-termname');
+
+        function hasTermChanged() {
+            return description.value != description.getAttribute('data-initialvalue')
+                    || dataType.value != dataType.getAttribute('data-initialvalue');
+        }
+
+        document.querySelector('x-page').addEventListener('input', (e) => {
+            document.body.classList.toggle('dirty', hasTermChanged());
+            saveButton.disabled = !hasTermChanged();
+            cancelButton.disabled = !hasTermChanged();
+        });
+
+        saveButton.addEventListener('click', (e) => {
+            renderRequest('POST', location.href, {
+                '_csrf': csrf,
+                'serviceAction': 'saveTerm',
+                'termName': termName,
+                'description': description.value,
+                'dataType': dataType.value,
+            }, updateState='replaceState');
+        });
+
     },
     "enter_table_editor": async (detail) => {
         const page = document.querySelector('x-page');

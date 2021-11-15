@@ -70,7 +70,6 @@ async function render(req, res, next) {
     const packageList = loginSession && loginSession.user
             && await loginSession.user.getPackageList();
 
-    console.log(req.loginSession);
     res.render('render/' +  templateName, {
         req,
         res,
@@ -330,8 +329,6 @@ async function renderConfirmLogin(req, res, next) {
     const args = {req, res, next, loginSession};
     args.badSession = false;
 
-    console.debug(args);
-
     switch (req.method) {
         case 'GET': {
             if (loginSession && loginSession.confirmLogin(confirmSecret)) {
@@ -403,7 +400,6 @@ async function renderPackageHome(req, res, next) {
             icon: `/svg/term-icon-${termStack[i].termTypeName}.svg`
         });
     }
-    console.debug('bct', breadCrumbTrail);
 
     res.render('render/packagehome', {
         req,

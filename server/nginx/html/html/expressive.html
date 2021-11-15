@@ -572,7 +572,6 @@ function clearElement(el) {
                 }
 
                 set value(newValue) {
-                    console.log('setting value', newValue);
                     this.sq('x-value').innerText = newValue;
                     this._syncDisplay();
                 }
@@ -984,8 +983,6 @@ function clearElement(el) {
                 constructor() {
                     super();
 
-                    console.log('xtermtable');
-
                     this.g.table.addEventListener('dblclick', (e) => {
                         console.log('dblclick');
                         const token = e.target.closest('x-token');
@@ -1033,15 +1030,12 @@ function clearElement(el) {
                     const thDict = {};
                     thList.forEach((th) => { thDict[th.getAttribute('data-termname')] = th.remove()});
 
-                    console.log('_syncKeyColumns', thList, thDict);
-
                     const tr = this.g.addColHeader.parentElement;
 
                     Array.from(this.term.keyTermNames).forEach((termName) => {
                         let th = thDict[termName];
 
                         if (!th) {
-                            console.log('cloneTemplate');
                             let token = this.ownerDocument.createElement('x-token');
                             th = this.g.keyColHeader.content.children[0].cloneNode(true);
                         }

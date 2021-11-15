@@ -1,0 +1,14 @@
+<div class="hidden" data-widgetid="input_editor"></div>
+<%- include('term-editor-header') %>
+<div class="py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <label class="block text-sm font-medium text-gray-700">Data Type</label>
+      <select id="dataType" data-initialvalue="<%= focusTerm.dataType %>" class="mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        <option value="" disabled selected>(choose)</option>
+        <% for (const dataType of pkg.constructor.DATA_TYPES) { %>
+        <option<%= focusTerm.dataType == dataType ? ' selected' : '' %>><%= dataType %></option>
+        <% } %>
+      </select>
+    </div>
+</div>
+<%- include('new-term-dialog') %>

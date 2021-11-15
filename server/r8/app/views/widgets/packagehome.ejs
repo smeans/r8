@@ -54,7 +54,7 @@
   </ol>
 </nav>
 
-<% if (focusTerm) { console.log(focusTerm);%>
+<% if (focusTerm) { %>
 <%- include(`${focusTerm.termTypeName}-editor.ejs`) %>
 <% } else { %>
 <%- include('package-editor.ejs') %>
