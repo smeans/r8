@@ -16,7 +16,8 @@
             "uri": "{r8MongoUrl}",
             "collection": "sessions",
             "expires": 2592000000
-        }
+        },
+        "org_file_store_root": "/server_files/r8/orgfiles"
     },
     "env_specific": {
         "development": {

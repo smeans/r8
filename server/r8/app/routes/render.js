@@ -55,7 +55,10 @@ async function validateUiUser(req, res, next) {
         if (loginSession && loginSession.valid) {
             await loginSession.user.populate();
 
-            req.loginSession = loginSession
+
+            req.loginSession = loginSession;
+            req.organization = loginSession.user.organization;
+            req.organization.currentEnvironment = loginSession.user.defaultEnvironment;
         }
     }
 
@@ -82,15 +85,14 @@ async function render(req, res, next) {
 const serviceActions = {
     createPackage: (req, res, next) => {
         const packageName = req.body.packageName;
-        const organization = req.loginSession && req.loginSession.user.organization;
 
-        if (!organization) {
+        if (!req.organization) {
             res.status(400);
 
             return next();
         }
 
-        organization.createPackage(packageName);
+        req.organization.createPackage(packageName);
 
         return next();
     },
@@ -98,14 +100,13 @@ const serviceActions = {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
         const loginSession = req.loginSession;
-        const organization = loginSession.user.organization;
-        const pkg = await organization.getPackage(packageId);
+        const pkg = await req.organization.getPackage(packageId);
 
         const term = pkg.createTerm('expression');
         term.isPublic = true;
         pkg.defineTerm(req.body.newProductName, term);
 
-        await organization.savePackage(pkg);
+        await req.organization.savePackage(pkg);
 
         return next();
     },
@@ -113,8 +114,7 @@ const serviceActions = {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
         const loginSession = req.loginSession;
-        const organization = loginSession.user.organization;
-        const pkg = await organization.getPackage(packageId);
+        const pkg = await req.organization.getPackage(packageId);
 
         const termName = req.body.termName;
         let term = pkg.getTerm(termName);
@@ -130,7 +130,7 @@ const serviceActions = {
                 }
             }
 
-            await organization.savePackage(pkg);
+            await req.organization.savePackage(pkg);
         } else {
             console.warn('unable to save term', termName, 'term does not exist');
         }
@@ -141,8 +141,7 @@ const serviceActions = {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
         const loginSession = req.loginSession;
-        const organization = loginSession.user.organization;
-        const pkg = await organization.getPackage(packageId);
+        const pkg = await req.organization.getPackage(packageId);
 
         const termName = req.body.termName;
         const termType = req.body.termType;
@@ -155,7 +154,7 @@ const serviceActions = {
 
         const term = pkg.createTerm(termType);
         pkg.defineTerm(termName, term);
-        await organization.savePackage(pkg);
+        await req.organization.savePackage(pkg);
 
         return next();
     },
@@ -163,15 +162,14 @@ const serviceActions = {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
         const loginSession = req.loginSession;
-        const organization = loginSession.user.organization;
-        const pkg = await organization.getPackage(packageId);
+        const pkg = await req.organization.getPackage(packageId);
 
         const termName = req.body.termName;
 
         if (pkg.deleteTerm(termName)) {
             console.debug('deleting term', termName);
 
-            await organization.savePackage(pkg);
+            await req.organization.savePackage(pkg);
         }
 
         return next();
@@ -180,8 +178,7 @@ const serviceActions = {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
         const loginSession = req.loginSession;
-        const organization = loginSession.user.organization;
-        const pkg = await organization.getPackage(packageId);
+        const pkg = await req.organization.getPackage(packageId);
 
         const termName = req.body.termName;
         let term = pkg.getTerm(termName);
@@ -195,7 +192,7 @@ const serviceActions = {
 
             term.keyTermNames.add(req.body.keyTermName);
 
-            await organization.savePackage(pkg);
+            await req.organization.savePackage(pkg);
         } else {
             res.status(404);
         }
@@ -372,8 +369,7 @@ async function renderConfirmLogin(req, res, next) {
 async function renderPackageHome(req, res, next) {
     const packageId = req.params[0];
     const loginSession = req.loginSession;
-    const organization = loginSession.user.organization;
-    const pkg = await organization.getPackage(packageId);
+    const pkg = await req.organization.getPackage(packageId);
     let termStack = req.query.ts || [];
     if (!(Array.isArray(termStack))) {
         termStack = [termStack];
