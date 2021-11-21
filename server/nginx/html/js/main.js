@@ -387,3 +387,9 @@ function setupNotifyListener() {
         }
     }
 }
+
+window['hideElement'] = (e) => {
+    const actor = e.target.closest('*[data-action]');
+
+    actor.classList.add('hidden');
+}

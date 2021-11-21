@@ -59,6 +59,7 @@ async function validateUiUser(req, res, next) {
             req.loginSession = loginSession;
             req.organization = loginSession.user.organization;
             req.organization.currentEnvironment = loginSession.user.defaultEnvironment;
+            req.errors = [];
         }
     }
 
@@ -83,7 +84,7 @@ async function render(req, res, next) {
 }
 
 const serviceActions = {
-    createPackage: (req, res, next) => {
+    createPackage: async (req, res, next) => {
         const packageName = req.body.packageName;
 
         if (!req.organization) {
@@ -92,7 +93,7 @@ const serviceActions = {
             return next();
         }
 
-        req.organization.createPackage(packageName);
+        await req.organization.createPackage(packageName);
 
         return next();
     },
@@ -152,6 +153,12 @@ const serviceActions = {
             return next();
         }
 
+        if (!req.organization.validateIdentifier(termName)) {
+            req.errors.push(`'${termName}' does not follow this organization's naming convention (${req.organization.idPolicy})`);
+
+            return next();
+        }
+
         const term = pkg.createTerm(termType);
         pkg.defineTerm(termName, term);
         await req.organization.savePackage(pkg);
@@ -206,7 +213,11 @@ async function renderServiceAction(req, res, next) {
 
     console.debug('renderServiceAction', serviceAction);
     if (serviceActions.hasOwnProperty(serviceAction)) {
-        return serviceActions[serviceAction](req, res, next);
+        try {
+            return await serviceActions[serviceAction](req, res, next)
+        } catch (e) {
+            req.errors.push(e);
+        }
     }
 
     return next();

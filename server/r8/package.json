@@ -8,6 +8,7 @@
     "build-tailwind": "npx tailwindcss -o ..\\nginx\\html\\css\\tailwind.css"
   },
   "dependencies": {
+    "better-sqlite3": "^7.4.4",
     "connect-mongodb-session": "^3.1.1",
     "cookie-parser": "~1.4.4",
     "csurf": "^1.11.0",
