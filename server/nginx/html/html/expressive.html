@@ -85,6 +85,16 @@ class ExpressiveElement extends PhElement {
         return false;
     }
 
+    handlePopupMenu(e, menu) {
+        ExpressiveElement.hideContextMenu();
+
+        e.preventDefault();
+
+        ExpressiveElement.showContextMenu(e, menu);
+
+        return false;
+    }
+
     fireEvent(eventName, detail=null) {
         const e = new CustomEvent(eventName, {
             bubbles: true,
@@ -95,8 +105,8 @@ class ExpressiveElement extends PhElement {
         this.dispatchEvent(e);
     }
 
-    buildContextMenu() {
-        const menuDefinitions = [];
+    buildContextMenu(menuDefinitions) {
+        menuDefinitions = menuDefinitions || [];
         let el = this;
 
         while (el)  {
@@ -948,6 +958,12 @@ function clearFields(form) {
                 width: 2em;
                 border-radius: 1em;
             }
+
+            x-value, -editarea {
+                display: inline-block;
+                height: 100%;
+                width: 100%;
+            }
         </style>
         <x-value><slot></slot></x-value>
         <x-editarea>
@@ -1104,6 +1120,20 @@ function clearFields(form) {
             x-template {
                 display: none;
             }
+
+            x-sff {
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+
+            .menu {
+                background: unset;
+            }
+
+            .menu:hover {
+                background: #eee;
+            }
         </style>
         <table id="table">
             <thead>
@@ -1138,6 +1168,9 @@ function clearFields(form) {
             <th class="keyCol" data-termname="">
                 <x-svg src="/svg/key.svg"></x-svg>
                 <x-token type="name"></x-token>
+                <x-button class="menu round">
+                    <x-svg src="svg/chevron-down.svg"></x-svg>
+                </x-button>
             </th>
         </template>
         <template id="rowButtons">
@@ -1170,6 +1203,20 @@ function clearFields(form) {
                             const tr = e.target.closest('tr');
 
                             this._deleteRow(tr);
+                        } else if (e.target.closest('x-button.menu')) {
+                            const th = e.target.closest('th');
+                            const keyTermName = th.querySelector('x-token').value;
+
+                            this.handlePopupMenu(e, this.buildContextMenu([
+                                {
+                                    "icon": '<x-svg src="/svg/trash.svg"></x-svg>',
+                                    "label": "delete",
+                                    "widget": "",
+                                    "action": (e) => {
+                                        this.fireEvent('x.deleteKeyTerm', {keyTermName});
+                                    }
+                                }
+                            ]))
                         }
                     });
 
@@ -1249,6 +1296,8 @@ function clearFields(form) {
                         newCell.querySelector('input').name = termName;
                         addCol.parentElement.insertBefore(newCell, addCol);
                     });
+
+                    this.g.addRow.hidden = this.term.keyTermNames.size <= 0;
                 }
 
                 _makeDataRow(row) {

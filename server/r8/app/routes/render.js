@@ -212,6 +212,32 @@ const serviceActions = {
         }
 
         return next();
+    },
+    deleteKeyTerm: async (req, res, next) => {
+        const parsedUrl = req._parsedUrl || new URL(req.url);
+        const packageId = parsedUrl.pathname.split('/')[2];
+        const loginSession = req.loginSession;
+        const pkg = await req.organization.getPackage(packageId);
+        const keyTermName = req.body.keyTermName;
+
+        const termName = req.body.termName;
+        let term = pkg.getTerm(termName);
+
+        if (term) {
+            if (term.termTypeName != 'table') {
+                res.status(400);
+
+                return next();
+            }
+
+            term.keyTermNames.delete(req.body.keyTermName);
+
+            await req.organization.savePackage(pkg);
+        } else {
+            res.status(404);
+        }
+
+        return next();
     }
 };
 

@@ -326,6 +326,15 @@ const widgetHandlers = {
             }, updateState='replaceState');
         });
 
+        termTable.addEventListener('x.deleteKeyTerm', (e) => {
+            renderRequest('POST', location.href, {
+                '_csrf': csrf,
+                'serviceAction': 'deleteKeyTerm',
+                'termName': termName,
+                'keyTermName': e.detail.keyTermName
+            }, updateState='replaceState');
+        });
+
         termTable.addEventListener('x.openToken', (e) => {
             const token = e.detail.token;
 
