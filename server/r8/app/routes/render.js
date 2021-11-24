@@ -186,6 +186,13 @@ const serviceActions = {
         const packageId = parsedUrl.pathname.split('/')[2];
         const loginSession = req.loginSession;
         const pkg = await req.organization.getPackage(packageId);
+        const keyTermName = req.body.keyTermName;
+
+        if (!req.organization.validateIdentifier(keyTermName)) {
+            req.errors.push(`'${keyTermName}' does not follow this organization's naming convention (${req.organization.idPolicy})`);
+
+            return next();
+        }
 
         const termName = req.body.termName;
         let term = pkg.getTerm(termName);
@@ -281,7 +288,7 @@ async function renderLogout(req, res, next) {
     const loginSessionId = loginSession && loginSession.id;
 
     if (loginSession) {
-        log.verbose('logout: deleting existing loginSession: ID', loginSession.id);
+        console.info('logout: deleting existing loginSession: ID', loginSession.id);
 
         await loginSession.user.cancelLogin(loginSessionId);
 

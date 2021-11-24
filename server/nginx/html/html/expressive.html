@@ -137,6 +137,27 @@ class ExpressiveElement extends PhElement {
 function clearElement(el) {
     el.innerText = '';
 }
+
+function formToJson(form) {
+    const data = {};
+    form.querySelectorAll('*[name]').forEach((el) => {
+        if (el.checkValidity && !el.checkValidity()) {
+            el.reportValidity && el.reportValidity();
+
+            throw new RangeError(`'${el.name}' is invalid`);
+        }
+
+        data[el.name] = el.value;
+    });
+
+    return data;
+}
+
+function clearFields(form) {
+    form.querySelectorAll('*[name]').forEach((el) => {
+        el.value = null;
+    });
+}
 </script>
 <ph-components>
     <template name="x-hbox">
@@ -908,6 +929,143 @@ function clearElement(el) {
         </script>
     </template>
 
+    <template name="x-sff">
+        <style>
+            :host(:not(.editing)) x-editarea {
+                display: none;
+            }
+
+            :host(.editing) x-value {
+                display: none;
+            }
+
+            :host(.error) input {
+                border: thin solid red;
+            }
+
+            button {
+                height: 2em;
+                width: 2em;
+                border-radius: 1em;
+            }
+        </style>
+        <x-value><slot></slot></x-value>
+        <x-editarea>
+            <input id="ti"/>
+            <button id="save"><x-svg src="svg/save.svg"></x-svg></button>
+            <button id="cancel"><x-svg src="svg/x.svg"></x-svg></button>
+        </x-editarea>
+        <script>
+            class XSff extends ExpressiveElement {
+                static mappedAttributes = {
+                    "fieldname": "fieldname",
+                    "apiurl": "apiurl",
+                    "type": "type",
+                    "placeholder": "placeholder"
+                };
+
+                constructor() {
+                    super();
+
+                    this.addEventListener('dblclick', (e) => {
+                        this.startEditing();
+                    });
+
+                    this.g.save.addEventListener('click', (e) => {
+                        this.commitEditing();
+                    });
+
+                    this.g.cancel.addEventListener('click', (e) => {
+                        this.endEditing();
+                    });
+                }
+
+                get fieldname() {
+                    return this._fieldname;
+                }
+
+                set fieldname(newFieldname) {
+                    this._fieldname = newFieldname;
+                }
+
+                get apiurl() {
+                    return this._apiurl;
+                }
+
+                set apiurl(newApiurl) {
+                    this._apiurl = newApiurl;
+                }
+
+                get type() {
+                    return this.g.ti.type;
+                }
+
+                set type(newType) {
+                    this.g.ti.type = newType;
+                }
+
+                get placeholder() {
+                    return this.g.ti.placeholder;
+                }
+
+                set placeholder(newPlaceholder) {
+                    this.g.ti.placeholder = newPlaceholder;
+                }
+
+                startEditing() {
+                    if (this.classList.contains('editing')) {
+                        return;
+                    }
+
+                    switch (this.g.ti.type) {
+                        case 'password': {
+                            this.g.ti.value = '';
+                        } break;
+
+                        default: {
+                            this.g.ti.value = this.innerText;
+                        } break;
+                    }
+                    this.classList.add('editing');
+                }
+
+                commitEditing() {
+                    const body = {};
+                    body[this.fieldname] = this.g.ti.value;
+
+                    this.classList.remove('error');
+
+                    fetch(this.url, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(body)
+                    }).then(resp => {
+                        if (resp.ok) {
+                            this.endEditing();
+                            switch (this.g.ti.type) {
+                                case 'password': break;
+
+                                default: {
+                                    this.innerText = this.g.ti.value;
+                                } break;
+                            }
+                        } else {
+                            this.classList.add('error');
+                        }
+                    });
+                }
+
+                endEditing() {
+                    this.classList.remove('error');
+                    this.classList.remove('editing');
+                }
+            }
+        </script>
+    </template>
+
     <template name="x-term-table">
         <style>
             :host {
@@ -965,8 +1123,12 @@ function clearElement(el) {
             </thead>
             <tbody>
                 <tr id="addRow">
-                    <td class="valueCol"></td>
-                    <td class="addCol"></td>
+                    <td class="valueCol"><input type="text" name="_value" required/></td>
+                    <td class="addCol">
+                        <x-button id="addRowButton" class="round">
+                            <x-svg src="svg/plus.svg"></x-svg>
+                        </x-button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -978,13 +1140,24 @@ function clearElement(el) {
                 <x-token type="name"></x-token>
             </th>
         </template>
+        <template id="rowButtons">
+            <td>
+                <x-button class="delete round">
+                    <x-svg src="/svg/trash.svg"></x-svg>
+                </x-button>
+            </td>
+        </template>
+        <template id="addCell">
+            <td>
+                <input type="text" required/>
+            </td>
+        </template>
         <script>
             class XTermTable extends ExpressiveElement {
                 constructor() {
                     super();
 
                     this.g.table.addEventListener('dblclick', (e) => {
-                        console.log('dblclick');
                         const token = e.target.closest('x-token');
 
                         if (token) {
@@ -992,8 +1165,28 @@ function clearElement(el) {
                         }
                     });
 
+                    this.g.table.addEventListener('click', (e) => {
+                        if (e.target.closest('x-button.delete')) {
+                            const tr = e.target.closest('tr');
+
+                            this._deleteRow(tr);
+                        }
+                    });
+
                     this.g.addKeyTerm.addEventListener('click', (e) => {
                         this.fireEvent('x.addKeyTerm', {keyTermName: this.g.keyTerm.value});
+                    });
+
+                    this.g.addRowButton.addEventListener('click', (e) => {
+                        const tr = e.target.closestElement('tr');
+
+                        try {
+                            const data = formToJson(tr);
+
+                            this._addRow(data);
+                        } catch {
+
+                        }
                     });
                 }
 
@@ -1023,6 +1216,8 @@ function clearElement(el) {
                         option.innerText = termName;
                         freeTerms.appendChild(option);
                     });
+
+                    this._syncData();
                 }
 
                 _syncKeyColumns() {
@@ -1031,12 +1226,15 @@ function clearElement(el) {
                     thList.forEach((th) => { thDict[th.getAttribute('data-termname')] = th.remove()});
 
                     const tr = this.g.addColHeader.parentElement;
+                    const addCol = this.sq('tbody .addCol');
+                    const doc = this.ownerDocument;
+                    const addCell = this.g.addCell.content.children[0];
 
                     Array.from(this.term.keyTermNames).forEach((termName) => {
                         let th = thDict[termName];
 
                         if (!th) {
-                            let token = this.ownerDocument.createElement('x-token');
+                            let token = doc.createElement('x-token');
                             th = this.g.keyColHeader.content.children[0].cloneNode(true);
                         }
 
@@ -1046,7 +1244,91 @@ function clearElement(el) {
                         const token = th.querySelector('x-token');
                         token.value = termName;
                         token.package = this.term.package;
+
+                        const newCell = addCell.cloneNode(true);
+                        newCell.querySelector('input').name = termName;
+                        addCol.parentElement.insertBefore(newCell, addCol);
                     });
+                }
+
+                _makeDataRow(row) {
+                    const rowButtons = this.g.rowButtons.content.children[0].cloneNode(true);
+                    const doc = this.ownerDocument;
+                    const tr = doc.createElement('tr');
+                    tr.setAttribute('data-rowid', row._id);
+
+                    Object.keys(row).filter(k => k != '_id').forEach((col) => {
+                        const td = doc.createElement('td');
+                        const sff =  doc.createElement('x-sff');
+                        sff.fieldname = col;
+                        sff.url = '/api/packages/' + this.term.package.id + '/tables/' + this.term.name + '/rows/' + row._id;
+                        sff.innerText = row[col];
+                        td.appendChild(sff);
+                        tr.appendChild(td);
+                    });
+
+                    tr.appendChild(rowButtons);
+
+                    return tr;
+                }
+
+                async _syncData() {
+                    this.classList.add('busy');
+                    fetch('/api/packages/' + this.term.package.id + '/tables/' + this.term.name)
+                        .then(async resp => {
+                            if (resp.ok) {
+                                const rows = await resp.json();
+                                const addRow = this.g.addRow;
+                                const doc = this.ownerDocument;
+                                const tbody = addRow.parentElement;
+
+                                for (const row of rows) {
+                                    tbody.insertBefore(this._makeDataRow(row), addRow);
+                                }
+                            }
+                        })
+                        .finally(() => {
+                            this.classList.remove('busy');
+                        });
+                }
+
+                async _addRow(data) {
+                    await fetch('/api/packages/' + this.term.package.id + '/tables/' + this.term.name, {
+                        method: 'POST',
+                        headers: {
+                          'Accept': 'application/json',
+                          'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    }).then(async resp => {
+                            if (resp.ok) {
+                                const row = await resp.json();
+                                const addRow = this.g.addRow;
+                                const tbody = addRow.parentElement;
+                                tbody.insertBefore(this._makeDataRow(row), addRow);
+
+                                clearFields(addRow);
+                                addRow.querySelector('*[name]').focus();
+                            }
+                        })
+                        .finally(() => {
+                            this.classList.remove('busy');
+                        });
+                }
+
+                async _deleteRow(tr) {
+                    const rowId = tr.getAttribute('data-rowid');
+
+                    await fetch('/api/packages/' + this.term.package.id + '/tables/' + this.term.name + '/rows/' + rowId, {
+                        method: 'DELETE'
+                    }).then(async resp => {
+                            if (resp.ok) {
+                                tr.remove();
+                            }
+                        })
+                        .finally(() => {
+                            this.classList.remove('busy');
+                        });
                 }
             }
         </script>

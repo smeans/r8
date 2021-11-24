@@ -8,86 +8,9 @@
     <!-- This example requires Tailwind CSS v2.0+ -->
     <div class="h-screen flex overflow-hidden bg-white">
       <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
-      <div class="fixed inset-0 flex z-40 lg:hidden" role="dialog" aria-modal="true">
-        <!--
-          Off-canvas menu overlay, show/hide based on off-canvas menu state.
-
-          Entering: "transition-opacity ease-linear duration-300"
-            From: "opacity-0"
-            To: "opacity-100"
-          Leaving: "transition-opacity ease-linear duration-300"
-            From: "opacity-100"
-            To: "opacity-0"
-        -->
-        <div class="fixed inset-0 bg-gray-600 bg-opacity-75" aria-hidden="true"></div>
-
-        <!--
-          Off-canvas menu, show/hide based on off-canvas menu state.
-
-          Entering: "transition ease-in-out duration-300 transform"
-            From: "-translate-x-full"
-            To: "translate-x-0"
-          Leaving: "transition ease-in-out duration-300 transform"
-            From: "translate-x-0"
-            To: "-translate-x-full"
-        -->
-        <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white focus:outline-none">
-          <!--
-            Close button, show/hide based on off-canvas menu state.
-
-            Entering: "ease-in-out duration-300"
-              From: "opacity-0"
-              To: "opacity-100"
-            Leaving: "ease-in-out duration-300"
-              From: "opacity-100"
-              To: "opacity-0"
-          -->
-          <div class="absolute top-0 right-0 -mr-12 pt-2">
-            <button type="button" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-              <span class="sr-only">Close sidebar</span>
-              <!-- Heroicon name: outline/x -->
-              <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-            <div class="flex-shrink-0 flex items-center px-4">
-              <h2 class="h-8 text-5xl font-black w-auto text-indigo-600">R8</h2>
-            </div>
-            <nav aria-label="Sidebar" class="mt-5">
-              <div class="px-2 space-y-1">
-                  <%- include('widgets/pagemenu') %>
-              </div>
-            </nav>
-          </div>
-          <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
-            <a href="#" class="flex-shrink-0 group block">
-              <div class="flex items-center">
-                <div>
-                  <img class="inline-block h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=256&h=256&q=80" alt="">
-                </div>
-                <div class="ml-3">
-                  <p class="text-base font-medium text-gray-700 group-hover:text-gray-900">
-                    Whitney Francis
-                  </p>
-                  <p class="text-sm font-medium text-gray-500 group-hover:text-gray-700">
-                    View profile
-                  </p>
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
-
-        <div class="flex-shrink-0 w-14" aria-hidden="true">
-          <!-- Force sidebar to shrink to fit close icon -->
-        </div>
-      </div>
 
       <!-- Static sidebar for desktop -->
-      <div class="hidden lg:flex lg:flex-shrink-0">
+      <div class="lg:flex lg:flex-shrink-0">
         <div class="flex flex-col w-64">
           <!-- Sidebar component, swap this element with another sidebar if you like -->
           <div class="flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-gray-100">
@@ -106,22 +29,6 @@
         </div>
       </div>
       <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
-        <div class="lg:hidden">
-          <div class="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-1.5">
-            <div>
-              <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg" alt="R8">
-            </div>
-            <div>
-              <button type="button" class="-mr-3 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900">
-                <span class="sr-only">Open sidebar</span>
-                <!-- Heroicon name: outline/menu -->
-                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
         <div class="flex-1 relative z-0 flex overflow-hidden">
           <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none xl:order-last">
               <%- body %>

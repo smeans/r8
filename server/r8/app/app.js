@@ -58,6 +58,8 @@ app.use(app.locals.sessionParser);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(upload.none());
+
+app.use('/api', apiRouter.validateApiUser, apiRouter.router);
 //app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(cookieParser(config.session_options.secret));
 app.use(csurf({ cookie: false }));
@@ -65,7 +67,6 @@ app.use(csurf({ cookie: false }));
 // set up routers
 app.use('/', indexRouter);
 app.use('/render', renderRouter.validateUiUser, renderRouter.router);
-app.use('/api', apiRouter.validateApiUser, apiRouter.router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
