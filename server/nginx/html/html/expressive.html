@@ -168,6 +168,24 @@ function clearFields(form) {
         el.value = null;
     });
 }
+
+function contentEditableText(el) {
+    const lines = [];
+
+    for (const nd of el.childNodes) {
+        switch (nd.nodeType) {
+            case Node.TEXT_NODE: {
+                lines.push(nd.nodeValue);
+            } break;
+
+            default: {
+                lines.push(nd.innerText.trim());
+            } break;
+        }
+    }
+
+    return lines.join('\n');
+}
 </script>
 <ph-components>
     <template name="x-hbox">
@@ -555,7 +573,7 @@ function clearFields(form) {
             }
         </style>
 
-        <x-value></x-value>
+        <x-value><slot></slot></x-value>
 
         <script>
             class XToken extends ExpressiveElement  {
@@ -599,11 +617,11 @@ function clearFields(form) {
                 }
 
                 get value() {
-                    return this.sq('x-value').innerText;
+                    return this.innerText;
                 }
 
                 set value(newValue) {
-                    this.sq('x-value').innerText = newValue;
+                    this.innerText = newValue;
                     this._syncDisplay();
                 }
 
@@ -613,30 +631,6 @@ function clearFields(form) {
                     this.classList.toggle('undefined',
                             this.type == 'name' && this.package
                             && !this.package.getTerm(this.value));
-                }
-
-                get menuDefinition() {
-                    if (this.type != 'name') {
-                        return [];
-                    }
-
-                    return [
-                        {
-                            "icon": "&#129146;",
-                            "label": "input parameter",
-                            "widget": "&#10003;",
-                            "action": (e) => {
-                                console.log(this, 'mark input');
-                            }
-                        },
-                        {
-                            "icon": "&#129144;",
-                            "label": "output parameter",
-                            "action": (e) => {
-                                console.log(this, 'mark output');
-                            }
-                        }
-                    ];
                 }
             }
         </script>
@@ -660,7 +654,6 @@ function clearFields(form) {
                 left:  0;
                 height: 100%;
                 outline: none;
-                white-space: pre;
             }
 
             x-editpane {
@@ -670,6 +663,7 @@ function clearFields(form) {
 
             x-displaypane {
                 display: block;
+                white-space: pre;
             }
 
             x-editpane:hover {
@@ -706,6 +700,7 @@ function clearFields(form) {
                     super();
 
                     this.editpane.addEventListener('input', e => this._handleInput(e));
+                    this.ownerDocument.addEventListener('selectionchange', e => this._handleSelectionChange(e));
                     this.sq('x-workarea').addEventListener('dblclick', e => this._handleDblClick(e));
                 }
 
@@ -755,6 +750,15 @@ function clearFields(form) {
                     this._syncDisplay();
                 }
 
+                _handleSelectionChange(e) {
+                    try {
+                        var selection = this.shadowRoot.getSelection(),
+                        range = selection.getRangeAt(0),
+                        rect = range.getClientRects()[0];
+                        console.log('selection rect', rect);
+                    } catch {}
+                }
+
                 _handleDblClick(e) {
                     const ael = this.shadowRoot.elementsFromPoint(e.clientX, e.clientY);
                     const token = ael.find(v => v.tagName == 'X-TOKEN');
@@ -766,7 +770,7 @@ function clearFields(form) {
 
                 _syncDisplay() {
                     const tokens = this.ownerDocument.createDocumentFragment();
-                    const src = this.editpane.innerText;
+                    const src = contentEditableText(this.editpane);
 
                     for (const match of src.matchAll(XExpression._lexRegex)) {
                         for (const group in match.groups) {
