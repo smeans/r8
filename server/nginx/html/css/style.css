@@ -134,8 +134,6 @@ h1 x-svg {
 
 x-expression {
     display: block;
-    min-width: 40em;
-    max-width: 60em;
-    height: 3em;
     background: #eee;
+    height: 4em;
 }

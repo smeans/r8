@@ -1,38 +1,25 @@
-<%
-    const gravatar = require('gravatar');
-%>
 <x-page data-title="<%= title %>" data-csrf="<%- req.csrfToken() %>">
-<%  if (req.errors && req.errors.length) { %>
-    <%- include('widgets/show-errors', {errors: req.errors}) %>
-<%  } %>
-    <!-- This example requires Tailwind CSS v2.0+ -->
-    <div class="h-screen flex overflow-hidden bg-white">
-      <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
+    <%  if (req.errors && req.errors.length) { %>
+        <%- include('widgets/show-errors', {errors: req.errors}) %>
+    <%  } %>
+    <div class="h-full flex">
+        <%- include('widgets/thin-pagemenu') %>
 
-      <!-- Static sidebar for desktop -->
-      <div class="lg:flex lg:flex-shrink-0">
-        <div class="flex flex-col w-64">
-          <!-- Sidebar component, swap this element with another sidebar if you like -->
-          <div class="flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-gray-100">
-            <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-              <div class="flex items-center flex-shrink-0 px-4">
-                <h2 class="h-8 text-5xl font-black w-auto text-indigo-600">R8</h2>
-              </div>
-              <nav class="mt-5 flex-1" aria-label="Sidebar">
-                <div class="px-2 space-y-1">
-                    <%- include('widgets/pagemenu') %>
-                </div>
-              </nav>
-            </div>
-            <%- include('widgets/profile-menu', {gravatar}) %>
-          </div>
-        </div>
-      </div>
-      <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
-        <div class="flex-1 relative z-0 flex overflow-hidden">
-          <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none xl:order-last">
-              <%- body %>
+      <!-- Content area -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Main content -->
+        <div class="flex-1 flex items-stretch overflow-hidden">
+          <main class="flex-1 overflow-y-auto">
+            <!-- Primary column -->
+            <section aria-labelledby="primary-heading" class="min-w-0 flex-1 h-full flex flex-col lg:order-last">
+                <%- body %>
+            </section>
           </main>
+
+          <!-- Secondary column (hidden on smaller screens) -->
+          <aside class="hidden w-72 bg-white border-l border-gray-200 overflow-y-auto md:block">
+            <!-- Your content -->
+          </aside>
         </div>
       </div>
     </div>

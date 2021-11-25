@@ -658,17 +658,14 @@ function clearFields(form) {
                 position: absolute;
                 top: 0;
                 left:  0;
-                width: 100%;
                 height: 100%;
                 outline: none;
+                white-space: pre;
             }
 
             x-editpane {
                 color: #0000;
                 caret-color: #000;
-                pointer-events: all;
-
-                transition: 0s pointer-events;
             }
 
             x-displaypane {
@@ -676,8 +673,10 @@ function clearFields(form) {
             }
 
             x-editpane:hover {
-                pointer-events: none;
-                transition-delay: .4s;
+            }
+
+            x-token:hover {
+                background: var(--accent-bg);
             }
         </style>
         <x-workarea>
@@ -772,11 +771,20 @@ function clearFields(form) {
                     for (const match of src.matchAll(XExpression._lexRegex)) {
                         for (const group in match.groups) {
                             if (match.groups[group]) {
-                                const token = this.ownerDocument.createElement('x-token');
-                                token.type = group;
-                                token.value = match.groups[group];
+                                switch (group) {
+                                    case 'ws': {
+                                        const ws = this.ownerDocument.createTextNode(match.groups[group]);
+                                        tokens.appendChild(ws);
+                                    } break;
 
-                                tokens.appendChild(token);
+                                    default: {
+                                        const token = this.ownerDocument.createElement('x-token');
+                                        token.type = group;
+                                        token.value = match.groups[group];
+
+                                        tokens.appendChild(token);
+                                    } break;
+                                }
 
                                 break;
                             }
@@ -785,6 +793,9 @@ function clearFields(form) {
 
                     this.displaypane.innerText = '';
                     this.displaypane.appendChild(tokens);
+
+                    this.displaypane.style.width = (this.editpane.offsetWidth + 1) + 'px';
+                    this.displaypane.style.height = this.editpane.offsetHeight + 'px';
                 }
             }
         </script>
