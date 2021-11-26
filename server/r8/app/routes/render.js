@@ -74,11 +74,14 @@ async function render(req, res, next) {
     const packageList = loginSession && loginSession.user
             && await loginSession.user.getPackageList();
 
+    const sidebar = [];
+
     res.render('render/' +  templateName, {
         req,
         res,
         loginSession,
         packageList,
+        sidebar,
         next
     });
 }
@@ -337,10 +340,13 @@ async function renderPendingLogin(req, res, next) {
         }
     }
 
+    const sidebar = [];
+
     res.render('render/pendinglogin', {
         req,
         res,
         loginSession,
+        sidebar,
         next
     });
 }
@@ -441,6 +447,8 @@ async function renderPackageHome(req, res, next) {
         });
     }
 
+    const sidebar = [];
+
     res.render('render/packagehome', {
         req,
         res,
@@ -449,6 +457,7 @@ async function renderPackageHome(req, res, next) {
         focusTerm,
         SPAURL,
         breadCrumbTrail,
+        sidebar,
         pkg,
         next
     });

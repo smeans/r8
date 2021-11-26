@@ -152,6 +152,21 @@ const widgetHandlers = {
     "exit_update_package": async (detail) => {
         focusPackage && delete window.focusPackage;
     },
+    "enter_termlistwidget": async (detail) => {
+        console.log('termlistwidget', termlistwidget);
+        termlistwidget.querySelector('summary label').addEventListener('click', (e) => {
+            e.target.closest('details').toggleAttribute('open');
+        });
+        termlistfilter.addEventListener('change', (e) => {
+            const filter = e.target.value;
+
+            termlistwidget.querySelectorAll('#termlist li').forEach(li => {
+                li.classList.toggle('hidden', filter && !li.hasAttribute(filter));
+            });
+
+            e.target.closest('details').toggleAttribute('open', true);
+        });
+    },
     "enter_package_home": async (detail) => {
         if ('cancelButton' in window)  {
             cancelButton.addEventListener('click', (e) => {

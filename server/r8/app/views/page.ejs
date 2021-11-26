@@ -16,10 +16,14 @@
             </section>
           </main>
 
+<%
+    if (sidebar.length > 0) {
+%>
           <!-- Secondary column (hidden on smaller screens) -->
           <aside class="hidden w-72 bg-white border-l border-gray-200 overflow-y-auto md:block">
-            <!-- Your content -->
+            <%- sidebar.join('') %>
           </aside>
+<%  } %>
         </div>
       </div>
     </div>

@@ -25,7 +25,7 @@
       </div>
     </li>
 
-    <% for (let i = 1; i < breadCrumbTrail.length-1; i++) { %>
+    <%  for (let i = 1; i < breadCrumbTrail.length-1; i++) { %>
     <li class="flex">
       <div class="flex items-center">
         <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -37,9 +37,10 @@
         </a>
       </div>
     </li>
-<%  }
-    if (breadCrumbTrail.length > 1) {
-        const i = breadCrumbTrail.length - 1;
+    <%  }
+
+        if (breadCrumbTrail.length > 1) {
+            const i = breadCrumbTrail.length - 1;
     %>
     <li class="flex">
       <div class="flex items-center">
@@ -54,7 +55,10 @@
   </ol>
 </nav>
 
-<% if (focusTerm) { %>
+<%
+    if (focusTerm) {
+        sidebar.push(include('termlist.ejs'));
+%>
 <%- include(`${focusTerm.termTypeName}-editor.ejs`) %>
 <% } else { %>
 <%- include('package-editor.ejs') %>
