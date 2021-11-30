@@ -49,6 +49,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return false;
             }
         }
+
+        const summary = e.target.closest('summary');
+
+        if (summary && e.target.tagName == 'LABEL') {
+            e.target.closest('details').toggleAttribute('open');
+        }
     }, {capture: true});
 
     addEventListener('beforeunload', (e) => {
@@ -153,10 +159,6 @@ const widgetHandlers = {
         focusPackage && delete window.focusPackage;
     },
     "enter_termlistwidget": async (detail) => {
-        console.log('termlistwidget', termlistwidget);
-        termlistwidget.querySelector('summary label').addEventListener('click', (e) => {
-            e.target.closest('details').toggleAttribute('open');
-        });
         termlistfilter.addEventListener('change', (e) => {
             const filter = e.target.value;
 

@@ -1,0 +1,44 @@
+<%
+    console.log(pkg.getRequiredInputs(focusTerm));
+%>
+<details id="testformwidget" data-widgetid="testformwidget" class="select-none" open>
+    <summary>
+        <label>test</label>
+    </summary>
+    <form method="POST">
+    <%
+    Array.from(pkg.getRequiredInputs(focusTerm)).forEach((term) => {
+%>
+    <div>
+      <label for="email" class="block text-sm font-medium text-gray-700"><%= term.name %></label>
+      <div class="mt-1">
+<%
+        console.log(term.name, term.getChoices());
+        switch(term.dataType) {
+            case 'String': {
+%>
+        <select name="<%= term.name %>">
+<%
+            Array.from(term.getChoices()).forEach((choice) => {
+%>
+            <option<%= (term.value == choice ? ' selected': '')%>><%= choice %></option>
+<%
+            });
+%>
+        </select>
+<%
+            } break;
+            
+            default: {
+%>
+        <input type="text" name="<%= term.name %>" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" value="<%= term.value || ''%>">
+
+<%          } break;
+        }
+%>
+      </div>
+    </div>
+<%  });
+    %>
+    </form>
+</details>

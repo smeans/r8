@@ -57,6 +57,7 @@
 
 <%
     if (focusTerm) {
+        sidebar.push(include('testform.ejs'));
         sidebar.push(include('termlist.ejs'));
 %>
 <%- include(`${focusTerm.termTypeName}-editor.ejs`) %>
