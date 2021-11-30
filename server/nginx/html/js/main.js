@@ -158,6 +158,27 @@ const widgetHandlers = {
     "exit_update_package": async (detail) => {
         focusPackage && delete window.focusPackage;
     },
+    "enter_testformwidget": async (detail) => {
+        testform.addEventListener('input', async (e) => {
+            const focusTerm = e.target.closest('*[data-focusterm]').getAttribute('data-focusterm');
+            const formData = new FormData(e.target.form);
+            const url = `/api/packages/${focusPackage.id}/products/${focusTerm}?${new URLSearchParams(formData)}`;
+            console.log('test url ', url);
+            document.body.classList.add('busy');
+            await fetch(url)
+                .then(async resp => {
+                    if (resp.ok) {
+                        const json = await resp.json();
+
+                        console.log('value: ', JSON.stringify(json));
+                        testformoutput.innerText = json[focusTerm];
+                    }
+                })
+                .finally(() => {
+                    document.body.classList.remove('busy');
+                });
+        });
+    },
     "enter_termlistwidget": async (detail) => {
         termlistfilter.addEventListener('change', (e) => {
             const filter = e.target.value;

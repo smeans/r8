@@ -1,11 +1,12 @@
 <%
     console.log(pkg.getRequiredInputs(focusTerm));
 %>
-<details id="testformwidget" data-widgetid="testformwidget" class="select-none" open>
+<details id="testformwidget" data-widgetid="testformwidget" data-focusterm="<%= focusTerm.name %>" class="select-none" open>
     <summary>
         <label>test</label>
     </summary>
-    <form method="POST">
+    <p><label><%= focusTerm.name %></label><span class="inline-block text-right font-bold w-6/12" id="testformoutput"></span></p>
+    <form name="testform" method="POST">
     <%
     Array.from(pkg.getRequiredInputs(focusTerm)).forEach((term) => {
 %>
@@ -20,6 +21,8 @@
         <select name="<%= term.name %>">
 <%
             Array.from(term.getChoices()).forEach((choice) => {
+                console.log(term);
+                console.log(choice);
 %>
             <option<%= (term.value == choice ? ' selected': '')%>><%= choice %></option>
 <%
@@ -28,7 +31,7 @@
         </select>
 <%
             } break;
-            
+
             default: {
 %>
         <input type="text" name="<%= term.name %>" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" value="<%= term.value || ''%>">

@@ -72,6 +72,23 @@ router.param('packageId', async function (req, res, next, packageId) {
     next();
 });
 
+router.param('productName', async function (req, res, next, productName) {
+    const term = req.package.getTerm(productName);
+
+    if (!term) {
+        res.status(404);
+
+        return res.json({
+            status: 404,
+            message: `product ${req.params.productName} not found`
+        });
+    }
+
+    req.product = term;
+
+    next();
+});
+
 router.param('tableTermName', async function (req, res, next, tableTermName) {
     const tableTerm = req.package.getTerm(tableTermName);
 
@@ -91,6 +108,30 @@ router.param('tableTermName', async function (req, res, next, tableTermName) {
     next();
 });
 
+/**
+ * Execute specific packages and return results.
+ */
+router.route('/packages/:packageId/products/:productName')
+    .get(async function (req, res, next) {
+        console.log(req.product);
+        const ec = req.package.evalTerm(req.product, req.query);
+
+        const out = {
+            [req.product.name]: ec.value
+        };
+
+        if (ec.log.length) {
+            out.log = ec.log.map(msg => {
+                return {
+                    level: msg.level,
+                    term: msg.term.name,
+                    message: msg.message
+                }
+            });
+        }
+
+        return res.json(out);
+    });
 
 /**
  * Query and return rows for specified table term.
