@@ -141,3 +141,12 @@ x-expression {
     background: #eee;
     height: 4em;
 }
+
+aside details summary {
+    background-color: rgb(67, 56, 202);
+    color: #fff;
+}
+
+aside details summary select {
+    color: #000;
+}

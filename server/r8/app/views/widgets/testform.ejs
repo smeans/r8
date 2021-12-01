@@ -21,8 +21,6 @@
         <select name="<%= term.name %>">
 <%
             Array.from(term.getChoices()).forEach((choice) => {
-                console.log(term);
-                console.log(choice);
 %>
             <option<%= (term.value == choice ? ' selected': '')%>><%= choice %></option>
 <%

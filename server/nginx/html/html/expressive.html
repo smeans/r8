@@ -573,7 +573,7 @@ function contentEditableText(el) {
             }
         </style>
 
-        <x-value><slot></slot></x-value>
+        <x-value id="value"><slot></slot></x-value>
 
         <script>
             class XToken extends ExpressiveElement  {
@@ -586,6 +586,13 @@ function contentEditableText(el) {
 
                 connectedCallback() {
                     this._syncDisplay();
+                    this.g.value.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+
+                        this.fireEvent('x.openToken', {token: this});
+
+                        return false;
+                    });
                 }
 
                 get type() {

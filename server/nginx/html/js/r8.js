@@ -28,6 +28,10 @@ class R8Term {
         throw "not implemented";
     }
 
+    get undefinedTerms() {
+        return new Set();
+    }
+
     get json() {
         throw "not implemented";
     }
@@ -203,6 +207,19 @@ class R8ExpressionTerm extends R8Term {
         return term;
     }
 
+    get undefinedTerms() {
+        const out = new Set();
+
+        this._expression.forEach(token => {
+            if (token.type == 'name'
+                    && !this._package.getTerm(token.value)) {
+                out.add(token.value);
+            }
+        }
+
+        return out;
+    }
+    
     get json() {
         return  {
             'expressionSource': this._expressionSource

@@ -113,7 +113,6 @@ router.param('tableTermName', async function (req, res, next, tableTermName) {
  */
 router.route('/packages/:packageId/products/:productName')
     .get(async function (req, res, next) {
-        console.log(req.product);
         const ec = req.package.evalTerm(req.product, req.query);
 
         const out = {

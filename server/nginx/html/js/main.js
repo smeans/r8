@@ -158,6 +158,11 @@ const widgetHandlers = {
     "exit_update_package": async (detail) => {
         focusPackage && delete window.focusPackage;
     },
+    "enter_undefinedtermswidget": async (detail) => {
+        undefinedtermswidget.querySelectorAll('x-token').forEach(el => {
+            el.package = window.focusPackage;
+        });
+    },
     "enter_testformwidget": async (detail) => {
         testform.addEventListener('input', async (e) => {
             const focusTerm = e.target.closest('*[data-focusterm]').getAttribute('data-focusterm');
@@ -239,13 +244,15 @@ const widgetHandlers = {
                 || description.value != description.getAttribute('data-initialvalue');
         }
 
-        document.querySelector('x-page').addEventListener('input', (e) => {
+        const page = document.querySelector('x-page');
+
+        page.addEventListener('input', (e) => {
             setPageDirty(hasTermChanged());
             saveButton.disabled = !isPageDirty();
             cancelButton.disabled = !isPageDirty();
         });
 
-        editor.addEventListener('x.openToken', (e) => {
+        page.addEventListener('x.openToken', (e) => {
             const token = e.detail.token;
 
             if (isPageDirty()) {
@@ -339,8 +346,8 @@ const widgetHandlers = {
         function hasTermChanged() {
             return description.value != description.getAttribute('data-initialvalue');
         }
-
-        document.querySelector('x-page').addEventListener('input', (e) => {
+        
+        page.addEventListener('input', (e) => {
             document.body.classList.toggle('dirty', hasTermChanged());
             saveButton.disabled = !hasTermChanged();
             cancelButton.disabled = !hasTermChanged();
@@ -373,7 +380,7 @@ const widgetHandlers = {
             }, updateState='replaceState');
         });
 
-        termTable.addEventListener('x.openToken', (e) => {
+        page.addEventListener('x.openToken', (e) => {
             const token = e.detail.token;
 
             if (isPageDirty()) {

@@ -13,8 +13,6 @@
     const referenced = pkg.getReferencingTerms(focusTerm);
     const referencing = pkg.getReferencedTerms(focusTerm);
 
-    console.log(focusTerm.referencingTerms);
-
     for (const termName in pkg.terms) {
         const term = pkg.getTerm(termName);
 

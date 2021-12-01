@@ -56,6 +56,10 @@
 </nav>
 
 <%
+    console.log('undefinedTerms ', pkg.undefinedTerms);
+    if (pkg.undefinedTerms.size  > 0) {
+        sidebar.push(include('undefinedterms.ejs'));
+    }
     if (focusTerm) {
         sidebar.push(include('testform.ejs'));
         sidebar.push(include('termlist.ejs'));
