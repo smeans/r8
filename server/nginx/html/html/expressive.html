@@ -135,12 +135,12 @@ class ExpressiveElement extends PhElement {
     }
 
     _syncDisplay() {
-        this.querySelectorAll('*').forEach((el) => {
-            el._syncDisplay && el._syncDisplay();
-        });
-        this.sqa('*').forEach((el) => {
-            el._syncDisplay && el._syncDisplay();
-        });
+        for (const node in allChildNodes(this)) {
+            node._syncDisplay && node._syncDisplay();
+        }
+        for (const node in allChildNodes(this.shadowRoot)) {
+            node._syncDisplay && node._syncDisplay();
+        }
     }
 }
 
@@ -762,7 +762,6 @@ function contentEditableText(el) {
                         var selection = this.shadowRoot.getSelection(),
                         range = selection.getRangeAt(0),
                         rect = range.getClientRects()[0];
-                        console.log('selection rect', rect);
                     } catch {}
                     // !!!TBD!!! look at doing term completion here
                 }
@@ -777,20 +776,46 @@ function contentEditableText(el) {
                 }
 
                 _syncDisplay() {
-                    const tokens = this.ownerDocument.createDocumentFragment();
-                    const src = contentEditableText(this.editpane);
+                    const tokens = this.editpane.cloneNode(true);
+
+                    for (const nd of allChildNodes(tokens)) {
+                        if (nd.nodeType == Node.TEXT_NODE) {
+                            this._tokenizeTextNode(nd);
+                        }
+                    }
+
+
+                    this.displaypane.innerHTML = '';
+
+                    const df = this.ownerDocument.createDocumentFragment();
+
+                    while (tokens.firstChild) {
+                        const nd = tokens.firstChild;
+                        nd.remove();
+                        df.appendChild(nd);
+                    }
+
+                    this.displaypane.appendChild(df);
+
+                    this.displaypane.style.width = (this.editpane.offsetWidth + 1) + 'px';
+                    this.displaypane.style.height = this.editpane.offsetHeight + 'px';
+                }
+
+                _tokenizeTextNode(nd) {
+                    const doc = nd.ownerDocument;
+                    const tokens = doc.createDocumentFragment();
+                    const src = nd.nodeValue;
 
                     for (const match of src.matchAll(XExpression._lexRegex)) {
                         for (const group in match.groups) {
                             if (match.groups[group]) {
                                 switch (group) {
                                     case 'ws': {
-                                        const ws = this.ownerDocument.createTextNode(match.groups[group]);
-                                        tokens.appendChild(ws);
+                                        tokens.appendChild(doc.createTextNode(match.groups[group]));
                                     } break;
 
                                     default: {
-                                        const token = this.ownerDocument.createElement('x-token');
+                                        const token = doc.createElement('x-token');
                                         token.type = group;
                                         token.value = match.groups[group];
 
@@ -803,11 +828,8 @@ function contentEditableText(el) {
                         }
                     }
 
-                    this.displaypane.innerText = '';
-                    this.displaypane.appendChild(tokens);
-
-                    this.displaypane.style.width = (this.editpane.offsetWidth + 1) + 'px';
-                    this.displaypane.style.height = this.editpane.offsetHeight + 'px';
+                    nd.parentNode.insertBefore(tokens, nd);
+                    nd.remove();
                 }
             }
         </script>

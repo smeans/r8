@@ -98,6 +98,18 @@ class PhElement extends HTMLElement {
     }
 }
 
+function* allChildNodes(n, c) {
+    const childNodes = Array.from((c || n).childNodes);
+
+    if (c) {
+        yield c;
+    }
+
+    for (let i = 0; i < childNodes.length; i++) {
+        yield* allChildNodes(n, childNodes[i])
+    }
+}
+
 /*
  * phInit
  * Called after DOMContentLoaded to load all ph-include files and

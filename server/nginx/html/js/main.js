@@ -68,6 +68,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         refreshPage();
     });
 
+    document.addEventListener('keydown', (e) => {
+        switch (e.code) {
+            case 'KeyS': {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+
+                    if ('saveButton' in window) {
+                        saveButton.click();
+                    }
+
+                    return false;
+                }
+            } break;
+
+            case 'Escape': {
+                if ('cancelButton' in window) {
+                    e.preventDefault();
+
+                    cancelButton.click();
+
+                    return false;
+                }
+            } break;
+        }
+    });
+
     phInit();
 });
 
@@ -299,6 +325,10 @@ const widgetHandlers = {
         });
 
         saveButton.addEventListener('click', (e) => {
+            if (e.target.disabled) {
+                return;
+            }
+
             const csrf = e.target.closest('x-page').getAttribute('data-csrf');
             const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
 
@@ -328,6 +358,10 @@ const widgetHandlers = {
         });
 
         saveButton.addEventListener('click', (e) => {
+            if (e.target.disabled) {
+                return;
+            }
+
             renderRequest('POST', location.href, {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
@@ -346,7 +380,7 @@ const widgetHandlers = {
         function hasTermChanged() {
             return description.value != description.getAttribute('data-initialvalue');
         }
-        
+
         page.addEventListener('input', (e) => {
             document.body.classList.toggle('dirty', hasTermChanged());
             saveButton.disabled = !hasTermChanged();
