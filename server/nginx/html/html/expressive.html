@@ -709,6 +709,7 @@ function contentEditableText(el) {
                     this.editpane.addEventListener('input', e => this._handleInput(e));
                     this.ownerDocument.addEventListener('selectionchange', e => this._handleSelectionChange(e));
                     this.sq('x-workarea').addEventListener('dblclick', e => this._handleDblClick(e));
+                    this.sq('x-workarea').addEventListener('click', e => this.editpane.focus());
                 }
 
                 get editpane() {

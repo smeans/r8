@@ -113,20 +113,34 @@ router.param('tableTermName', async function (req, res, next, tableTermName) {
  */
 router.route('/packages/:packageId/products/:productName')
     .get(async function (req, res, next) {
-        const ec = req.package.evalTerm(req.product, req.query);
+        const out = {};
+        try {
+            const ec = req.package.evalTerm(req.product, req.query);
 
-        const out = {
-            [req.product.name]: ec.value
-        };
+            out[req.product.name] = ec.value;
 
-        if (ec.log.length) {
-            out.log = ec.log.map(msg => {
-                return {
-                    level: msg.level,
-                    term: msg.term.name,
-                    message: msg.message
-                }
-            });
+            if (ec.log.length) {
+                out.log = ec.log.map(msg => {
+                    return {
+                        level: msg.level,
+                        term: msg.term.name,
+                        message: msg.message
+                    }
+                });
+            }
+
+            console.debug(`${req.product.name}: term values`, JSON.stringify(ec.termValues));
+        } catch (e) {
+            console.error(`${req.product.name}: eval error: ${e}`);
+
+            res.status(500);
+
+            out.log = out.log || [];
+            out.log.push({
+                level: 'error',
+                term: req.product.name,
+                message: e.toString()
+            })
         }
 
         return res.json(out);

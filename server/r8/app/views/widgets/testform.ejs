@@ -6,6 +6,8 @@
         <label>test</label>
     </summary>
     <p><label><%= focusTerm.name %></label><span class="inline-block text-right font-bold w-6/12" id="testformoutput"></span></p>
+    <ul id="testformerrors" class="text-red-400 text-xs">
+    </ul>
     <form name="testform" method="POST">
     <%
     Array.from(pkg.getRequiredInputs(focusTerm)).forEach((term) => {

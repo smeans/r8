@@ -194,16 +194,24 @@ const widgetHandlers = {
             const focusTerm = e.target.closest('*[data-focusterm]').getAttribute('data-focusterm');
             const formData = new FormData(e.target.form);
             const url = `/api/packages/${focusPackage.id}/products/${focusTerm}?${new URLSearchParams(formData)}`;
-            console.log('test url ', url);
+
+            testformerrors.innerHTML = '';
+
             document.body.classList.add('busy');
             await fetch(url)
                 .then(async resp => {
-                    if (resp.ok) {
-                        const json = await resp.json();
+                    const json = await resp.json();
 
-                        console.log('value: ', JSON.stringify(json));
+                    if (resp.ok) {
                         testformoutput.innerText = json[focusTerm];
                     }
+
+                    json.log && json.log.forEach(err => {
+                        const li = document.createElement('li');
+                        li.innerText = `${err.level}: ${err.term}: ${err.message}`;
+
+                        testformerrors.appendChild(li);
+                    });
                 })
                 .finally(() => {
                     document.body.classList.remove('busy');
