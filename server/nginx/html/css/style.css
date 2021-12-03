@@ -35,7 +35,7 @@ html, body {
 }
 
 html, body, main, x-page {
-    min-height: 100vh;
+    height: 100vh;
 }
 
 header x-input  {
