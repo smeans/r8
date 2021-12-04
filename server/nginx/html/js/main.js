@@ -219,6 +219,13 @@ const widgetHandlers = {
         };
 
         testform.addEventListener('input', refreshTestForm);
+        testform.addEventListener('keydown', (e) => {
+            if (e.code == 'Enter') {
+                e.preventDefault();
+
+                return false;
+            }
+        });
         refreshtestterm.addEventListener('click', refreshTestForm);
     },
     "enter_termlistwidget": async (detail) => {
@@ -422,6 +429,16 @@ const widgetHandlers = {
                 'serviceAction': 'deleteKeyTerm',
                 'termName': termName,
                 'keyTermName': e.detail.keyTermName
+            }, updateState='replaceState');
+        });
+
+        termTable.addEventListener('x.changeKeyTermMatchType', (e) => {
+            renderRequest('POST', location.href, {
+                '_csrf': csrf,
+                'serviceAction': 'changeKeyTermMatchType',
+                'termName': termName,
+                'keyTermName': e.detail.keyTermName,
+                'matchType': e.detail.matchType
             }, updateState='replaceState');
         });
 

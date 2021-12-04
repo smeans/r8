@@ -154,7 +154,6 @@ router.route('/packages/:packageId/tables/:tableTermName')
         return res.json(Array.from(req.tableTerm.table.query()));
     })
     .post(async function (req, res, next) {
-        console.debug('posted', req.body);
         return res.json(req.tableTerm.table.insert(req.body));
     });
 

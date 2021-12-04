@@ -267,9 +267,76 @@ function contentEditableText(el) {
                 fill: #fff;
             }
         </style>
-        <button><slot></slot></button>
+        <button id="button"><slot></slot></button>
         <script>
             class XButton extends ExpressiveElement {
+                constructor() {
+                    super();
+
+                    this.g.button.addEventListener('click', (e) => {
+                        if (!this._cycleOptions) {
+                            return;
+                        }
+
+                        const label = this.innerText;
+
+                        let i = 0;
+
+                        while (i < this._cycleOptions.length) {
+                            if (this._cycleOptions[i].label == label) {
+                                break;
+                            }
+
+                            i++;
+                        }
+
+                        i++;
+                        i %= this._cycleOptions.length;
+
+                        this._setCycleOption(this._cycleOptions[i]);
+                    });
+                }
+
+                get cycleOptions() {
+                    return this._cycleOptions;
+                }
+
+                set cycleOptions(newCycleOptions) {
+                    this._cycleOptions = newCycleOptions;
+                }
+
+                get value() {
+                    const label = this.innerText;
+
+                    if (this._cycleOptions) {
+                        const co = this._cycleOptions.filter(v => v.label == label);
+
+                        if (co.length) {
+                            return co[0].value;
+                        }
+                    }
+
+                    return label;
+                }
+
+                set value(newValue) {
+                    if (this._cycleOptions) {
+                        const co = this._cycleOptions.filter(v => v.value == newValue);
+
+                        if (co.length) {
+                            this._setCycleOption(co[0]);
+
+                            return;
+                        }
+                    }
+                    
+                    this.innerText = newValue;
+                }
+
+                _setCycleOption(co) {
+                    this.innerText = co.label;
+                    this.setAttribute('title', co.title);
+                }
 
             }
         </script>
@@ -1212,7 +1279,9 @@ function contentEditableText(el) {
         </datalist>
         <template id="keyColHeader">
             <th class="keyCol" data-termname="">
-                <x-svg src="/svg/key.svg"></x-svg>
+                <x-button class="matchType round">
+                    =
+                </x-button>
                 <x-token type="name"></x-token>
                 <x-button class="menu round">
                     <x-svg src="svg/chevron-down.svg"></x-svg>
@@ -1233,6 +1302,24 @@ function contentEditableText(el) {
         </template>
         <script>
             class XTermTable extends ExpressiveElement {
+                static KEY_COLUMN_CYCLE_OPTIONS = [
+                    {
+                        value: 'Exact',
+                        label: '=',
+                        title: 'Match the key value exactly.'
+                    },
+                    {
+                        value: 'ClosestLowValue',
+                        label: '<',
+                        title: 'Match the closest value that is less than or equal to the key value.'
+                    },
+                    {
+                        value: 'ClosestHighValue',
+                        label: '>',
+                        title: 'Match the closest value that is greater than or equal to the key value.'
+                    }
+                ];
+
                 constructor() {
                     super();
 
@@ -1263,6 +1350,12 @@ function contentEditableText(el) {
                                     }
                                 }
                             ]))
+                        } else if (e.target.closest('x-button.matchType')) {
+                            const th = e.target.closest('th');
+                            const keyTermName = th.querySelector('x-token').value;
+                            const matchType = e.target.value;
+
+                            this.fireEvent('x.changeKeyTermMatchType', {keyTermName, matchType});
                         }
                     });
 
@@ -1334,6 +1427,10 @@ function contentEditableText(el) {
                         tr.insertBefore(th, this.g.addColHeader);
                         th.setAttribute('data-termname', termName);
 
+                        const matchType = th.querySelector('.matchType');
+                        matchType.cycleOptions = XTermTable.KEY_COLUMN_CYCLE_OPTIONS;
+                        matchType.value = this.term.getKeyTermMatchType(termName);
+
                         const token = th.querySelector('x-token');
                         token.value = termName;
                         token.package = this.term.package;
@@ -1388,6 +1485,7 @@ function contentEditableText(el) {
                 }
 
                 async _addRow(data) {
+                    this.classList.add('busy');
                     await fetch('/api/packages/' + this.term.package.id + '/tables/' + this.term.name, {
                         method: 'POST',
                         headers: {
@@ -1441,8 +1539,6 @@ function contentEditableText(el) {
                 static mappedAttributes = {"key": "key"};
                 constructor() {
                     super();
-
-                    console.log('current data', this.data);
 
                     this.addEventListener('input', (e) => {
                         if (!e.target.name) {
