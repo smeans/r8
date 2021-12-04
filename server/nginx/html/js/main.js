@@ -190,9 +190,9 @@ const widgetHandlers = {
         });
     },
     "enter_testformwidget": async (detail) => {
-        testform.addEventListener('input', async (e) => {
+        const refreshTestForm = async (e) => {
             const focusTerm = e.target.closest('*[data-focusterm]').getAttribute('data-focusterm');
-            const formData = new FormData(e.target.form);
+            const formData = new FormData(e.target.closest('form'));
             const url = `/api/packages/${focusPackage.id}/products/${focusTerm}?${new URLSearchParams(formData)}`;
 
             testformerrors.innerHTML = '';
@@ -216,7 +216,10 @@ const widgetHandlers = {
                 .finally(() => {
                     document.body.classList.remove('busy');
                 });
-        });
+        };
+
+        testform.addEventListener('input', refreshTestForm);
+        refreshtestterm.addEventListener('click', refreshTestForm);
     },
     "enter_termlistwidget": async (detail) => {
         termlistfilter.addEventListener('change', (e) => {

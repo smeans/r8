@@ -5,43 +5,48 @@
     <summary>
         <label>test</label>
     </summary>
-    <p><label><%= focusTerm.name %></label><span class="inline-block text-right font-bold w-6/12" id="testformoutput"></span></p>
-    <ul id="testformerrors" class="text-red-400 text-xs">
-    </ul>
-    <form name="testform" method="POST">
+    <x-persist-form key="<%= pkg.id %>">
+        <form name="testform" method="POST">
+            <p>
+                <button type="button" id="refreshtestterm" class="inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <x-svg class="h-4 w-4" src="/svg/refresh.svg"></x-svg>
+                </button>
+                <label class="text-blue-400"><%= focusTerm.name %></label><span class="inline-block text-right font-bold w-6/12" id="testformoutput"></span>
+            </p>
+            <ul id="testformerrors" class="text-red-400 text-xs">
+            </ul>
     <%
     Array.from(pkg.getRequiredInputs(focusTerm)).forEach((term) => {
 %>
-    <div>
-      <label for="email" class="block text-sm font-medium text-gray-700"><%= term.name %></label>
-      <div class="mt-1">
+        <div class="mt-1">
+          <label for="email" class="block text-sm font-medium text-blue-400"><%= term.name %></label>
+          <div>
 <%
-        console.log(term.name, term.getChoices());
-        switch(term.dataType) {
-            case 'String': {
+        console.log(term.name, );
+        const choices = term.getChoices();
+
+        if (choices) {
 %>
-        <select name="<%= term.name %>">
+            <select name="<%= term.name %>">
 <%
-            Array.from(term.getChoices()).forEach((choice) => {
+            Array.from(choices).forEach((choice) => {
 %>
-            <option<%= (term.value == choice ? ' selected': '')%>><%= choice %></option>
+                <option<%= (term.value == choice ? ' selected': '')%>><%= choice %></option>
 <%
             });
 %>
-        </select>
+            </select>
 <%
-            } break;
-
-            default: {
+        } else {
 %>
-        <input type="text" name="<%= term.name %>" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" value="<%= term.value || ''%>">
-
-<%          } break;
+                <input type="text" name="<%= term.name %>" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" value="<%= term.value || ''%>">
+<%
         }
 %>
-      </div>
-    </div>
+          </div>
+        </div>
 <%  });
     %>
-    </form>
+        </form>
+    </x-persist-form>
 </details>

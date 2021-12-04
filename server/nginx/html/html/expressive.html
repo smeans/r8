@@ -1428,4 +1428,62 @@ function contentEditableText(el) {
             }
         </script>
     </template>
+
+    <template name="x-persist-form">
+        <style>
+            :host {
+                display: inline-block;
+            }
+        </style>
+        <slot></slot>
+        <script>
+            class XPersistForm extends ExpressiveElement {
+                static mappedAttributes = {"key": "key"};
+                constructor() {
+                    super();
+
+                    console.log('current data', this.data);
+
+                    this.addEventListener('input', (e) => {
+                        if (!e.target.name) {
+                            return;
+                        }
+
+                        const data = this.data;
+
+                        data[e.target.name] = e.target.value;
+
+                        this.data = data;
+                    });
+                }
+
+                connectedCallback() {
+                    const data = this.data;
+                    this.querySelectorAll('*[name]').forEach(el => {
+                        if (el.name in data) {
+                            el.value = data[el.name];
+                        }
+                    });
+                }
+
+                get data() {
+                    const item = localStorage.getItem(`persistForm-{this.key}`);
+
+                    return item ? JSON.parse(item) : {};
+                }
+
+                set data(newData) {
+                    localStorage.setItem(`persistForm-{this.key}`, JSON.stringify(newData));
+                }
+
+                get key() {
+                    return this._key;
+                }
+
+                set key(newKey) {
+                    this._key = newKey;
+                }
+            }
+        </script>
+    </template>
 </ph-components>
