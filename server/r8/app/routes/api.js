@@ -131,7 +131,7 @@ router.route('/packages/:packageId/products/:productName')
 
             console.debug(`${req.product.name}: term values`, JSON.stringify(ec.termValues));
         } catch (e) {
-            console.error(`${req.product.name}: eval error: ${e}`);
+            console.error(`${req.product.name}: eval error: ${e}`, e.stack);
 
             res.status(500);
 

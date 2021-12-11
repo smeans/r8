@@ -190,9 +190,9 @@ const widgetHandlers = {
         });
     },
     "enter_testformwidget": async (detail) => {
-        const refreshTestForm = async (e) => {
-            const focusTerm = e.target.closest('*[data-focusterm]').getAttribute('data-focusterm');
-            const formData = new FormData(e.target.closest('form'));
+        const refreshTestForm = async (target) => {
+            const focusTerm = target.closest('*[data-focusterm]').getAttribute('data-focusterm');
+            const formData = new FormData(target.closest('form'));
             const url = `/api/packages/${focusPackage.id}/products/${focusTerm}?${new URLSearchParams(formData)}`;
 
             testformerrors.innerHTML = '';
@@ -218,7 +218,7 @@ const widgetHandlers = {
                 });
         };
 
-        testform.addEventListener('input', refreshTestForm);
+        testform.addEventListener('input', (e) => refreshTestForm(e.target));
         testform.addEventListener('keydown', (e) => {
             if (e.code == 'Enter') {
                 e.preventDefault();
@@ -226,7 +226,9 @@ const widgetHandlers = {
                 return false;
             }
         });
-        refreshtestterm.addEventListener('click', refreshTestForm);
+        refreshtestterm.addEventListener('click', (e) => refreshTestForm(e.target));
+
+        refreshTestForm(testform);
     },
     "enter_termlistwidget": async (detail) => {
         termlistfilter.addEventListener('change', (e) => {
@@ -285,7 +287,8 @@ const widgetHandlers = {
 
         function hasTermChanged() {
             return editor.isDirty
-                || description.value != description.getAttribute('data-initialvalue');
+                || description.value != description.getAttribute('data-initialvalue')
+                || dataType.value != dataType.getAttribute('data-initialvalue');
         }
 
         const page = document.querySelector('x-page');
@@ -324,6 +327,7 @@ const widgetHandlers = {
                 'serviceAction': 'saveTerm',
                 'termName': termName,
                 'description': description.value,
+                'dataType': dataType.value,
                 'value': editor.value
             }, updateState='replaceState');
         });
@@ -396,7 +400,8 @@ const widgetHandlers = {
         const termName = page.querySelector('*[data-termname]').getAttribute('data-termname');
 
         function hasTermChanged() {
-            return description.value != description.getAttribute('data-initialvalue');
+            return description.value != description.getAttribute('data-initialvalue')
+                || dataType.value != dataType.getAttribute('data-initialvalue');
         }
 
         page.addEventListener('input', (e) => {
@@ -410,7 +415,8 @@ const widgetHandlers = {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
-                'description': description.value
+                'description': description.value,
+                'dataType': dataType.value
             }, updateState='replaceState');
         });
 

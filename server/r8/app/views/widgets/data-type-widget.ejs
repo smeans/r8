@@ -1,0 +1,6 @@
+<select id="dataType" data-initialvalue="<%= currentDataType %>" class="mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+  <option value="" disabled selected>(choose)</option>
+  <% for (const dataType of pkg.constructor.DATA_TYPES) { %>
+  <option<%= dataType == currentDataType ? ' selected' : '' %>><%= dataType %></option>
+  <% } %>
+</select>
