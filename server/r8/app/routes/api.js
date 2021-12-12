@@ -3,8 +3,83 @@
 const express = require('express');
 const log = require('log');
 const router = express.Router();
+const YAML = require('yaml');
 
 const { LoginSession } = require('db');
+
+const R8TYPE_TO_OPENAPI = {
+    undefined: "number",
+    "String": 'string',
+    "Integer": 'integer',
+    "Currency": "number",
+    "Float": "number",
+    "Date": "string",
+    "DateTime": "string"
+}
+
+async function buildOrgOpenApiJson(organization) {
+    const out = {
+        openapi: "3.0.1",
+        info: {
+            "title": `${organization.name}-api`,
+            "version": `${organization.currentEnvironment}-1.0.0`
+        },
+        paths: {}
+    }
+
+    const packageList = await organization.getPackageList();
+
+    for (const packageName in packageList) {
+        const pkg = await organization.getPackage(packageName);
+
+        // !!!TBD!!! this is where we can use user roles to filter
+        // what terms are available to each user type. For example,
+        // an internal integration dev should be able to see any
+        // terms in a package, where an external integration dev
+        // can only see public terms.
+        const terms = Object.values(pkg.terms).filter(term => term.isPublic);
+        for (let i = 0; i < terms.length; i++) {
+            const term = terms[i];
+            const requiredInputs = pkg.getRequiredInputs(term);
+            const endpoint = {
+                parameters: Array.from(requiredInputs).map(ri => {
+                    return {
+                        "name": ri.name,
+                        "in": "query",
+                        "description": ri.description,
+                        "schema": {
+                            "type": R8TYPE_TO_OPENAPI[ri.dataType]
+                        }
+                    }
+                }),
+                "get": {
+                    "responses": {
+                        "200": {
+                            "description": term.description,
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            [term.name]: {
+                                                "type": R8TYPE_TO_OPENAPI[term.dataType]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            console.log(endpoint);
+            out.paths[`/api/${packageName}/products/${term.name}`] = endpoint;
+        }
+    }
+
+    return out;
+}
 
 async function validateApiUser(req, res, next) {
     const loginSessionId = req.session && req.session.loginSessionId;
@@ -47,6 +122,22 @@ router.get('/status', function(req, res, next) {
         });
 });
 
+router.get('/openapi/:format((json|yaml))', async function(req, res, next) {
+    const openApiJson = await buildOrgOpenApiJson(req.apiMeta.organization);
+
+    switch (req.params.format) {
+        case 'yaml': {
+            res.contentType('application/x-yaml');
+
+            return res.send(YAML.stringify(openApiJson));
+        }
+
+        case 'json': {
+            return res.json(openApiJson);
+        }
+    }
+});
+
 /**
  * Return a list of all packages available to the currently
  * authenticated user.
@@ -68,6 +159,7 @@ router.param('packageId', async function (req, res, next, packageId) {
     }
 
     req.package = pkg;
+    req.params.packageId = pkg.id;
 
     next();
 });

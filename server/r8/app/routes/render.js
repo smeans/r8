@@ -110,7 +110,9 @@ const serviceActions = {
         term.isPublic = true;
         pkg.defineTerm(req.body.newProductName, term);
 
-        await req.organization.savePackage(pkg);
+        await req.organization.savePackage(pkg, {
+            userId: loginSession.user.id
+        });
 
         return next();
     },
@@ -134,7 +136,9 @@ const serviceActions = {
                 }
             }
 
-            await req.organization.savePackage(pkg);
+            await req.organization.savePackage(pkg, {
+                userId: loginSession.user.id
+            });
         } else {
             console.warn('unable to save term', termName, 'term does not exist');
         }
@@ -164,7 +168,9 @@ const serviceActions = {
 
         const term = pkg.createTerm(termType);
         pkg.defineTerm(termName, term);
-        await req.organization.savePackage(pkg);
+        await req.organization.savePackage(pkg, {
+            userId: loginSession.user.id
+        });
 
         return next();
     },
@@ -179,7 +185,9 @@ const serviceActions = {
         if (pkg.deleteTerm(termName)) {
             console.debug('deleting term', termName);
 
-            await req.organization.savePackage(pkg);
+            await req.organization.savePackage(pkg, {
+                userId: loginSession.user.id
+            });
         }
 
         return next();
@@ -209,7 +217,9 @@ const serviceActions = {
 
             term.addKeyTerm(req.body.keyTermName);
 
-            await req.organization.savePackage(pkg);
+            await req.organization.savePackage(pkg, {
+                userId: loginSession.user.id
+            });
         } else {
             res.status(404);
         }
@@ -237,7 +247,9 @@ const serviceActions = {
 
             console.log('saving after delete');
 
-            await req.organization.savePackage(pkg);
+            await req.organization.savePackage(pkg, {
+                userId: loginSession.user.id
+            });
         } else {
             res.status(404);
         }
@@ -263,7 +275,9 @@ const serviceActions = {
 
             term.setKeyTermMatchType(keyTermName, req.body.matchType);
 
-            await req.organization.savePackage(pkg);
+            await req.organization.savePackage(pkg, {
+                userId: loginSession.user.id
+            });
         } else {
             res.status(404);
         }
