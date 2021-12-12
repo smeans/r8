@@ -5,7 +5,7 @@ const log = require('log');
 const router = express.Router();
 const YAML = require('yaml');
 
-const { LoginSession } = require('db');
+const { Organization, LoginSession } = require('db');
 
 const R8TYPE_TO_OPENAPI = {
     undefined: "number",
@@ -102,6 +102,23 @@ async function validateApiUser(req, res, next) {
             };
 
             return next();
+        }
+    }
+
+    if (req.headers.authorization) {
+        const authorization = req.headers.authorization.split(/\s+/);
+        if (authorization.shift() == 'Bearer' && authorization.length > 0) {
+            const token = authorization.shift();
+            const organization = await Organization.findByApiToken(token);
+
+            if (organization) {
+                req.apiMeta = {
+                    mode: req.query.mode || '_run',
+                    organization: organization
+                };
+
+                return next();
+            }
         }
     }
 
@@ -221,6 +238,7 @@ router.route('/packages/:packageId/products/:productName')
                 });
             }
 
+            // !!!TBD!!! implement setTermValue() in all terms for tracing
             console.debug(`${req.product.name}: term values`, JSON.stringify(ec.termValues));
         } catch (e) {
             console.error(`${req.product.name}: eval error: ${e}`, e.stack);

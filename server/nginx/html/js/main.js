@@ -138,6 +138,23 @@ function pushCreateTerm(termName, termType) {
 }
 
 const widgetHandlers = {
+    "enter_addapitokenwidget": async (detail) => {
+        document.forms.addApiToken.addEventListener('click', (e) => {
+            const deleteButton = e.target.closest('x-button.delete');
+
+            if (deleteButton) {
+                const token = e.target.closest('tr').querySelector('td').innerText;
+                const csrf = document.querySelector('x-page').getAttribute('data-csrf');
+                const url = new URL(location.href);
+
+                renderRequest('POST', url, {
+                    '_csrf': csrf,
+                    'serviceAction': 'revokeApiToken',
+                    'token': token
+                }, updateState='replaceState');
+            }
+        });
+    },
     "enter_dashboard": async (detail) => {
         addPackage.addEventListener('click', (e) => {
             if (packages.querySelector('x-tile.new')) {
@@ -194,6 +211,8 @@ const widgetHandlers = {
             const focusTerm = target.closest('*[data-focusterm]').getAttribute('data-focusterm');
             const formData = new FormData(target.closest('form'));
             const url = `/api/packages/${focusPackage.id}/products/${focusTerm}?${new URLSearchParams(formData)}`;
+
+            console.debug('test url', url);
 
             testformerrors.innerHTML = '';
 

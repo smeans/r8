@@ -17,9 +17,11 @@
             </ul>
     <%
     Array.from(pkg.getRequiredInputs(focusTerm)).forEach((term) => {
+        const url = new SPAURL(req.url);
+        url.searchParams.append('ts', term.name);
 %>
         <div class="mt-1">
-          <label for="email" class="block text-sm font-medium text-blue-400"><%= term.name %></label>
+          <label for="email" class="block text-sm font-medium text-blue-400"><a href="<%- url %>"><%= term.name %></a></label>
           <div>
 <%
         console.log(term.name, );

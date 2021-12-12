@@ -1,0 +1,85 @@
+<!-- This example requires Tailwind CSS v2.0+ -->
+<div data-widgetid="addapitokenwidget" class="flex flex-col">
+  <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+      <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+        <form method="POST" name="addApiToken">
+            <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
+            <input type="hidden" name="serviceAction" value="addApiToken"/>
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Token
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Issued To
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Environment
+                  </th>
+                  <th scope="col" class="relative px-6 py-3">
+                    <span class="sr-only">Edit</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+<%
+    const organization = loginSession.user.organization;
+    const Organization = organization.constructor;
+
+    for (const token in organization.apiTokens) {
+        const record = organization.apiTokens[token];
+%>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 select-all">
+                    <%= token %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= record.issuedTo %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <%= record.environment %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <x-button class="delete round">
+                          <x-svg src="/svg/trash.svg"></x-svg>
+                      </x-button>
+                  </td>
+                </tr>
+<%
+    }
+%>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    &nbsp;
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <input name="issueTo" required/>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <select name="environment">
+<%
+    for (const env of Organization.ENVIRONMENTS) {
+%>
+                        <option><%= env %></option>
+<%
+    }
+%>
+
+                    </select>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button type="submit" class="inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <!-- Heroicon name: solid/plus-sm -->
+                        <x-svg style="fill: #fff" src="/svg/plus.svg"></x-svg>
+                      </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

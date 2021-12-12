@@ -87,6 +87,24 @@ async function render(req, res, next) {
 }
 
 const serviceActions = {
+    addApiToken: async (req, res, next) => {
+        // !!!TBD!!! here is where we need to check user permissions
+
+        req.organization.issueApiToken(req.body.issueTo, req.body.environment);
+
+        await req.organization.save();
+
+        return next();
+    },
+    revokeApiToken: async (req, res, next) => {
+        // !!!TBD!!! here is where we need to check user permissions
+
+        req.organization.revokeApiToken(req.body.token);
+
+        await req.organization.save();
+
+        return next();
+    },
     createPackage: async (req, res, next) => {
         const packageName = req.body.packageName;
 
