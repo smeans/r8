@@ -74,7 +74,7 @@ async function buildOrgOpenApiJson(organization) {
             };
 
             console.log(endpoint);
-            out.paths[`/api/${packageName}/products/${term.name}`] = endpoint;
+            out.paths[`/api/packages/${packageName}/products/${term.name}`] = endpoint;
         }
     }
 
