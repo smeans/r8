@@ -1,8 +1,8 @@
 <x-tiles class="large" id="packages">
     <% for (const packageName in packageList) {
-        const package = packageList[packageName];
+        const pkg = packageList[packageName];
     %>
-    <x-tile data-packageId="<%= package._id %>">
+    <x-tile data-packageId="<%= pkg.packageId %>">
         <h1><%= packageName %></h1>
     </x-tile>
     <% } %>

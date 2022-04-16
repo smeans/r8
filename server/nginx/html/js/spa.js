@@ -128,54 +128,55 @@ function renderRequest(method, url, body=null, updateState=null) {
 
     const main = document.querySelector('main');
 
-    if (promise) {
-        promise.then(res => {
-            document.body.classList.remove('loading');
-
-            if (res && res.ok) {
-                fireCustomEvent('exitPage', {
-                    page: main.querySelector('x-page')
-                });
-
-                res.text()
-                    .then(data => {
-                        main.innerHTML = data;
-
-                        if (main.firstElementChild.tagName == 'X-REDIRECT') {
-                            const url = main.firstElementChild.getAttribute('data-url');
-
-                            return renderRequest('GET', url, null,
-                                updateState='replaceState');
-                        }
-
-                        document.title = getPageTitle();
-
-                        fireCustomEvent('enterPage', {
-                            method: method,
-                            page: main.querySelector('x-page')
-                        });
-
-                        const href = url.href;
-                        if (updateState) {
-                            try {
-                                history[updateState]({method, href, body}, document.title,
-                                        url);
-                            } catch {
-                                // !!!TBD!!! deal with unserializable bodies
-                                history[updateState]({method, href}, document.title,
-                                        url);
-                            }
-                        }
-                    });
-            } else if (res) {
-                reportError(res);
-                res.text()
-                    .then(data => {
-                        main.innerHTML = data;
-                    });
-            }
-        });
+    if (!promise) {
+        return promise;
     }
+    promise.then(res => {
+        document.body.classList.remove('loading');
+
+        if (res && res.ok) {
+            fireCustomEvent('exitPage', {
+                page: main.querySelector('x-page')
+            });
+
+            res.text()
+                .then(data => {
+                    main.innerHTML = data;
+
+                    if (main.firstElementChild.tagName == 'X-REDIRECT') {
+                        const url = main.firstElementChild.getAttribute('data-url');
+
+                        return renderRequest('GET', url, null,
+                            updateState='replaceState');
+                    }
+
+                    document.title = getPageTitle();
+
+                    fireCustomEvent('enterPage', {
+                        method: method,
+                        page: main.querySelector('x-page')
+                    });
+
+                    const href = url.href;
+                    if (updateState) {
+                        try {
+                            history[updateState]({method, href, body}, document.title,
+                                    url);
+                        } catch {
+                            // !!!TBD!!! deal with unserializable bodies
+                            history[updateState]({method, href}, document.title,
+                                    url);
+                        }
+                    }
+                });
+        } else if (res) {
+            reportError(res);
+            res.text()
+                .then(data => {
+                    main.innerHTML = data;
+                });
+        }
+    });
 
     return promise;
 }

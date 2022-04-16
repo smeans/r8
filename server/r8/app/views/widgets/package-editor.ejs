@@ -25,4 +25,22 @@
         </x-tile>
     </x-tiles>
 </div>
+<div class="py-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <h1 class="text-1xl font-semibold text-gray-900"><x-svg src="/svg/right-arrow.svg"></x-svg>Deployment</h1>
+  </div>
+</div>
+<div class="flex py-4">
+    <div class="px-4 sm:px-6 md:px-8">
+        <div>
+            <h1>dev</h1>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
+            <input type="hidden" name="serviceAction" value="deploy"/>
+            <input type="hidden" name="env" value="dev"/>
+            <button type="submit"><x-svg src="/svg/right-arrow.svg"></x-svg></button>
+        </form>
+    </div>
+</div>
 <%- include('terms-grid', {title: "Terms", terms: Object.values(pkg.terms)}) %>

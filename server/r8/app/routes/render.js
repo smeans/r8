@@ -86,6 +86,22 @@ async function render(req, res, next) {
     });
 }
 
+async function renderApim(req, res, next) {
+    const loginSession = req.loginSession || {};
+
+    const sidebar = [];
+    const changeLog = loginSession && await loginSession.user.organization.getChangeLog();
+
+    res.render('render/apim', {
+        req,
+        res,
+        loginSession,
+        sidebar,
+        changeLog,
+        next
+    });
+}
+
 const serviceActions = {
     addApiToken: async (req, res, next) => {
         // !!!TBD!!! here is where we need to check user permissions
@@ -301,6 +317,14 @@ const serviceActions = {
         }
 
         return next();
+    },
+    deploy: async (req, res, next) => {
+        const loginSession = req.loginSession;
+        await loginSession.user.organization.deploy({
+            userId: loginSession.user.id
+        });
+
+        next();
     }
 };
 
@@ -529,7 +553,8 @@ router.get(/\/(pendinglogin)/, renderPendingLogin);
 router.get(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/?(\w*)/, renderServiceAction);
-router.all(/\/package\/([0-9a-f]+)/, renderPackageHome);
+router.all(/apim/, renderApim);
+router.all(/\/package\/([0-9a-f\-]+)/, renderPackageHome);
 router.all(/\/?(\w*)/, render);
 
 module.exports = {
