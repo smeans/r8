@@ -1,0 +1,193 @@
+<div data-widgetid="dashboard" class="py-10">
+  <header>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl font-bold leading-tight text-gray-900">All Products</h1>
+    </div>
+  </header>
+  <main>
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="flex items-center w-full">
+          <%#<div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+              <h1 class="text-xl font-semibold text-gray-900">Users</h1>
+              <p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>
+              <!-- component -->
+            </div>%>
+            <div class="relative mr-6 my-2">
+              <input type="search" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Search">
+              <div class="absolute top-1 right-3 mt-3 mr-4 text-purple-lighter">
+              	<svg version="1.1" class="h-4 text-dark" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            	 viewBox="0 0 52.966 52.966" style="enable-background:new 0 0 52.966 52.966;" xml:space="preserve">
+                	<path d="M51.704,51.273L36.845,35.82c3.79-3.801,6.138-9.041,6.138-14.82c0-11.58-9.42-21-21-21s-21,9.42-21,21s9.42,21,21,21
+                    c5.083,0,9.748-1.817,13.384-4.832l14.895,15.491c0.196,0.205,0.458,0.307,0.721,0.307c0.25,0,0.499-0.093,0.693-0.279
+                    C52.074,52.304,52.086,51.671,51.704,51.273z M21.983,40c-10.477,0-19-8.523-19-19s8.523-19,19-19s19,8.523,19,19
+                    S32.459,40,21.983,40z"/>
+
+            	</svg>
+
+              </div>
+            </div>
+            <div class="flex-grow">&nbsp;</div>
+            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+              <button type="button" data-action="toggleModal" data-target="#new-product" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add Product</button>
+            </div>
+          </div>
+          <div class="mt-2 flex flex-col">
+            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                  <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">PRODUCT NAME</th>
+                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">PRODUCT DESCRIPTION</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">EDITORS</th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">TAGS</th>
+                        <%#
+                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                          <span class="sr-only">Edit</span>
+                        </th>
+                        %>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        <% if (productList.length) {
+                             productList.forEach((product) => {%>
+                      <tr class="hover:bg-indigo-50">
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <div class="text-gray-900"><%= product.productName %></div>
+                          <%# <div class="text-gray-500">Optimization</div> %>
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800"><%= product.description %></span>
+                        </td>
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                          <div class="flex items-center">
+                            <div class="h-10 w-10 flex-shrink-0">
+                              <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                              <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                              <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                            </div>
+                          </div>
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= product.tags %></td>
+                      </tr>
+                      <%   });
+                         } else { %>
+                              <tr class="hover:bg-indigo-50">
+                                <td data-action="toggleModal" data-target="#new-product" class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center" colspan="4">
+                                    create your first product
+                                    <a href="#" class="inline text-gray-500 hover:text-gray-900">
+                                      <!-- Heroicon name: solid/question-mark-circle -->
+                                      <svg class="inline h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                      </svg>
+                                    </a>
+                                </td>
+                              </tr>
+                     <% }%>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </main>
+      <!--
+      This example requires Tailwind CSS v2.0+
+
+      This example requires some changes to your config:
+
+      ```
+      // tailwind.config.js
+      module.exports = {
+        // ...
+        plugins: [
+          // ...
+          require('@tailwindcss/forms'),
+        ],
+      }
+      ```
+    -->
+    <div data-action="hideModal" data-modalin="translate-x-0" data-modalout="translate-x-full" id="new-product" class="translate-x-full transform transition ease-in-out duration-300 fixed inset-0 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+      <div class="absolute inset-0 overflow-hidden">
+        <!-- Background overlay, show/hide based on slide-over state. -->
+        <div class="absolute inset-0" aria-hidden="true"></div>
+
+        <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
+          <!--
+            Slide-over panel, show/hide based on slide-over state.
+
+            Entering: "transform transition ease-in-out duration-500 sm:duration-700"
+              From: "translate-x-full"
+              To: "translate-x-0"
+            Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
+              From: "translate-x-0"
+              To: "translate-x-full"
+          -->
+          <div data-action="" class="pointer-events-auto w-screen max-w-md">
+            <form class="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl" action="#/" method="POST">
+              <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
+              <input type="hidden" name="serviceAction" value="createProduct"/>
+              <div class="h-0 flex-1 overflow-y-auto">
+                <div class="bg-indigo-700 py-6 px-4 sm:px-6">
+                  <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-medium text-white" id="slide-over-title">New Product</h2>
+                    <div class="ml-3 flex h-7 items-center">
+                      <button type="button" class="rounded-md bg-indigo-700 text-indigo-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+                        <span class="sr-only">Close panel</span>
+                        <!-- Heroicon name: outline/x -->
+                        <svg data-action="hideModal" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-1">
+                    <p class="text-sm text-indigo-300">Enter the name, description, and relevant tags for your new product below, then click Create.</p>
+                  </div>
+                </div>
+                <div class="flex flex-1 flex-col justify-between">
+                  <div class="divide-y divide-gray-200 px-4 sm:px-6">
+                    <div class="space-y-6 pt-6 pb-5">
+                      <div>
+                        <label for="product-name" class="block text-sm font-medium text-gray-900"> Product name </label>
+                        <div class="mt-1">
+                          <input type="text" name="productName" id="product-name" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required autofocus>
+                        </div>
+                      </div>
+                      <div>
+                        <label for="description" class="block text-sm font-medium text-gray-900"> Description </label>
+                        <div class="mt-1">
+                          <textarea id="description" name="description" rows="4" class="block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                        </div>
+                      </div>
+                      <div>
+                        <label for="tags" class="block text-sm font-medium text-gray-900" inline-flex items-center> Tags
+                          <a href="#" class="inline text-gray-500 hover:text-gray-900">
+                            <!-- Heroicon name: solid/question-mark-circle -->
+                            <svg class="inline h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                            </svg>
+                          </a>
+                        </label>
+                        <div class="mt-1">
+                          <textarea id="tags" name="tags" rows="4" class="block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-shrink-0 justify-end px-4 py-4">
+                <button data-action="hideModal" type="button" class="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Cancel</button>
+                <button type="submit" class="ml-4 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

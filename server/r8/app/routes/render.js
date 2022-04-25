@@ -6,9 +6,11 @@ const multer = require('multer');
 const upload = multer();
 const { URL } = require('url');
 
+const log = require('log');
+
 const notify = require('notify');
 
-const { User, LoginSession } = require('db');
+const { User, LoginSession, Product } = require('db');
 
 class SPAURL extends URL {
     static RELATIVE_BASE_URL = new URL('http://localhost');
@@ -71,8 +73,8 @@ async function validateUiUser(req, res, next) {
 async function render(req, res, next) {
     const templateName = req.params[0] || 'home';
     const loginSession = req.loginSession || {};
-    const packageList = loginSession && loginSession.user
-            && await loginSession.user.getPackageList();
+    const productList = loginSession && loginSession.user
+            && await loginSession.user.getProductList();
 
     const sidebar = [];
 
@@ -80,7 +82,7 @@ async function render(req, res, next) {
         req,
         res,
         loginSession,
-        packageList,
+        productList,
         sidebar,
         next
     });
@@ -121,6 +123,16 @@ const serviceActions = {
 
         return next();
     },
+    createProduct: async (req, res, next) => {
+        const productName = req.body.productName;
+        const description = req.body.description;
+        const tags = req.body.tags;
+
+        log.debug('createProduct', productName);
+        const product = await req.organization.createProduct(productName, description, tags);
+
+        res.render('render/redirect', {url: '#/product/' + product.id});
+    },
     createPackage: async (req, res, next) => {
         const packageName = req.body.packageName;
 
@@ -134,7 +146,7 @@ const serviceActions = {
 
         return next();
     },
-    addProduct: async (req, res, next) => {
+    addProductTerm: async (req, res, next) => {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
         const loginSession = req.loginSession;
@@ -336,6 +348,8 @@ async function renderServiceAction(req, res, next) {
         try {
             return await serviceActions[serviceAction](req, res, next)
         } catch (e) {
+            log.error('renderServiceAction', e);
+            log.debug(e.stack);
             req.errors.push(e);
         }
     }
@@ -500,6 +514,26 @@ async function renderConfirmLogin(req, res, next) {
     res.render('render/confirmLogin', args);
 }
 
+async function renderProductHome(req, res, next) {
+    const productId = req.params[0];
+    const loginSession = req.loginSession;
+
+    const product = Product.findById(productId);
+    if (!product) {
+        res.status(404);
+        return next();
+    }
+
+    res.render('render/productHome', {
+        req,
+        res,
+        loginSession,
+        product,
+        SPAURL,
+        next
+    });
+}
+
 async function renderPackageHome(req, res, next) {
     const packageId = req.params[0];
     const loginSession = req.loginSession;
@@ -554,6 +588,7 @@ router.get(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/?(\w*)/, renderServiceAction);
 router.all(/apim/, renderApim);
+router.all(/\/product\/([0-9a-f\-]+)/, renderProductHome);
 router.all(/\/package\/([0-9a-f\-]+)/, renderPackageHome);
 router.all(/\/?(\w*)/, render);
 

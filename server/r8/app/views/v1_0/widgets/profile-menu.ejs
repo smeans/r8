@@ -1,0 +1,32 @@
+<% if (loginSession && loginSession.valid) { %>
+<div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+    <span class="relative z-0 inline-flex shadow-sm rounded-md">
+      <button type="button" class="<%= req.currentEnv == 'dev' ? 'bg-indigo-100' : 'bg-white' %>relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+        dev
+      </button>
+      <button type="button" class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+        test
+      </button>
+      <button type="button" class="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+        prod
+      </button>
+    </span>
+</div>
+<div class="flex-shrink-0 flex border-t border-gray-200 p-4">
+  <a href="#/profile" class="flex-shrink-0 w-full group block">
+    <div class="flex items-center">
+      <div>
+        <img class="inline-block h-9 w-9 rounded-full" src="<%- gravatar.url(loginSession.user.email, {s: '256', r: 'pg', protocol: req.protocol}) %>" alt="<%= loginSession.user.name%>">
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+          <%= loginSession.user.name %>
+        </p>
+        <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+          View profile
+        </p>
+      </div>
+    </div>
+  </a>
+</div>
+<% } %>

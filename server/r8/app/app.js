@@ -29,7 +29,7 @@ const app = express();
 
 // view engine setup
 app.engine('ejs', ejs.__express);
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', [path.join(__dirname, 'views/v1_0'), path.join(__dirname, 'views/v0_5')]);
 app.set('view engine', 'ejs');
 app.set('view options', {
     debug: false
