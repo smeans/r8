@@ -55,6 +55,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (summary && e.target.tagName == 'LABEL') {
             e.target.closest('details').toggleAttribute('open');
         }
+
+        if (currentModal && !currentModal.contains(e.target)
+                && !e.target.closest('*[data-action]')) {
+            hideModal();
+        }
     }, {capture: true});
 
     addEventListener('beforeunload', (e) => {
@@ -533,4 +538,62 @@ window['hideElement'] = (e) => {
     const actor = e.target.closest('*[data-action]');
 
     actor.classList.add('hidden');
+}
+
+let currentModal = null;
+
+function _applyModalStyles(show) {
+    if (!currentModal) {
+        return;
+    }
+
+    if (!currentModal.hasAttribute('data-modalout')) {
+        currentModal && currentModal.classList.toggle('hidden', !show);
+
+        return;
+    }
+
+    const outStyles = currentModal.getAttribute('data-modalout') || '';
+    const inStyles = currentModal.getAttribute('data-modalin') || '';
+
+    if (show) {
+        currentModal.classList.remove(outStyles);
+        currentModal.classList.add(inStyles);
+    } else {
+        currentModal.classList.remove(inStyles);
+        currentModal.classList.add(outStyles);
+    }
+}
+
+window['hideModal'] = () => {
+    _applyModalStyles(false);
+
+    currentModal = null;
+}
+
+window['toggleModal'] = (e) => {
+    const actor = e.target.closest('*[data-action]');
+    const targetSelector = actor.getAttribute('data-target');
+    const target = document.querySelector(targetSelector);
+
+    if (!target) {
+        console.warn(`toggleModal() target "${targetSelector}" not found`);
+    }
+
+    const previousModal = currentModal;
+
+    hideModal();
+
+    if (previousModal == target) {
+        return;
+    }
+
+    currentModal = target;
+    if (!currentModal) {
+        return;
+    }
+
+    _applyModalStyles(true);
+    let af = currentModal.querySelector('[autofocus]');
+    af && af.focus();
 }
