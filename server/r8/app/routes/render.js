@@ -76,6 +76,7 @@ async function render(req, res, next) {
     const productList = loginSession && loginSession.user
             && await loginSession.user.getProductList();
 
+    log.debug('productList', productList);
     const sidebar = [];
 
     res.render('render/' +  templateName, {
@@ -524,7 +525,7 @@ async function renderProductHome(req, res, next) {
         return next();
     }
 
-    res.render('render/productHome', {
+    res.render('render/producthome', {
         req,
         res,
         loginSession,

@@ -150,3 +150,13 @@ aside details summary {
 aside details summary select {
     color: #000;
 }
+
+.searchable * {
+    max-height: 100vh;
+}
+
+.unmatched {
+    transform: scaleY(0.0);
+    max-height: 0px;
+    transition: max-height transform .25s;
+}

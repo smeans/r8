@@ -99,6 +99,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    document.addEventListener('input', (e) => {
+        if (e.target.type != 'search' || !e.target.hasAttribute('data-searchtarget')) {
+            return;
+        }
+
+        const searchString = e.target.value.toLowerCase();
+        const items = document.querySelectorAll(e.target.getAttribute('data-searchtarget'));
+
+        items.forEach((item, i) => {
+            item.classList.toggle('unmatched', !item.innerText.toLowerCase().includes(searchString));
+        });
+    });
+
     phInit();
 });
 

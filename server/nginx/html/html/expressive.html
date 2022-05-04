@@ -218,6 +218,20 @@ function contentEditableText(el) {
         </script>
     </template>
 
+    <template name="x-tags">
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <slot></slot>
+        <script>
+            class XTags extends ExpressiveElement {
+
+            }
+        </script>
+    </template>
+
     <template name="x-button">
         <style>
             :host {
@@ -329,7 +343,7 @@ function contentEditableText(el) {
                             return;
                         }
                     }
-                    
+
                     this.innerText = newValue;
                 }
 

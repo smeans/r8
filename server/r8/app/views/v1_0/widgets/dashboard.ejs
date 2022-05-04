@@ -14,7 +14,7 @@
               <!-- component -->
             </div>%>
             <div class="relative mr-6 my-2">
-              <input type="search" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Search">
+              <input type="search" data-searchtarget="#products tr" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Search">
               <div class="absolute top-1 right-3 mt-3 mr-4 text-purple-lighter">
               	<svg version="1.1" class="h-4 text-dark" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
             	 viewBox="0 0 52.966 52.966" style="enable-background:new 0 0 52.966 52.966;" xml:space="preserve">
@@ -50,7 +50,7 @@
                         %>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
+                    <tbody id="products" class="searchable divide-y divide-gray-200 bg-white">
                         <% if (productList.length) {
                              productList.forEach((product) => {%>
                       <tr class="hover:bg-indigo-50">
@@ -59,18 +59,17 @@
                           <%# <div class="text-gray-500">Optimization</div> %>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800"><%= product.description %></span>
+                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 text-green-800"><%= product.description %></span>
                         </td>
                         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                           <div class="flex items-center">
                             <div class="h-10 w-10 flex-shrink-0">
                               <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
                               <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                              <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
                             </div>
                           </div>
                         </td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= product.tags %></td>
+                        <td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><x-tags><%= product.tags %></x-tags></td>
                       </tr>
                       <%   });
                          } else { %>
