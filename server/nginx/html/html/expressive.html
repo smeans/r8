@@ -187,6 +187,13 @@ function contentEditableText(el) {
     return lines.join('\n');
 }
 </script>
+
+<style>
+    x-multicheck::selection,
+    x-multicheck>*::selection {
+        background: transparent;
+    }
+</style>
 <ph-components>
     <template name="x-hbox">
         <style>
@@ -228,6 +235,88 @@ function contentEditableText(el) {
         <script>
             class XTags extends ExpressiveElement {
 
+            }
+        </script>
+    </template>
+
+    <template name="x-multicheck">
+        <style>
+            :host {
+                display: block;
+                user-select: text;
+            }
+
+            ::slotted(*) {
+                display: inline-block;
+                white-space: nowrap;
+            }
+        </style>
+        <slot id="slot"></slot>
+        <script>
+            class XMulticheck extends ExpressiveElement {
+                constructor() {
+                    super();
+
+                    this.g.slot.addEventListener('input', (e) => {
+                        const item = this.getItem(e.target);
+                        item.classList.toggle('checked', e.target.checked);
+                    });
+
+                    document.addEventListener('selectstart', (e) => {
+                        this._selectToggle = null;
+                    });
+
+                    document.addEventListener('selectionchange', (e) => {
+                        const items = this.getSelectedItems();
+                        if (this._selectToggle == null && items.length) {
+                            this._selectToggle = !items[0].classList.contains('checked');
+                        }
+
+                        items.forEach((item) => {
+                            item.classList.toggle('checked', this._selectToggle);
+                            item.querySelector('input[type=checkbox]').checked = this._selectToggle;
+                        });
+                    });
+                }
+
+                getItem(target) {
+                    while (target && target.parentElement != this) {
+                        target = target.parentElement;
+                    }
+
+                    return target;
+                }
+
+                getSelectedItems() {
+                    const items = [];
+
+                    const sel = document.getSelection();
+                    if (sel.isCollapsed) {
+                        return items;
+                    }
+
+                    const range = sel.getRangeAt(0);
+                    let startItem = this.getItem(range.startContainer);
+                    const endItem = this.getItem(range.endContainer);
+
+                    if (!startItem || !endItem) {
+                        return items;
+                    }
+
+                    while (startItem && startItem != endItem) {
+                        if (startItem.nodeType == Node.ELEMENT_NODE) {
+                            items.push(startItem);
+                        }
+
+                        startItem = startItem.nextSibling;
+                    }
+
+                    if (endItem.nodeType == Node.ELEMENT_NODE) {
+                        items.push(endItem);
+                    }
+
+                    return items;
+                }
             }
         </script>
     </template>

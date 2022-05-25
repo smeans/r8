@@ -147,6 +147,11 @@ function phInit() {
             appendScript(script.innerHTML);
         });
 
+        // apply all global styles
+        root.querySelectorAll('style').forEach(function(style) {
+            document.querySelector('head').appendChild(style.cloneNode());
+        });
+
         // process each template element
         root.querySelectorAll('template').forEach(function(template) {
             let tagName = template.getAttribute('name');

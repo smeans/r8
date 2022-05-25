@@ -48,6 +48,12 @@ function handlePageClick(e) {
         if (action && window[action]) {
             return window[action](e);
         }
+
+        if (routeRequest(action, actor)) {
+            e.preventDefault();
+
+            return false;
+        }
     }
 
     const a = e.target.closest('a');
@@ -84,7 +90,7 @@ function routeRequest(url, target) {
             promise = renderRequest(method, url, data);
         } break;
 
-        case 'A': {
+        default: {
             promise = renderRequest('GET', url, null,
                     updateState='pushState');
         } break;

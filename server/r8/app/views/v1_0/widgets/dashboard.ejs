@@ -1,3 +1,6 @@
+<%
+    const organization = loginSession.user.organization;
+%>
 <div data-widgetid="dashboard" class="py-10">
   <header>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,7 +17,7 @@
               <!-- component -->
             </div>%>
             <div class="relative mr-6 my-2">
-              <input type="search" data-searchtarget="#products tr" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Search">
+              <input type="search" data-searchtarget="#products tr" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Filter">
               <div class="absolute top-1 right-3 mt-3 mr-4 text-purple-lighter">
               	<svg version="1.1" class="h-4 text-dark" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
             	 viewBox="0 0 52.966 52.966" style="enable-background:new 0 0 52.966 52.966;" xml:space="preserve">
@@ -41,8 +44,8 @@
                       <tr>
                         <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">PRODUCT NAME</th>
                         <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">PRODUCT DESCRIPTION</th>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">EDITORS</th>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">TAGS</th>
+                        <%#<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">EDITORS</th>%>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">STATES</th>
                         <%#
                         <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                           <span class="sr-only">Edit</span>
@@ -53,7 +56,7 @@
                     <tbody id="products" class="searchable divide-y divide-gray-200 bg-white">
                         <% if (productList.length) {
                              productList.forEach((product) => {%>
-                      <tr class="hover:bg-indigo-50">
+                      <tr class="hover:bg-indigo-50" data-action="#/product/<%=product.id%>">
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           <div class="text-gray-900"><%= product.productName %></div>
                           <%# <div class="text-gray-500">Optimization</div> %>
@@ -61,6 +64,7 @@
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 text-green-800"><%= product.description %></span>
                         </td>
+                        <%#
                         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                           <div class="flex items-center">
                             <div class="h-10 w-10 flex-shrink-0">
@@ -69,7 +73,9 @@
                             </div>
                           </div>
                         </td>
-                        <td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><x-tags><%= product.tags %></x-tags></td>
+                        %>
+                        <td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><%=product.states && product.states.join(', ')%></td>
+                        <%#<td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><x-tags>< product.tags ></x-tags></td>%>
                       </tr>
                       <%   });
                          } else { %>
@@ -92,24 +98,9 @@
             </div>
           </div>
         </div>
+      </main>
     </div>
-  </main>
-      <!--
-      This example requires Tailwind CSS v2.0+
 
-      This example requires some changes to your config:
-
-      ```
-      // tailwind.config.js
-      module.exports = {
-        // ...
-        plugins: [
-          // ...
-          require('@tailwindcss/forms'),
-        ],
-      }
-      ```
-    -->
     <div data-action="hideModal" data-modalin="translate-x-0" data-modalout="translate-x-full" id="new-product" class="translate-x-full transform transition ease-in-out duration-300 fixed inset-0 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
       <div class="absolute inset-0 overflow-hidden">
         <!-- Background overlay, show/hide based on slide-over state. -->
@@ -145,7 +136,7 @@
                     </div>
                   </div>
                   <div class="mt-1">
-                    <p class="text-sm text-indigo-300">Enter the name, description, and relevant tags for your new product below, then click Create.</p>
+                    <p class="text-sm text-indigo-300">Enter the name, description, valid states, and relevant tags for your new product below, then click Create.</p>
                   </div>
                 </div>
                 <div class="flex flex-1 flex-col justify-between">
@@ -164,7 +155,7 @@
                         </div>
                       </div>
                       <div>
-                        <label for="tags" class="block text-sm font-medium text-gray-900" inline-flex items-center> Tags
+                        <label for="states" class="block text-sm font-medium text-gray-900" inline-flex items-center> States
                           <a href="#" class="inline text-gray-500 hover:text-gray-900">
                             <!-- Heroicon name: solid/question-mark-circle -->
                             <svg class="inline h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -173,7 +164,10 @@
                           </a>
                         </label>
                         <div class="mt-1">
-                          <textarea id="tags" name="tags" rows="4" class="block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                            <x-multicheck id="states"><% for (const state in organization.validStateCodes) {%>
+                                <label title="<%=organization.validStateCodes[state]%>"><input class="hidden" type="checkbox" name="states" value="<%=state%>"/><%=state%></label>
+                            <%}%>
+                            </x-multicheck>
                         </div>
                       </div>
                     </div>
@@ -189,4 +183,3 @@
         </div>
       </div>
     </div>
-</div>

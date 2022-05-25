@@ -127,10 +127,11 @@ const serviceActions = {
     createProduct: async (req, res, next) => {
         const productName = req.body.productName;
         const description = req.body.description;
-        const tags = req.body.tags;
+        const states = req.body.states;
 
         log.debug('createProduct', productName);
-        const product = await req.organization.createProduct(productName, description, tags);
+        const product = await req.organization.createProduct(productName,
+                description, states);
 
         res.render('render/redirect', {url: '#/product/' + product.id});
     },
@@ -519,7 +520,7 @@ async function renderProductHome(req, res, next) {
     const productId = req.params[0];
     const loginSession = req.loginSession;
 
-    const product = Product.findById(productId);
+    const product = await Product.findById(productId);
     if (!product) {
         res.status(404);
         return next();

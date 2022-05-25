@@ -23,6 +23,7 @@
     --card-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     --big-tile-h: 10em;
     --big-tile-w: 16em;
+    --flat-blue: #415272;
 
     --fastest: .2s;
     --faster: .3s;
@@ -159,4 +160,19 @@ aside details summary select {
     transform: scaleY(0.0);
     max-height: 0px;
     transition: max-height transform .25s;
+}
+
+x-multicheck .checked {
+    background: rgb(67, 56, 202);
+    color: white;
+}
+
+x-multicheck label {
+    padding: .25em .5em;
+    border-radius: .5em;
+    margin: .125rem 0;
+}
+
+.bg-flatblue {
+    background-color: var(--flat-blue);
 }
