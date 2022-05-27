@@ -1,22 +1,14 @@
 <%
     const gravatar = require('gravatar');
+    const user = loginSession.user;
+    const organization = user.organization;
+
+    const urlParams = req.url.split('/');
+    const defaultEnv = organization.currentEnvironment;
+    const currentTab = urlParams.length > 3 ? urlParams[3] : defaultEnv;
+    console.log(currentTab, urlParams);
+    console.log(packageLists);
 %>
-<!--
-  This example requires Tailwind CSS v2.0+
-
-  This example requires some changes to your config:
-
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
--->
 <nav>
     <%- include('widgets/navbar', {title}) %>
 </nav>
@@ -43,6 +35,51 @@
   </div>
 </div>
 
+<div class="max-w-7xl mx-auto py-1 px-4 sm:py-2 sm:px-6 lg:px-8 lg:flex lg:justify-between">
+  <div class="sm:hidden">
+    <label for="tabs" class="sr-only">Select a tab</label>
+    <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
+    <select id="tabs" name="tabs" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+      <option selected>Development</option>
+
+      <option>Staging</option>
+
+      <option>Production</option>
+    </select>
+  </div>
+<%
+    function renderLink(env) {
+        const packageCount = packageLists[env].length;
+
+        if (currentTab == env) {
+            return `
+            <a href="#/product/${product.id}/${env}" class="border-indigo-500 text-indigo-600 whitespace-nowrap flex py-4 px-1 border-b-2 font-medium text-sm" aria-current="page">
+              ${env}
+
+              <span class="bg-indigo-100 text-indigo-600 hidden ml-3 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block">${packageCount}</span>
+            </a>
+            `;
+        } else {
+            return `
+            <a href="#/product/${product.id}/${env}" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200 whitespace-nowrap flex py-4 px-1 border-b-2 font-medium text-sm">
+                ${env}
+
+              <span class="bg-gray-100 text-gray-900 hidden ml-3 py-0.5 px-2.5 rounded-full text-xs font-medium md:inline-block">${packageCount}</span>
+            </a>`;
+        }
+    }
+%>
+  <div class="hidden sm:block">
+    <div class="border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <% for (const env of organization.environments) {%>
+            <%- renderLink(env) %>
+        <%}%>
+      </nav>
+    </div>
+  </div>
+</div>
+
 <div data-action="hideModal" data-modalin="translate-x-0" data-modalout="translate-x-full" id="product-details" class="translate-x-full transform transition ease-in-out duration-300 fixed inset-0 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
   <div class="absolute inset-0 overflow-hidden">
     <!-- Background overlay, show/hide based on slide-over state. -->
@@ -60,9 +97,10 @@
           To: "translate-x-full"
       -->
       <div data-action="" class="pointer-events-auto w-screen max-w-md">
-        <form class="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl" action="#/" method="POST">
+        <form class="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl" action="#/product/<%=product.id%>" method="POST">
           <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
           <input type="hidden" name="serviceAction" value="updateProduct"/>
+          <input type="hidden" name="productId" value="<%=product.id%>"/>
           <div class="h-0 flex-1 overflow-y-auto">
             <div class="bg-flatblue py-6 px-4 sm:px-6">
               <div class="flex items-center justify-between">
@@ -109,7 +147,7 @@
                         <x-multicheck id="states"><%
                                 const ss = new Set(product.states);
 
-                                for (const state in product.organization.validStateCodes) {
+                                for (const state in product.organization.validStateCodes) {%>
                             <label <% if (ss.has(state)) {%>class="checked"<%}%> title="<%=product.organization.validStateCodes[state]%>"><input class="hidden" type="checkbox" name="states" value="<%=state%>" <% if (ss.has(state)) {%>checked<%}%>/><%=state%></label>
                         <%}%>
                         </x-multicheck>

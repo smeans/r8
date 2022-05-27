@@ -127,13 +127,33 @@ const serviceActions = {
     createProduct: async (req, res, next) => {
         const productName = req.body.productName;
         const description = req.body.description;
-        const states = req.body.states;
+        const states = Array.isArray(req.body.states) ? req.body.states
+                : [req.body.states];
 
         log.debug('createProduct', productName);
         const product = await req.organization.createProduct(productName,
                 description, states);
 
         res.render('render/redirect', {url: '#/product/' + product.id});
+    },
+    updateProduct: async (req, res, next) => {
+        const product = await req.organization.getProduct(req.body.productId);
+
+        if (!product) {
+            res.status(400);
+
+            return next();
+        }
+
+        log.debug('updateProduct', product.name);
+        product.name = req.body.productName;
+        product.description = req.body.description;
+        product.states = Array.isArray(req.body.states) ? req.body.states
+                        : [req.body.states];
+
+        await product.save();
+
+        return next();
     },
     createPackage: async (req, res, next) => {
         const packageName = req.body.packageName;
@@ -342,15 +362,20 @@ const serviceActions = {
     }
 };
 
-async function renderServiceAction(req, res, next) {
-    const  serviceAction =  req.body.serviceAction;
+async function processServiceAction(req, res, next) {
+    console.debug('in processServiceAction');
+    if (req.method != 'POST') {
+        return next();
+    }
 
-    console.debug('renderServiceAction', serviceAction);
+    const serviceAction = req.body.serviceAction;
+
+    console.debug('processServiceAction', serviceAction);
     if (serviceActions.hasOwnProperty(serviceAction)) {
         try {
             return await serviceActions[serviceAction](req, res, next)
         } catch (e) {
-            log.error('renderServiceAction', e);
+            log.error('processServiceAction', e);
             log.debug(e.stack);
             req.errors.push(e);
         }
@@ -520,17 +545,22 @@ async function renderProductHome(req, res, next) {
     const productId = req.params[0];
     const loginSession = req.loginSession;
 
-    const product = await Product.findById(productId);
+    const product = await req.organization.getProduct(productId);
     if (!product) {
         res.status(404);
+
         return next();
     }
+
+    const packageLists = await req.organization.getPackageLists();
+
 
     res.render('render/producthome', {
         req,
         res,
         loginSession,
         product,
+        packageLists,
         SPAURL,
         next
     });
@@ -583,12 +613,13 @@ async function renderPackageHome(req, res, next) {
     });
 }
 
+router.use(processServiceAction);
+
 router.post(/\/(login)/, renderLogin);
 router.post(/\/(logout)/, renderLogout);
 router.get(/\/(pendinglogin)/, renderPendingLogin);
 router.get(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/(confirmlogin)/, renderConfirmLogin);
-router.post(/\/?(\w*)/, renderServiceAction);
 router.all(/apim/, renderApim);
 router.all(/\/product\/([0-9a-f\-]+)/, renderProductHome);
 router.all(/\/package\/([0-9a-f\-]+)/, renderPackageHome);
