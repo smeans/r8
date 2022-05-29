@@ -156,7 +156,9 @@ const serviceActions = {
         return next();
     },
     createPackage: async (req, res, next) => {
-        const packageName = req.body.packageName;
+        const organization = req.organization;
+        const product = await organization.getProduct(req.body.productId);
+        const effectiveDate = req.body.effectiveDate;
 
         if (!req.organization) {
             res.status(400);
@@ -164,7 +166,7 @@ const serviceActions = {
             return next();
         }
 
-        await req.organization.createPackage(packageName);
+        await req.organization.createPackage(product, effectiveDate);
 
         return next();
     },
@@ -552,8 +554,7 @@ async function renderProductHome(req, res, next) {
         return next();
     }
 
-    const packageLists = await req.organization.getPackageLists();
-
+    const packageLists = await req.organization.getPackageLists(productId);
 
     res.render('render/producthome', {
         req,

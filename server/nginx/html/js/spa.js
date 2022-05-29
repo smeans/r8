@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('click', handlePageClick);
+    document.addEventListener('input', handlePageInput);
 });
 
 function isInternalLocation(location) {
@@ -41,19 +42,21 @@ function handleSubmit(e) {
     }
 }
 
+function runAction(actor, e) {
+    const action = actor.getAttribute('data-action');
+    if (action && window[action]) {
+        return window[action](e);
+    }
+
+    return routeRequest(action, actor);
+}
+
 function handlePageClick(e) {
     const actor = e.target.closest('*[data-action]');
-    if (actor) {
-        const action = actor.getAttribute('data-action');
-        if (action && window[action]) {
-            return window[action](e);
-        }
+    if (actor && runAction(actor, e)) {
+        e.preventDefault();
 
-        if (routeRequest(action, actor)) {
-            e.preventDefault();
-
-            return false;
-        }
+        return false;
     }
 
     const a = e.target.closest('a');
@@ -66,6 +69,22 @@ function handlePageClick(e) {
 
             return false;
         }
+    }
+}
+
+function handlePageInput(e) {
+    switch (e.target.tagName) {
+        case 'SELECT': {
+            for (const opt of e.target.selectedOptions) {
+                if (opt.hasAttribute('data-action')) {
+                    if (runAction(opt, e)) {
+                        e.preventDefault();
+
+                        return false;
+                    }
+                }
+            }
+        } break;
     }
 }
 

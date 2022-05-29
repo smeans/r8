@@ -566,15 +566,17 @@ function _applyModalStyles(show) {
         return;
     }
 
-    const outStyles = currentModal.getAttribute('data-modalout') || '';
-    const inStyles = currentModal.getAttribute('data-modalin') || '';
+    let outStyles = currentModal.getAttribute('data-modalout') || '';
+    outStyles = outStyles.split(/\s+/);
+    let inStyles = currentModal.getAttribute('data-modalin') || '';
+    inStyles = inStyles.split(/\s+/);
 
     if (show) {
-        currentModal.classList.remove(outStyles);
-        currentModal.classList.add(inStyles);
+        currentModal.classList.remove(...outStyles);
+        currentModal.classList.add(...inStyles);
     } else {
-        currentModal.classList.remove(inStyles);
-        currentModal.classList.add(outStyles);
+        currentModal.classList.remove(...inStyles);
+        currentModal.classList.add(...outStyles);
     }
 }
 
