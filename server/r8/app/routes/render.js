@@ -156,6 +156,7 @@ const serviceActions = {
         return next();
     },
     createPackage: async (req, res, next) => {
+        const loginSession = req.loginSession;
         const organization = req.organization;
         const product = await organization.getProduct(req.body.productId);
         const effectiveDate = req.body.effectiveDate;
@@ -166,7 +167,9 @@ const serviceActions = {
             return next();
         }
 
-        await req.organization.createPackage(product, effectiveDate);
+        await req.organization.createPackage(product, effectiveDate, {
+            userId: loginSession.user.id
+        });
 
         return next();
     },
@@ -365,7 +368,6 @@ const serviceActions = {
 };
 
 async function processServiceAction(req, res, next) {
-    console.debug('in processServiceAction');
     if (req.method != 'POST') {
         return next();
     }

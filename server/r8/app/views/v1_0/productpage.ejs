@@ -9,8 +9,6 @@
     const currentTab = urlParams.length > 3 ? urlParams[3] : defaultEnv;
     const inDevelopmentEnv = organization.environments.indexOf(currentTab) == 0;
     const noVersions = packageLists[developmentEnv].length == 0;
-    console.log(currentTab, urlParams);
-    console.log(packageLists);
 %>
 <nav>
     <%- include('widgets/navbar', {title}) %>
@@ -122,6 +120,32 @@
     </button>
   </div>
 </div>
+<% } else { %>
+    <!-- This example requires Tailwind CSS v2.0+ -->
+      <div class="max-w-7xl mx-auto py-1 px-4 sm:py-2 sm:px-6 lg:px-8 mt-8 flex flex-col">
+        <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              <table class="min-w-full divide-y divide-gray-300">
+                <tbody class="divide-y divide-gray-200 bg-white">
+<%
+       for (const package of packageLists[currentTab]) { %>
+                    <tr>
+                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">Effective <%=package.effectiveDate%></td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Last updated <%=package.versionInfo.saveTs%></td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">&nbsp;</td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">&nbsp;</td>
+                      <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+
+                      </td>
+                    </tr>
+<%   } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 <% } %>
 
 <div data-action="hideModal" data-modalin="translate-x-0" data-modalout="translate-x-full" id="product-details" class="translate-x-full transform transition ease-in-out duration-300 fixed inset-0 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
