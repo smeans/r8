@@ -8,6 +8,8 @@
     const developmentEnv = organization.environments[0];
     const currentTab = urlParams.length > 3 ? urlParams[3] : defaultEnv;
     const inDevelopmentEnv = organization.environments.indexOf(currentTab) == 0;
+    const inProdEnv = organization.environments.indexOf(currentTab) == organization.environments.length-1;
+    const higherEnv = !inProdEnv ? organization.environments[organization.environments.indexOf(currentTab)+1] : null;
     const noVersions = packageLists[developmentEnv].length == 0;
 %>
 <nav>
@@ -131,12 +133,19 @@
 <%
        for (const package of packageLists[currentTab]) { %>
                     <tr>
-                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">Effective <%=package.effectiveDate%></td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Last updated <%=package.versionInfo.saveTs%></td>
+                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">Effective <x-date><%=package.effectiveDate%></x-date></td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Last updated <x-date><%=package.versionInfo.saveTs%></x-date></td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">&nbsp;</td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">&nbsp;</td>
                       <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-
+                          <!-- This example requires Tailwind CSS v2.0+ -->
+<%                          if (inDevelopmentEnv) { %>
+                          <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Edit</button>
+                          <%                          } %>
+                          <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Test</button>
+<%                          if (higherEnv) { %>
+                          <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Deploy to <%=higherEnv%></button>
+<%                          } %>
                       </td>
                     </tr>
 <%   } %>

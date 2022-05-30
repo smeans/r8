@@ -239,6 +239,43 @@ function contentEditableText(el) {
         </script>
     </template>
 
+    <template name="x-date">
+        <style>
+            :host {
+                display: inline-block;
+            }
+            slot {
+                display: none;
+            }
+        </style>
+        <slot></slot>
+        <div id="output"></div>
+        <script>
+            class XDate extends ExpressiveElement {
+                constructor() {
+                    super();
+                    this.refresh();
+                }
+
+                connectedCallback() {
+                    let observer = new MutationObserver((mutations) => {
+                        this.refresh();
+                    });
+
+                    observer.observe(this, {childList: true});
+                }
+
+                refresh() {
+                    const date = new Date(this.textContent);
+
+                    this.g.output.innerText = date.toLocaleDateString(undefined, {
+                        "dateStyle": "long"
+                    });
+                }
+            }
+        </script>
+    </template>
+
     <template name="x-multicheck">
         <style>
             :host {
