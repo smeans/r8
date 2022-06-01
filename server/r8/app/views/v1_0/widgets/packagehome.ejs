@@ -10,15 +10,12 @@
         filter: inherit;
     }
 </style>
-<!-- This example requires Tailwind CSS v2.0+ -->
-<script data-widgetid="update_package" id="packageJson">
-    () => { return <%- JSON.stringify(pkg.json) %>; }
-</script>
-<nav data-widgetid="package_home" class="bg-white border-b border-gray-200 flex" aria-label="Breadcrumb">
-  <ol role="list" class="max-w-screen-xl w-full mx-auto px-4 flex flex-wrap space-x-4 sm:px-6 lg:px-8">
+
+<nav class="bg-white border-b border-gray-200 flex" aria-label="Breadcrumb">
+  <ol role="list" class="max-w-screen-xl w-full mx-auto flex flex-wrap space-x-4 sm:px-2 lg:px-4 items-center">
     <li class="flex">
       <div class="flex items-center">
-        <a href="<%- breadCrumbTrail[0].url %>" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <a href="<%- breadCrumbTrail[0].url %>" class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700">
             <x-svg src="<%= breadCrumbTrail[0].icon %>"></x-svg>
             <%= breadCrumbTrail[0].label %>
         </a>
@@ -28,11 +25,13 @@
     <%  for (let i = 1; i < breadCrumbTrail.length-1; i++) { %>
     <li class="flex">
       <div class="flex items-center">
-        <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
         </svg>
-        <a href="<%- breadCrumbTrail[i].url %>" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <a href="<%- breadCrumbTrail[i].url %>" class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+<%          if (breadCrumbTrail[i].icon) { %>
             <x-svg src="<%= breadCrumbTrail[i].icon %>"></x-svg>
+<%          } %>
             <%= breadCrumbTrail[i].label %>
         </a>
       </div>
@@ -44,26 +43,56 @@
     %>
     <li class="flex">
       <div class="flex items-center">
-        <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
         </svg>
+        <span class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+<%        if (breadCrumbTrail[i].icon) { %>
             <x-svg src="<%= breadCrumbTrail[i].icon %>"></x-svg>
+<%        } %>
             <%= breadCrumbTrail[i].label %>
+        </span>
       </div>
     </li>
 <%  } %>
   </ol>
 </nav>
 
+<x-page data-widgetid="package_home" class="py-10">
+  <script data-widgetid="update_package" id="packageJson">
+    () => { return <%- JSON.stringify(pkg.json) %>; }
+  </script>
+
+  <header class="flex flex-col items-start">
+    <div class="max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold leading-tight text-gray-900"><%=product.name%> &dash; Effective <%=pkg.effectiveDate%></h1>
+    </div>
+    <div class="max-w-7xl mt-2 px-4 sm:px-6 lg:px-8 w-full flex flex-row">
+        <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"> Development </span>
+        </div>
+        <div class="flex-grow">
+            &nbsp;
+        </div>
+        <div>
+            <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Edit</button>
+            <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Test</button>
+            <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Deploy to staging</button>
+        </div>
+    </div>
+  </header>
+  <div class="flex flex-col items-start">
 <%
-    if (pkg.undefinedTerms.size  > 0) {
-        sidebar.push(include('undefinedterms.ejs'));
-    }
-    if (focusTerm) {
-        sidebar.push(include('testform.ejs'));
-        sidebar.push(include('termlist.ejs'));
+  if (pkg.undefinedTerms.size  > 0) {
+      sidebar.push(include('undefinedterms.ejs'));
+  }
+  if (focusTerm) {
+      sidebar.push(include('testform.ejs'));
+      sidebar.push(include('termlist.ejs'));
 %>
 <%- include(`${focusTerm.termTypeName}-editor.ejs`) %>
 <% } else { %>
 <%- include('package-editor.ejs') %>
 <% } %>
+  </div>
+</x-page>

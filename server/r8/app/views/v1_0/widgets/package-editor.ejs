@@ -1,46 +1,8 @@
-<div data-widgetid="package_editor" class="py-4">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-    <h1 class="text-1xl font-semibold text-gray-900"><x-svg src="/svg/globe.svg"></x-svg>Products</h1>
-  </div>
+<%
+    const ratingTerm = pkg.getTerm('_rating');
+%>
+<div class="max-w-7xl mt-4 px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-bold leading-tight text-gray-900">Rating Algorithm</h2>
 </div>
-<div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-    <x-tiles class="large" id="products">
-        <% for (const termName in pkg.terms) {
-            const term = pkg.terms[termName];
-            if (term.isPublic) { %>
-            <x-tile data-termname="<%= termName %>">
-                <h1><%= termName %></h1>
-            </x-tile>
-        <%  }%>
-        <% } %>
-        <x-tile class="addNew">
-            <form method="POST">
-                <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
-                <input type="hidden" name="serviceAction" value="addProduct"/>
-                <input class="mr-1" type="text" name="newProductName" placeholder="ProductName" required/>
-                <button id="addProduct" type="submit" class="inline-flex items-center border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <x-svg src="/svg/plus.svg"></x-svg>
-                </button>
-            </form>
-        </x-tile>
-    </x-tiles>
-</div>
-<div class="py-4">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-    <h1 class="text-1xl font-semibold text-gray-900"><x-svg src="/svg/right-arrow.svg"></x-svg>Deployment</h1>
-  </div>
-</div>
-<div class="flex py-4">
-    <div class="px-4 sm:px-6 md:px-8">
-        <div>
-            <h1>dev</h1>
-        </div>
-        <form method="POST">
-            <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
-            <input type="hidden" name="serviceAction" value="deploy"/>
-            <input type="hidden" name="env" value="dev"/>
-            <button type="submit"><x-svg src="/svg/right-arrow.svg"></x-svg></button>
-        </form>
-    </div>
-</div>
+<%- include('expression-editor.ejs', {focusTerm: ratingTerm}) %>
 <%- include('terms-grid', {title: "Terms", terms: Object.values(pkg.terms)}) %>

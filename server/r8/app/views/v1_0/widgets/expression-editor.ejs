@@ -6,9 +6,9 @@
       <%- include('data-type-widget', {currentDataType: focusTerm.dataType}) %>
     </div>
 </div>
-<div class="py-4">
+<div class="py-4 w-full">
     <div class="w-full mx-auto px-4 sm:px-6 md:px-8">
-        <x-expression id="editor" class="bg-white rounded-md p-1" initialvalue="<%= focusTerm.expressionSource %>"></x-expression>
+        <x-expression id="editor" class="bg-white rounded-md p-1 w-full max-w-5xl" initialvalue="<%= focusTerm.expressionSource %>"></x-expression>
     </div>
 </div>
 <%- include('terms-grid', {

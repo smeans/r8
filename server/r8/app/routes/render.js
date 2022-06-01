@@ -573,6 +573,7 @@ async function renderPackageHome(req, res, next) {
     const packageId = req.params[0];
     const loginSession = req.loginSession;
     const pkg = await req.organization.getPackage(packageId);
+    const product = await req.organization.getProduct(pkg.productId);
     let termStack = req.query.ts || [];
     if (!(Array.isArray(termStack))) {
         termStack = [termStack];
@@ -582,13 +583,20 @@ async function renderPackageHome(req, res, next) {
     const focusTerm = termStack.length > 0 ? termStack[termStack.length-1]
         : null;
 
-    const breadCrumbTrail = [];
+    const breadCrumbTrail = [{
+        url: `#/`,
+        label: 'Products'
+    }];
     const bcUrl = new SPAURL(req.url);
     bcUrl.searchParams.delete('ts');
     breadCrumbTrail.push({
+        url: `#/product/${product.id}`,
+        label: product.name
+    });
+    const effectiveDate = pkg.effectiveDate.toLocaleString(undefined, {'dateStyle': 'short'});
+    breadCrumbTrail.push({
         url: bcUrl.toString(),
-        label: pkg.packageName,
-        icon: '/svg/package.svg'
+        label: `Effective ${effectiveDate}`
     });
     for (let i = 0; i < termStack.length; i++) {
         bcUrl.searchParams.append('ts', termStack[i].name);
@@ -611,6 +619,7 @@ async function renderPackageHome(req, res, next) {
         SPAURL,
         breadCrumbTrail,
         sidebar,
+        product,
         pkg,
         next
     });
