@@ -116,14 +116,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function notifyWidgets(eventName, detail) {
-    detail.page && detail.page.querySelectorAll('*[data-widgetid]')
+    if (!detail.page) {
+        return;
+    }
+
+    const page = detail.page;
+    const notifyList = [];
+
+    if (page.hasAttribute('data-widgetid')) {
+        notifyList.push([eventName, page.getAttribute('data-widgetid')].join('_'));
+    }
+
+    page.querySelectorAll('*[data-widgetid]')
         .forEach( (el) => {
             const id = el.getAttribute('data-widgetid');
             const notifyFnName = [eventName, id].join('_');
 
-            console.debug('notifyWidgets', notifyFnName);
-            widgetHandlers[notifyFnName] && widgetHandlers[notifyFnName](detail);
+            notifyList.push(notifyFnName);
         });
+
+    notifyList.forEach((notifyFnName) => {
+        console.debug('notifyWidgets', notifyFnName);
+        widgetHandlers[notifyFnName] && widgetHandlers[notifyFnName](detail);
+    });
 }
 
 function openNewTermDialog(termName) {
@@ -268,20 +283,11 @@ const widgetHandlers = {
         refreshTestForm(testform);
     },
     "enter_termlistwidget": async (detail) => {
-        termlistfilter.addEventListener('change', (e) => {
-            const filter = e.target.value;
-
-            termlistwidget.querySelectorAll('#termlist li').forEach(li => {
-                li.classList.toggle('hidden', filter && !li.hasAttribute(filter));
-            });
-
-            e.target.closest('details').toggleAttribute('open', true);
-        });
     },
     "enter_package_home": async (detail) => {
         if ('cancelButton' in window)  {
             cancelButton.addEventListener('click', (e) => {
-                if (confirm('Abandon your changes and reload?')) {
+                if (!isPageDirty() || confirm('Abandon your changes and reload?')) {
                     renderRequest('GET', location.href, null, updateState='replaceState');
                 }
             });
@@ -297,26 +303,28 @@ const widgetHandlers = {
         });
     },
     "enter_term_editor": (detail) => {
-        deleteButton.addEventListener('click', (e) => {
-            if (confirm('Delete this term?')) {
-                const csrf = e.target.closest('x-page').getAttribute('data-csrf');
-                const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
+        if ('deleteButton' in window) {
+            deleteButton.addEventListener('click', (e) => {
+                if (confirm('Delete this term?')) {
+                    const csrf = e.target.closest('x-page').getAttribute('data-csrf');
+                    const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
 
-                renderRequest('POST', location.href, {
-                    '_csrf': csrf,
-                    'serviceAction': 'deleteTerm',
-                    'termName': termName
-                }).then(res => {
-                    if (res && res.ok) {
-                        const url = new URL('', location.href);
-                        url.searchParams.delete('ts');
-                        url.hash = location.hash;
+                    renderRequest('POST', location.href, {
+                        '_csrf': csrf,
+                        'serviceAction': 'deleteTerm',
+                        'termName': termName
+                    }).then(res => {
+                        if (res && res.ok) {
+                            const url = new URL('', location.href);
+                            url.searchParams.delete('ts');
+                            url.hash = location.hash;
 
-                        renderRequest('GET', url, null, updateState="replaceState");
-                    }
-                })
-            }
-        });
+                            renderRequest('GET', url, null, updateState="replaceState");
+                        }
+                    })
+                }
+            });
+        }
     },
     "enter_expression_editor": async (detail) => {
         console.assert(focusPackage);
@@ -333,7 +341,6 @@ const widgetHandlers = {
         page.addEventListener('input', (e) => {
             setPageDirty(hasTermChanged());
             saveButton.disabled = !isPageDirty();
-            cancelButton.disabled = !isPageDirty();
         });
 
         page.addEventListener('x.openToken', (e) => {
@@ -369,6 +376,18 @@ const widgetHandlers = {
             }, updateState='replaceState');
         });
 
+        editButton.addEventListener('click', (e) => {
+            const page = e.target.closest('x-page');
+            page.classList.remove('mode-default');
+            page.classList.remove('mode-test');
+            page.classList.add('mode-edit');
+            dataType.disabled =
+            description.disabled =
+            editor.disabled = false;
+
+            editor.focus();
+        });
+
         initNewTermDialog();
     },
     "enter_constant_editor": async (detail) => {
@@ -380,7 +399,6 @@ const widgetHandlers = {
         document.querySelector('x-page').addEventListener('input', (e) => {
             document.body.classList.toggle('dirty', hasTermChanged());
             saveButton.disabled = !hasTermChanged();
-            cancelButton.disabled = !hasTermChanged();
         });
 
         saveButton.addEventListener('click', (e) => {
@@ -413,7 +431,6 @@ const widgetHandlers = {
         document.querySelector('x-page').addEventListener('input', (e) => {
             document.body.classList.toggle('dirty', hasTermChanged());
             saveButton.disabled = !hasTermChanged();
-            cancelButton.disabled = !hasTermChanged();
         });
 
         saveButton.addEventListener('click', (e) => {
@@ -430,6 +447,14 @@ const widgetHandlers = {
             }, updateState='replaceState');
         });
 
+        editButton.addEventListener('click', (e) => {
+            const page = e.target.closest('x-page');
+            page.classList.remove('mode-default');
+            page.classList.remove('mode-test');
+            page.classList.add('mode-edit');
+            dataType.disabled =
+            description.disabled = false;
+        });
     },
     "enter_table_editor": async (detail) => {
         const page = document.querySelector('x-page');
@@ -444,7 +469,6 @@ const widgetHandlers = {
         page.addEventListener('input', (e) => {
             document.body.classList.toggle('dirty', hasTermChanged());
             saveButton.disabled = !hasTermChanged();
-            cancelButton.disabled = !hasTermChanged();
         });
 
         saveButton.addEventListener('click', (e) => {
@@ -611,4 +635,8 @@ window['toggleModal'] = (e) => {
     _applyModalStyles(true);
     let af = currentModal.querySelector('[autofocus]');
     af && af.focus();
+}
+
+window['newTermFromEvent'] = (e) => {
+    openNewTermDialog(e.target.innerText.trim());
 }

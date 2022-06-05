@@ -135,7 +135,9 @@
                     <tr>
                       <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">Effective <x-date><%=package.effectiveDate%></x-date></td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Last updated <x-date><%=package.versionInfo.saveTs%></x-date></td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">&nbsp;</td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%
+          if (package.undefinedTerms.size > 0) { %><span class="text-red-500"><%= package.undefinedTerms.size %> undefined term<%= package.undefinedTerms.size > 1 ? 's' : '' %></span>
+<%        } %></td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">&nbsp;</td>
                       <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <!-- This example requires Tailwind CSS v2.0+ -->

@@ -1,18 +1,40 @@
-<div class="hidden" data-widgetid="expression_editor"></div>
-<%- include('term-editor-header') %>
-<div class="py-4">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <label class="block text-sm font-medium text-gray-700">Data Type</label>
-      <%- include('data-type-widget', {currentDataType: focusTerm.dataType}) %>
+<%
+    const availableTerms = Array.from(Object.values(pkg.terms)).filter((term) => term.name[0] != '_' && term != focusTerm && !focusTerm.referencedTerms.has(term));
+%>
+<div data-widgetid="expression_editor" class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap">
+        <div class="py-4 w-full max-w-4xl flex-grow flex-shrink-0">
+            <%- include('term-editor-header') %>
+            <div class="mx-auto">
+                <x-expression id="editor" disabled class="w-full bg-white rounded-md p-1 outline-blue-500" initialvalue="<%= focusTerm.expressionSource %>"></x-expression>
+                <% if (focusTerm.undefinedTerms.size) { %>
+                <h5 class="text-xs mt-1 text-red-500"><%= focusTerm.undefinedTerms.size %> undefined term<%= focusTerm.undefinedTerms.size == 1 ? '': 's' %></h5>
+                <% } %>
+            </div>
+        </div>
+        <%
+            if (focusTerm.undefinedTerms.size) { %>
+        <div class="w-64 m-4">
+            <h2 class="text-xl font-bold leading-tight text-red-500 uppercase">Undefined Terms</h2>
+            <ul>
+<%              for (const termName of Array.from(focusTerm.undefinedTerms)) {
+                    const url = new SPAURL(req.url);
+                    url.searchParams.append('ts', termName);
+%>
+                <li class="text-red-500" data-action="newTermFromEvent"><%= termName %></li>
+<%              } %>
+            </ul>
+        </div>
+<%          }%>
+        <%- include('termlist', {
+            listTitle: "Referenced Terms",
+            termList: focusTerm.referencedTerms
+        }) %>
+        <%- include('termlist', {
+            listTitle: "Available Terms for Use",
+            termList: availableTerms
+        }) %>
     </div>
 </div>
-<div class="py-4 w-full">
-    <div class="w-full mx-auto px-4 sm:px-6 md:px-8">
-        <x-expression id="editor" class="bg-white rounded-md p-1 w-full max-w-5xl" initialvalue="<%= focusTerm.expressionSource %>"></x-expression>
-    </div>
-</div>
-<%- include('terms-grid', {
-    title: "Referenced Terms",
-    terms: focusTerm.referencedTerms
-}) %>
+
 <%- include('new-term-dialog') %>

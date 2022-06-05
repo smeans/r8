@@ -1,18 +1,21 @@
+<%
+    const pageTitle = product.name + ' Product ‐ Effective ' + pkg.effectiveDate;
+    const termName = focusTerm ? focusTerm.name : 'Rating Algorithm';
+%>
 <style>
-    #saveButton, #cancelButton {
-        pointer-events: none;
-        filter: grayscale(80%);
+    .mode-default .mode-edit,
+    .mode-default .mode-test {
+        display: none;
     }
 
-    .dirty #saveButton,
-    .dirty #cancelButton {
-        pointer-events: inherit;
-        filter: inherit;
+    .mode-edit .mode-default,
+    .mode-edit .mode-test {
+        display: none;
     }
 </style>
 
-<nav class="bg-white border-b border-gray-200 flex" aria-label="Breadcrumb">
-  <ol role="list" class="max-w-screen-xl w-full mx-auto flex flex-wrap space-x-4 sm:px-2 lg:px-4 items-center">
+<nav class="bg-white flex max-w-screen-xl w-full mb-4 mx-auto px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
+  <ol role="list" class="items-center flex flex-wrap space-x-4">
     <li class="flex">
       <div class="flex items-center">
         <a href="<%- breadCrumbTrail[0].url %>" class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700">
@@ -58,26 +61,32 @@
   </ol>
 </nav>
 
-<x-page data-widgetid="package_home" class="py-10">
+<x-page class="py-10 mode-default w-full" data-widgetid="package_home" data-csrf="<%- req.csrfToken() %>"
+        data-title="<%= pageTitle %>: <%= termName %>">
   <script data-widgetid="update_package" id="packageJson">
     () => { return <%- JSON.stringify(pkg.json) %>; }
   </script>
 
-  <header class="flex flex-col items-start">
-    <div class="max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h1 class="text-4xl font-bold leading-tight text-gray-900"><%=product.name%> &dash; Effective <%=pkg.effectiveDate%></h1>
-    </div>
-    <div class="max-w-7xl mt-2 px-4 sm:px-6 lg:px-8 w-full flex flex-row">
+  <header data-termname="<%= focusTerm ? focusTerm.name : '_rating' %>" class="max-w-7xl flex flex-col items-start mx-auto px-4 pb-2 mb-6 sm:px-6 lg:px-8 border-b border-gray-200">
+    <h1 class="text-4xl font-bold leading-tight text-gray-900"><%= pageTitle %></h1>
+    <div class="max-w-7xl mt-2 w-full flex flex-row">
         <div>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"> Development </span>
         </div>
         <div class="flex-grow">
             &nbsp;
         </div>
-        <div>
-            <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Edit</button>
-            <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Test</button>
-            <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Deploy to staging</button>
+        <div class="mode-default">
+            <button id="editButton" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-flatblue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Edit</button>
+            <button id="testButton" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-flatblue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Test</button>
+            <button id="deployToStagingButton" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-flatblue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Deploy to staging</button>
+        </div>
+        <div class="mode-edit">
+            <button type="button" id="saveButton" disabled class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-flatblue font-medium rounded hover:bg-flatblue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+            <button type="button" id="cancelButton" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-blue-800 bg-white font-medium rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Cancel</button>
+<%          if (focusTerm) { %>
+            <button type="button" id="deleteButton" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs text-white bg-red-600 font-medium rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Delete</button>
+<%          } %>
         </div>
     </div>
   </header>
@@ -87,8 +96,6 @@
       sidebar.push(include('undefinedterms.ejs'));
   }
   if (focusTerm) {
-      sidebar.push(include('testform.ejs'));
-      sidebar.push(include('termlist.ejs'));
 %>
 <%- include(`${focusTerm.termTypeName}-editor.ejs`) %>
 <% } else { %>

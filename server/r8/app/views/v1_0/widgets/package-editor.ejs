@@ -1,8 +1,4 @@
 <%
     const ratingTerm = pkg.getTerm('_rating');
 %>
-<div class="max-w-7xl mt-4 px-4 sm:px-6 lg:px-8">
-    <h2 class="text-2xl font-bold leading-tight text-gray-900">Rating Algorithm</h2>
-</div>
 <%- include('expression-editor.ejs', {focusTerm: ratingTerm}) %>
-<%- include('terms-grid', {title: "Terms", terms: Object.values(pkg.terms)}) %>

@@ -80,14 +80,15 @@
                       <%   });
                          } else { %>
                               <tr class="hover:bg-indigo-50">
-                                <td data-action="toggleModal" data-target="#new-product" class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center" colspan="4">
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center" colspan="4">
                                     create your first product
                                     <a href="#" class="inline text-gray-500 hover:text-gray-900">
                                       <!-- Heroicon name: solid/question-mark-circle -->
                                       <svg class="inline h-5 w-5 text-gray-400 group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                                      </svg>
+                                      </svg><br/>
                                     </a>
+                                    <button type="button" data-action="toggleModal" data-target="#new-product" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 mt-1 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add Product</button>
                                 </td>
                               </tr>
                      <% }%>
@@ -145,13 +146,13 @@
                       <div>
                         <label for="product-name" class="block text-sm font-medium text-gray-900"> Product name </label>
                         <div class="mt-1">
-                          <input type="text" name="productName" id="product-name" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required autofocus>
+                          <input type="text" name="productName" id="product-name" class="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required autofocus>
                         </div>
                       </div>
                       <div>
                         <label for="description" class="block text-sm font-medium text-gray-900"> Description </label>
                         <div class="mt-1">
-                          <textarea id="description" name="description" rows="4" class="block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                          <textarea id="description" name="description" rows="4" class="block w-full p-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                         </div>
                       </div>
                       <div>

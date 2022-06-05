@@ -23,7 +23,10 @@
     --card-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     --big-tile-h: 10em;
     --big-tile-w: 16em;
-    --flat-blue: #415272;
+    --flatblue: #415272;
+    --flatblue-500: #41527288;
+    --ltpurple: #BD66BF55;
+    --dkpurple: #BD66BFaa;
 
     --fastest: .2s;
     --faster: .3s;
@@ -141,6 +144,12 @@ x-expression {
     display: block;
     background: #eee;
     height: 4em;
+    outline-style: solid;
+    outline-color: var(--ltpurple);
+}
+
+x-expression:focus {
+    outline-color: var(--dkpurple);
 }
 
 aside details summary {
@@ -174,5 +183,9 @@ x-multicheck label {
 }
 
 .bg-flatblue {
-    background-color: var(--flat-blue);
+    background-color: var(--flatblue);
+}
+
+.bg-flatblue-500, .hover\:bg-flatblue-500:hover {
+    background-color: var(--flatblue-500);
 }

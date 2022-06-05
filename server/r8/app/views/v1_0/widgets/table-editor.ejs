@@ -2,12 +2,6 @@
 <%- include('term-editor-header') %>
 <div class="py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <label class="block text-sm font-medium text-gray-700">Data Type</label>
-      <%- include('data-type-widget', {currentDataType: focusTerm.dataType}) %>
-    </div>
-</div>
-<div class="py-4">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <x-term-table id="termTable">
         </x-term-table>
     </div>

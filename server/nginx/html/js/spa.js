@@ -119,7 +119,7 @@ function routeRequest(url, target) {
 }
 
 function getPageTitle() {
-    const page = document.querySelector('main>x-page');
+    const page = document.querySelector('main x-page');
 
     return page ? document.querySelector('head title').getAttribute('data-baseTitle')
             + ': ' + page.getAttribute('data-title')

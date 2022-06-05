@@ -4,6 +4,10 @@
     <div id="terms">
       <ul role="list" class="mt-3 grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <% terms.forEach((term) => {
+            if (term.name[0] == '_') {
+                return;
+            }
+            
             const url = new SPAURL(req.url);
             url.searchParams.append('ts', term.name);
         %>

@@ -897,7 +897,8 @@ function contentEditableText(el) {
             class XExpression extends ExpressiveElement  {
                 static mappedAttributes = {
                     "initialvalue": "initialValue",
-                    "value": "value"
+                    "value": "value",
+                    "disabled": "disabled"
                 };
 
                 static _lexRules = [
@@ -918,6 +919,10 @@ function contentEditableText(el) {
                     this.ownerDocument.addEventListener('selectionchange', e => this._handleSelectionChange(e));
                     this.sq('x-workarea').addEventListener('dblclick', e => this._handleDblClick(e));
                     this.sq('x-workarea').addEventListener('click', e => this.editpane.focus());
+                }
+
+                focus(e) {
+                    this.editpane.focus();
                 }
 
                 get editpane() {
@@ -955,6 +960,14 @@ function contentEditableText(el) {
                     this.editpane.innerText = newValue;
 
                     this._syncDisplay();
+                }
+
+                get disabled() {
+                    return this.editpane.disabled;
+                }
+
+                set disabled(newDisabled) {
+                    this.editpane.setAttribute('contenteditable', newDisabled.toString() == 'false');
                 }
 
                 get isDirty() {
