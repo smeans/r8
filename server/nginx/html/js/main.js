@@ -392,11 +392,28 @@ const widgetHandlers = {
     },
     "enter_constant_editor": async (detail) => {
         function hasTermChanged() {
-            return constantValue.value != constantValue.getAttribute('data-originalvalue')
-                || description.value != description.getAttribute('data-initialvalue');
+            return dataType.value != dataType.getAttribute('data-initialvalue')
+                || description.value != description.getAttribute('data-initialvalue')
+                || constantValue.value != constantValue.getAttribute('data-originalvalue');
+        }
+
+        function updateInputMethod() {
+            const inputAttrs = {
+                "String": {type: "text", placeholder: ""},
+                "Integer": {type: "number", placeholder: "#"},
+                "Currency": {type: "number", placeholder: "#.##"},
+                "Float": {type: "number", placeholder: "#.##"},
+                "Date": {type: "date", placeholder: "yyyy-mm-dd"},
+                "DateTime": {type: "datetime-local", "placeholder": "yyyy-mm-dd hh:mm:ss"}
+            }[dataType.value] || {type: 'text', placeholder: null};
+            constantValue.type = inputAttrs.type;
+            constantValue.placeholder = inputAttrs.placeholder;
         }
 
         document.querySelector('x-page').addEventListener('input', (e) => {
+            if (e.target == dataType) {
+                updateInputMethod();
+            }
             document.body.classList.toggle('dirty', hasTermChanged());
             saveButton.disabled = !hasTermChanged();
         });
@@ -413,10 +430,25 @@ const widgetHandlers = {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
+                'dataType': dataType.value,
                 'description': description.value,
                 'value': constantValue.value
             }, updateState='replaceState');
         });
+
+        editButton.addEventListener('click', (e) => {
+            const page = e.target.closest('x-page');
+            page.classList.remove('mode-default');
+            page.classList.remove('mode-test');
+            page.classList.add('mode-edit');
+            dataType.disabled =
+            description.disabled =
+            constantValue.disabled = false;
+
+            constantValue.focus();
+        });
+
+        updateInputMethod();
     },
     "enter_input_editor": async (detail) => {
         const page = document.querySelector('x-page');
@@ -480,6 +512,19 @@ const widgetHandlers = {
                 'dataType': dataType.value
             }, updateState='replaceState');
         });
+
+        editButton.addEventListener('click', (e) => {
+            const page = e.target.closest('x-page');
+            page.classList.remove('mode-default');
+            page.classList.remove('mode-test');
+            page.classList.add('mode-edit');
+            dataType.disabled =
+            description.disabled =
+            termTable.disabled = false;
+
+            saveButton.disabled = true;
+        });
+
 
         termTable.addEventListener('x.addKeyTerm', (e) => {
             renderRequest('POST', location.href, {

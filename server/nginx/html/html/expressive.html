@@ -276,6 +276,50 @@ function contentEditableText(el) {
         </script>
     </template>
 
+    <template name="x-term-icon">
+        <style>
+            :host {
+                display: block;
+            }
+
+            #icon {
+                width:  100%;
+                height:  100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #svg {
+                stroke:  white;
+                margin-top: .25rem;
+            }
+        </style>
+        <div id="icon">
+            <x-svg id="svg" class="term-icon"></x-svg>
+        </div>
+        <script>
+            class XTermIcon extends ExpressiveElement {
+                static mappedAttributes = {"type": "type"};
+
+                get type() {
+                    return this._type;
+                }
+
+                set type(newType) {
+                    console.debug(`new type ${newType}`);
+                    this._type = newType;
+                    this._refresh();
+                }
+
+                _refresh() {
+                    this.g.svg.src = `/svg/term-icon-${this._type}.svg`;
+                    this.g.icon.style.background = `var(--term-${this._type})`;
+                }
+            }
+        </script>
+    </template>
+
     <template name="x-multicheck">
         <style>
             :host {
@@ -1394,6 +1438,13 @@ function contentEditableText(el) {
                 height: 100%;
             }
 
+            .disabled .addCol,
+            .disabled #addRow,
+            .disabled .rowButtons,
+            .disabled th x-button {
+                display: none ;
+            }
+
             .menu {
                 background: unset;
             }
@@ -1443,7 +1494,7 @@ function contentEditableText(el) {
             </th>
         </template>
         <template id="rowButtons">
-            <td>
+            <td class="rowButtons">
                 <x-button class="delete round">
                     <x-svg src="/svg/trash.svg"></x-svg>
                 </x-button>
@@ -1456,6 +1507,10 @@ function contentEditableText(el) {
         </template>
         <script>
             class XTermTable extends ExpressiveElement {
+                static mappedAttributes = {
+                    "disabled": "disabled"
+                };
+
                 static KEY_COLUMN_CYCLE_OPTIONS = [
                     {
                         value: 'Exact',
@@ -1538,6 +1593,14 @@ function contentEditableText(el) {
                     this._term = newTerm;
                     this._syncDisplay();
                 }
+
+                get disabled() {
+                    return this.editpane.disabled;
+                }
+
+                set disabled(newDisabled) {
+                    this.g.table.classList.toggle('disabled', newDisabled.toString() != 'false');
+                }                
 
                 _syncDisplay() {
                     this.g.termHeader.package =  this.term.package;

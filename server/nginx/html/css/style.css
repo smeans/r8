@@ -28,6 +28,13 @@
     --ltpurple: #BD66BF55;
     --dkpurple: #BD66BFaa;
 
+    --term-constant: #5779da;
+    --term-input: #ffa956;
+    --term-expression: #cd8bcf;
+    --term-table: #79c7c4;
+    --term-integration: #3b4662;
+    --term-peril: #e56f69;
+
     --fastest: .2s;
     --faster: .3s;
     --fast: .5s;
@@ -35,7 +42,7 @@
 
 html, body {
     background: var(--main-bg);
-    font-family: "Source Code Pro", monospace;
+    font-family: "Source Serif Pro", serif;
 }
 
 html, body, main, x-page {
@@ -141,6 +148,9 @@ h1 x-svg {
 }
 
 x-expression {
+    font-family: "Source Code Pro", monospace;
+    font-weight: 600;
+
     display: block;
     background: #eee;
     height: 4em;
@@ -150,6 +160,11 @@ x-expression {
 
 x-expression:focus {
     outline-color: var(--dkpurple);
+}
+
+.term {
+    font-family: "Source Code Pro", monospace;
+    font-weight: 600;
 }
 
 aside details summary {
@@ -188,4 +203,8 @@ x-multicheck label {
 
 .bg-flatblue-500, .hover\:bg-flatblue-500:hover {
     background-color: var(--flatblue-500);
+}
+
+.term-icon {
+    stroke:  white;
 }

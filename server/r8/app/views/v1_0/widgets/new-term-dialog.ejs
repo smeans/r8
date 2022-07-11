@@ -30,76 +30,31 @@
       <div>
         <div class="mt-3 text-center sm:mt-5">
           <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-            Define Term: <span id="newTermName" class="text-blue-500"></span>
+            Create Term: <span id="newTermName" class="text-blue-500"></span>
           </h3>
           <div class="mt-2">
               <ul role="list" style="fill: #fff" class="mt-3 grid grid-cols-1 gap-5 sm:gap-6">
-                <li class="col-span-1 flex shadow-sm rounded-md">
-                  <div class="flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
-                    <x-svg src="/svg/term-icon-expression.svg"></x-svg>
-                  </div>
-                  <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
-                    <div class="flex-1 px-4 py-2 text-sm truncate">
-                      <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Expression</a>
-                    </div>
+<%
+  const term_types = {
+    "expression": "Expression",
+    "constant": "Constant",
+    "input": "Input",
+    "table": "Table",
+    "integration": "Integration"
+  };
+
+  for (let k in term_types) {
+    let v = term_types[k];
+%>
+                <li class="col-span-1 flex items-start shadow-sm rounded-md">
+                  <div class="flex items-center border-t border-r border-b border-gray-200 bg-white hover:bg-gray-200 rounded-r-md truncate w-full">
+                    <x-term-icon class="flex-shrink-0 w-10 h-10" type="<%= k %>"></x-term-icon>
+                    <a href="#" class="m-1 text-gray-900 font-medium"><%= v %></a>
                   </div>
                 </li>
-
-                <li class="col-span-1 flex shadow-sm rounded-md">
-                  <div class="flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
-                    <x-svg src="/svg/term-icon-constant.svg"></x-svg>
-                  </div>
-                  <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
-                    <div class="flex-1 px-4 py-2 text-sm truncate">
-                      <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Constant</a>
-                    </div>
-                  </div>
-                </li>
-
-                <li class="col-span-1 flex shadow-sm rounded-md">
-                  <div class="flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
-                    <x-svg src="/svg/term-icon-input.svg"></x-svg>
-                  </div>
-                  <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
-                    <div class="flex-1 px-4 py-2 text-sm truncate">
-                      <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Input</a>
-                    </div>
-                  </div>
-                </li>
-
-                <li class="col-span-1 flex shadow-sm rounded-md">
-                  <div class="flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
-                    <x-svg src="/svg/term-icon-table.svg"></x-svg>
-                  </div>
-                  <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
-                    <div class="flex-1 px-4 py-2 text-sm truncate">
-                      <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Table</a>
-                    </div>
-                  </div>
-                </li>
-
-                <li class="col-span-1 flex shadow-sm rounded-md">
-                  <div class="flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
-                    <x-svg src="/svg/term-icon-integration.svg"></x-svg>
-                  </div>
-                  <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
-                    <div class="flex-1 px-4 py-2 text-sm truncate">
-                      <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Integration</a>
-                    </div>
-                  </div>
-                </li>
-
-                <li class="col-span-1 flex shadow-sm rounded-md">
-                  <div class="flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
-                    <x-svg src="/svg/term-icon-environment.svg"></x-svg>
-                  </div>
-                  <div class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
-                    <div class="flex-1 px-4 py-2 text-sm truncate">
-                      <a href="#" class="text-gray-900 font-medium hover:text-gray-600">Environment</a>
-                    </div>
-                  </div>
-                </li>
-
+<%
+  }
+%>
               </ul>
           </div>
         </div>

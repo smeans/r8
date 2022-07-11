@@ -5,7 +5,7 @@
     <div class="flex flex-wrap">
         <div class="py-4 w-full max-w-4xl flex-grow flex-shrink-0">
             <%- include('term-editor-header') %>
-            <div class="mx-auto">
+            <div class="mx-auto px-4 sm:px-6 md:px-8">
                 <x-expression id="editor" disabled class="w-full bg-white rounded-md p-1 outline-blue-500" initialvalue="<%= focusTerm.expressionSource %>"></x-expression>
                 <% if (focusTerm.undefinedTerms.size) { %>
                 <h5 class="text-xs mt-1 text-red-500"><%= focusTerm.undefinedTerms.size %> undefined term<%= focusTerm.undefinedTerms.size == 1 ? '': 's' %></h5>
@@ -26,14 +26,16 @@
             </ul>
         </div>
 <%          }%>
+        <div class="flex flex-wrap xl:w-64">
         <%- include('termlist', {
             listTitle: "Referenced Terms",
             termList: focusTerm.referencedTerms
         }) %>
         <%- include('termlist', {
-            listTitle: "Available Terms for Use",
+            listTitle: "Available Terms",
             termList: availableTerms
         }) %>
+        </div>
     </div>
 </div>
 
