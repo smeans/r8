@@ -2,6 +2,7 @@
     https://theemer.com/?colors=778899-8ea32f-8ea3af-0e236f-0e23ef-0ea36f-000000-ffffff-8b0000-ff0000-eeeeee-fafad2-ff4500
 */
 :root{
+    --main-bg: #fff;
     --border: #778899;
     --ok-text: #0ea36f;
     --err-text: #ff0000;
@@ -12,7 +13,7 @@
     --accent-bg-lt: #87cefa94;
     --border: #727272;
     --menu-text: #111111;
-    --menu-hilight: #eeeeee;
+    --menu-hilight: #dddddd;
     --focus-bg: #fafad2;
     --thin: 1pt;
     --med: 2pt;
