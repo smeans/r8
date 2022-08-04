@@ -12,6 +12,27 @@ function setPageDirty(isDirty) {
     document.body.classList.toggle('dirty', isDirty);
 }
 
+function setPageEditing(page) {
+    page.classList.remove('mode-default');
+    page.classList.remove('mode-test');
+    page.classList.add('mode-edit');
+}
+
+function getPageMode(page) {
+    const mode = Array.from(page.classList).filter(v => v.startsWith('mode-')).pop();
+
+    return mode && mode.replace('mode-', '');
+}
+
+function getPageHref(newMode) {
+    const url = new URL(location.href);
+    const pageMode = getPageMode(document.querySelector('x-page'));
+
+    url.searchParams.set('mode', newMode || pageMode);
+
+    return url;
+}
+
 function initNewTermDialog() {
     newTermDialog.addEventListener('click', (e) => {
         if (e.target.name == 'cancel'
@@ -28,10 +49,18 @@ function initNewTermDialog() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('spa.enterPage', (e) => {
+        const qp = new URLSearchParams(location.search);
+
         document.body.classList.remove('dirty');
 
         notifyWidgets('enter', e.detail);
         setupNotifyListener();
+
+        if (qp.get('mode') == 'edit') {
+            if ('editButton' in window) {
+                window.editButton.click();
+            }
+        }        
     });
 
     document.addEventListener('spa.exitPage', (e) => {
@@ -151,7 +180,7 @@ function  cancelNewTermDialog() {
 }
 
 function pushEditTerm(termName) {
-    const url = new URL(location.href);
+    const url = new URL(getPageHref());
     url.searchParams.append('ts', termName);
 
     renderRequest('GET', url, null, updateState="replaceState");
@@ -161,6 +190,7 @@ function pushCreateTerm(termName, termType) {
     const csrf = document.querySelector('x-page').getAttribute('data-csrf');
     const url = new URL(location.href);
     url.searchParams.append('ts', termName);
+    url.searchParams.set('mode', 'edit');
 
     renderRequest('POST', url, {
         '_csrf': csrf,
@@ -178,7 +208,7 @@ const widgetHandlers = {
             if (deleteButton) {
                 const token = e.target.closest('tr').querySelector('td').innerText;
                 const csrf = document.querySelector('x-page').getAttribute('data-csrf');
-                const url = new URL(location.href);
+                const url = new URL(getPageHref('default'));
 
                 renderRequest('POST', url, {
                     '_csrf': csrf,
@@ -202,7 +232,7 @@ const widgetHandlers = {
             const csrf = e.target.closest('x-page').getAttribute('data-csrf');
 
             if (!packageId) {
-                return renderRequest('POST', location.href, {
+                return renderRequest('POST', getPageHref(), {
                         serviceAction: 'createPackage',
                         _csrf: csrf,
                         packageName: e.detail.newName
@@ -288,7 +318,10 @@ const widgetHandlers = {
         if ('cancelButton' in window)  {
             cancelButton.addEventListener('click', (e) => {
                 if (!isPageDirty() || confirm('Abandon your changes and reload?')) {
-                    renderRequest('GET', location.href, null, updateState='replaceState');
+                    const url = getPageHref();
+                    url.searchParams.delete('mode');
+
+                    renderRequest('GET', url, null, updateState='replaceState');
                 }
             });
         }
@@ -309,13 +342,13 @@ const widgetHandlers = {
                     const csrf = e.target.closest('x-page').getAttribute('data-csrf');
                     const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
 
-                    renderRequest('POST', location.href, {
+                    renderRequest('POST', getPageHref(), {
                         '_csrf': csrf,
                         'serviceAction': 'deleteTerm',
                         'termName': termName
                     }).then(res => {
                         if (res && res.ok) {
-                            const url = new URL('', location.href);
+                            const url = new URL('', getPageHref('default'));
                             url.searchParams.delete('ts');
                             url.hash = location.hash;
 
@@ -366,7 +399,7 @@ const widgetHandlers = {
             const csrf = e.target.closest('x-page').getAttribute('data-csrf');
             const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
 
-            renderRequest('POST', location.href, {
+            renderRequest('POST', getPageHref('view'), {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
@@ -378,9 +411,8 @@ const widgetHandlers = {
 
         editButton.addEventListener('click', (e) => {
             const page = e.target.closest('x-page');
-            page.classList.remove('mode-default');
-            page.classList.remove('mode-test');
-            page.classList.add('mode-edit');
+            setPageEditing(page)
+
             dataType.disabled =
             description.disabled =
             editor.disabled = false;
@@ -426,7 +458,7 @@ const widgetHandlers = {
             const csrf = e.target.closest('x-page').getAttribute('data-csrf');
             const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
 
-            renderRequest('POST', location.href, {
+            renderRequest('POST', getPageHref('view'), {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
@@ -438,9 +470,8 @@ const widgetHandlers = {
 
         editButton.addEventListener('click', (e) => {
             const page = e.target.closest('x-page');
-            page.classList.remove('mode-default');
-            page.classList.remove('mode-test');
-            page.classList.add('mode-edit');
+            setPageEditing(page);
+
             dataType.disabled =
             description.disabled =
             constantValue.disabled = false;
@@ -470,7 +501,7 @@ const widgetHandlers = {
                 return;
             }
 
-            renderRequest('POST', location.href, {
+            renderRequest('POST', getPageHref('view'), {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
@@ -481,9 +512,8 @@ const widgetHandlers = {
 
         editButton.addEventListener('click', (e) => {
             const page = e.target.closest('x-page');
-            page.classList.remove('mode-default');
-            page.classList.remove('mode-test');
-            page.classList.add('mode-edit');
+            setPageEditing(page);
+
             dataType.disabled =
             description.disabled = false;
         });
@@ -504,7 +534,7 @@ const widgetHandlers = {
         });
 
         saveButton.addEventListener('click', (e) => {
-            renderRequest('POST', location.href, {
+            renderRequest('POST', getPageHref('view'), {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',
                 'termName': termName,
@@ -515,9 +545,9 @@ const widgetHandlers = {
 
         editButton.addEventListener('click', (e) => {
             const page = e.target.closest('x-page');
-            page.classList.remove('mode-default');
-            page.classList.remove('mode-test');
-            page.classList.add('mode-edit');
+
+            setPageEditing(page);
+
             dataType.disabled =
             description.disabled =
             termTable.disabled = false;
@@ -527,7 +557,7 @@ const widgetHandlers = {
 
 
         termTable.addEventListener('x.addKeyTerm', (e) => {
-            renderRequest('POST', location.href, {
+            renderRequest('POST', getPageHref(), {
                 '_csrf': csrf,
                 'serviceAction': 'addKeyTerm',
                 'termName': termName,
@@ -536,7 +566,7 @@ const widgetHandlers = {
         });
 
         termTable.addEventListener('x.deleteKeyTerm', (e) => {
-            renderRequest('POST', location.href, {
+            renderRequest('POST', getPageHref(), {
                 '_csrf': csrf,
                 'serviceAction': 'deleteKeyTerm',
                 'termName': termName,
@@ -545,7 +575,7 @@ const widgetHandlers = {
         });
 
         termTable.addEventListener('x.changeKeyTermMatchType', (e) => {
-            renderRequest('POST', location.href, {
+            renderRequest('POST', getPageHref(), {
                 '_csrf': csrf,
                 'serviceAction': 'changeKeyTermMatchType',
                 'termName': termName,

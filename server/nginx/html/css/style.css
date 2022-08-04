@@ -65,6 +65,10 @@ button.round {
     border-radius: 25%;
 }
 
+button[disabled] {
+    opacity: .5;
+}
+
 x-page>header {
     display: flex;
     grid-area: header;
@@ -204,6 +208,10 @@ x-multicheck label {
 
 .bg-flatblue-500, .hover\:bg-flatblue-500:hover {
     background-color: var(--flatblue-500);
+}
+
+*[disabled].hover\:bg-flatblue:hover {
+    background-color: var(--flatblue);
 }
 
 .term-icon {

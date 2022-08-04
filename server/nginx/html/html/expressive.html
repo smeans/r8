@@ -315,6 +315,7 @@ function contentEditableText(el) {
                 _refresh() {
                     this.g.svg.src = `/svg/term-icon-${this._type}.svg`;
                     this.g.icon.style.background = `var(--term-${this._type})`;
+                    this.g.icon.title = this._type;
                 }
             }
         </script>

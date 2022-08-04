@@ -5,12 +5,14 @@
     for (const term of Array.from(termList)) {
         const url = new SPAURL(req.url);
         url.searchParams.append('ts', term.name);
+        console.log(term.description);
 %>
         <li class="col-span-1 flex m-1">
           <x-term-icon class="flex-shrink-0 w-8 h-8" type="<%- term.termTypeName %>"></x-term-icon>
           <div class="flex-1 flex items-center justify-between bg-white">
             <div class="flex-1 px-2 py-1 text-sm truncate">
-              <a href="<%- url %>" class="text-gray-900 font-medium hover:text-gray-600 term"><%= term.name %></a>
+              <a href="<%- url %>" class="text-gray-900 font-medium hover:text-gray-600 term"
+                        title="<%= term.description || '(missing description)' %>"><%= term.name %></a>
             </div>
           </div>
         </li>

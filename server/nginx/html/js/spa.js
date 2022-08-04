@@ -177,11 +177,6 @@ function renderRequest(method, url, body=null, updateState=null) {
 
                     document.title = getPageTitle();
 
-                    fireCustomEvent('enterPage', {
-                        method: method,
-                        page: main.querySelector('x-page')
-                    });
-
                     const href = url.href;
                     if (updateState) {
                         try {
@@ -193,6 +188,11 @@ function renderRequest(method, url, body=null, updateState=null) {
                                     url);
                         }
                     }
+
+                    fireCustomEvent('enterPage', {
+                        method: method,
+                        page: main.querySelector('x-page')
+                    });
                 });
         } else if (res) {
             reportError(res);

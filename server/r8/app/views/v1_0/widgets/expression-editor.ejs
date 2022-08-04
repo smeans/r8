@@ -12,7 +12,8 @@
                 <% } %>
             </div>
         </div>
-        <%
+        <div class="flex flex-wrap xl:w-64">
+<%
             if (focusTerm.package.undefinedTerms.size) { %>
         <div class="w-64 m-4">
             <h2 class="text-xl font-bold leading-tight text-red-500 uppercase">Undefined Terms</h2>
@@ -26,7 +27,6 @@
             </ul>
         </div>
 <%          }%>
-        <div class="flex flex-wrap xl:w-64">
         <%- include('termlist', {
             listTitle: "Referenced Terms",
             termList: focusTerm.referencedTerms
