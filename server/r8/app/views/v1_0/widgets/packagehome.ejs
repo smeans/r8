@@ -71,7 +71,7 @@
     <h1 class="text-4xl font-bold leading-tight text-gray-900"><%= pageTitle %></h1>
     <div class="max-w-7xl mt-2 w-full flex flex-row">
         <div>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"> Development </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"> <%= req.organization.currentEnvironment %> </span>
         </div>
         <div class="flex-grow">
             &nbsp;
@@ -103,3 +103,5 @@
 <% } %>
   </div>
 </x-page>
+
+<%- include('test-dialog') %>

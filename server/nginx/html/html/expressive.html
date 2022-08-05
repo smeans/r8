@@ -1013,7 +1013,20 @@ function contentEditableText(el) {
                 }
 
                 set disabled(newDisabled) {
-                    this.editpane.setAttribute('contenteditable', newDisabled.toString() == 'false');
+                    newDisabled = newDisabled.toString() == 'false';
+
+                    if (newDisabled != this.disabled) {
+                        this.editpane.setAttribute('contenteditable', newDisabled);
+                        // https://stackoverflow.com/questions/1125292/how-to-move-cursor-to-end-of-contenteditable-entity
+                        const range = document.createRange();
+                        range.selectNodeContents(this.editpane);
+                        range.collapse(false);
+
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+
                 }
 
                 get isDirty() {

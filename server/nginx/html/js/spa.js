@@ -61,7 +61,7 @@ function handlePageClick(e) {
 
     const a = e.target.closest('a');
 
-    if (a) {
+    if (a && a.href) {
         const url = new URL(a.href);
 
         if (routeRequest(url, a)) {

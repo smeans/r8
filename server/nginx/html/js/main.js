@@ -175,8 +175,17 @@ function openNewTermDialog(termName) {
     newTermName.innerText = termName;
 }
 
-function  cancelNewTermDialog() {
+function cancelNewTermDialog() {
     newTermDialog.classList.add('hidden');
+}
+
+function openTestDialog(e) {
+    testDialog.classList.remove('hidden');
+    activateTab(testTabLinks.firstElementChild);
+}
+
+window['closeTestDialog'] = (e) => {
+    testDialog.classList.add('hidden');
 }
 
 function pushEditTerm(termName) {
@@ -270,45 +279,14 @@ const widgetHandlers = {
         });
     },
     "enter_testformwidget": async (detail) => {
-        const refreshTestForm = async (target) => {
-            const focusTerm = target.closest('*[data-focusterm]').getAttribute('data-focusterm');
-            const formData = new FormData(target.closest('form'));
-            const url = `/api/packages/${focusPackage.id}/products/${focusTerm}?${new URLSearchParams(formData)}`;
-
-            console.debug('test url', url);
-
-            testformerrors.innerHTML = '';
-
-            document.body.classList.add('busy');
-            await fetch(url)
-                .then(async resp => {
-                    const json = await resp.json();
-
-                    if (resp.ok) {
-                        testformoutput.innerText = json[focusTerm];
-                    }
-
-                    json.log && json.log.forEach(err => {
-                        const li = document.createElement('li');
-                        li.innerText = `${err.level}: ${err.term}: ${err.message}`;
-
-                        testformerrors.appendChild(li);
-                    });
-                })
-                .finally(() => {
-                    document.body.classList.remove('busy');
-                });
-        };
-
-        testform.addEventListener('input', (e) => refreshTestForm(e.target));
-        testform.addEventListener('keydown', (e) => {
+        testDialog.addEventListener('input', (e) => refreshTestForm(e.target));
+        testDialog.addEventListener('keydown', (e) => {
             if (e.code == 'Enter') {
                 e.preventDefault();
 
                 return false;
             }
         });
-        refreshtestterm.addEventListener('click', (e) => refreshTestForm(e.target));
 
         refreshTestForm(testform);
     },
@@ -324,6 +302,10 @@ const widgetHandlers = {
                     renderRequest('GET', url, null, updateState='replaceState');
                 }
             });
+        }
+
+        if ('testButton' in window) {
+            testButton.addEventListener('click', openTestDialog);
         }
     },
     "enter_package_editor": async (detail) => {
@@ -714,4 +696,63 @@ window['toggleModal'] = (e) => {
 
 window['newTermFromEvent'] = (e) => {
     openNewTermDialog(e.target.innerText.trim());
+}
+
+window['handleTabs'] = (e) => {
+    const tab = e.target.closest('a');
+    if (!tab) {
+        return;
+    }
+
+    activateTab(tab);
+}
+
+function activateTab(tab) {
+    const tabs = Array.from(tab.parentElement.children);
+    const tabIndex = tabs.indexOf(tab);
+
+    console.log('tabIndex', tabIndex);
+
+    const tabsTarget = document.querySelector(tab.closest("*[data-tabstarget").getAttribute('data-tabstarget'));
+    const tabPanes = Array.from(tabsTarget.children);
+
+    for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList = tabIndex == i ? activeTabLink.classList : defaultTabLink.classList;
+        tabPanes[i].classList.toggle('hidden', i != tabIndex);
+    }
+}
+
+window['refreshTestForm'] = async (target) => {
+    if (target instanceof Event) {
+        target = target.target;
+    }
+    
+    const form = target.closest('form');
+    const testTerm = target.closest('*[data-testterm]').getAttribute('data-testterm');
+    const formData = new FormData(form);
+    const url = `/api/packages/${focusPackage.id}/products/${testTerm}?${new URLSearchParams(formData)}`;
+
+    console.debug('test url', url);
+
+    testformerrors.innerHTML = '';
+
+    document.body.classList.add('busy');
+    await fetch(url)
+        .then(async resp => {
+            const json = await resp.json();
+
+            if (resp.ok) {
+                form[testTerm].value = json[testTerm];
+            }
+
+            json.log && json.log.forEach(err => {
+                const li = document.createElement('li');
+                li.innerText = `${err.level}: ${err.term}: ${err.message}`;
+
+                testformerrors.appendChild(li);
+            });
+        })
+        .finally(() => {
+            document.body.classList.remove('busy');
+        });
 }
