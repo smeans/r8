@@ -47,12 +47,15 @@
           <div class="mt-2 <%= classes %>" data-testterm="<%= testTerm.name %>">
             <x-persist-form key="<%= pkg.id %>">
                 <form method="POST">
-                    <p>
-                        <button type="button" data-action="refreshTestForm" class="inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <x-svg class="h-4 w-4" src="/svg/refresh.svg"></x-svg>
-                        </button>
-                        <label class="text-blue-400"><%= testTerm.name == '_rating' ? 'Total Premium' : testTerm.name %></label><input disabled name="<%= testTerm.name %>" class="inline-block text-right font-bold w-6/12"/>
+                    <p class="flex items-center">
+                      <x-term-icon class="inline-block flex-shrink-0 w-8 h-8" type="<%- testTerm.termTypeName %>"></x-term-icon>
+                      <label class="text-blue-400 whitespace-nowrap"><%= testTerm.name == '_rating' ? 'Total Premium' : testTerm.name %></label>
+                      <input disabled name="<%= testTerm.name %>" class="inline-block text-right font-bold w-6/12 px-2"/>
+                      <button type="button" data-action="refreshTestForm" class="inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                          <x-svg class="h-4 w-4" src="/svg/refresh.svg"></x-svg>
+                      </button>
                     </p>
+                    <hr class="my-2 py-2"/>
     <%
     Array.from(pkg.getRequiredInputs(testTerm)).forEach((term) => {
         const url = new SPAURL(req.url);

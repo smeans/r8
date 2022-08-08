@@ -7,6 +7,7 @@ const upload = multer();
 const { URL } = require('url');
 
 const log = require('log');
+const email = require('email');
 
 const notify = require('notify');
 
@@ -389,7 +390,7 @@ async function processServiceAction(req, res, next) {
 }
 
 async function renderLogin(req, res, next) {
-    const email = req.body.email;
+    const userEmail = req.body.email;
     const session = req.session;
     let loginSession = req.loginSession;
 
@@ -399,14 +400,14 @@ async function renderLogin(req, res, next) {
         delete session.loginSessionId;
     }
 
-    if (email) {
-        let user = await User.findById(User.normalizeEmail(email));
+    if (userEmail) {
+        let user = await User.findById(User.normalizeEmail(userEmail));
         if (!user) {
             try {
                 user = User.create({
-                    email: email
+                    email: userEmail
                 });
-                user.id = email;
+                user.id = userEmail;
                 await user.save();
             } catch (e) {
                 console.error(e);
@@ -430,6 +431,12 @@ async function renderLogin(req, res, next) {
             console.debug(`user ${loginSession.user.id}: confirm url ${confirmUrl}`);
 
             // !!!TBD!!! send confirmation email here
+            if (!(await email.sendEmail("confirmLogin", userEmail, {
+                "confirmUrl": confirmUrl,
+                "confirmMnemonic": loginSession.confirmMnemonic
+            }))) {
+                return res.render('error', {message:'There was an error on our end sending your login email. We\'re sorry, please try again later!'});    
+            }
 
             res.render('render/redirect', {url: '#/pendinglogin'});
 
@@ -512,7 +519,7 @@ async function renderConfirmLogin(req, res, next) {
                     message: 'loginConfirmed'
                 });
 
-                return res.render('render/redirect', {url: '#/'});
+                return res.render('render/redirect', {url: '?#/'});
             }
         } break;
 
@@ -538,7 +545,7 @@ async function renderConfirmLogin(req, res, next) {
                 } break;
             }
 
-            return res.render('render/redirect', {url: '#/'});
+            return res.render('render/redirect', {url: '?#/'});
         } break;
     }
 
@@ -628,7 +635,7 @@ async function renderPackageHome(req, res, next) {
 router.use(processServiceAction);
 
 router.post(/\/(login)/, renderLogin);
-router.post(/\/(logout)/, renderLogout);
+router.all(/\/(logout)/, renderLogout);
 router.get(/\/(pendinglogin)/, renderPendingLogin);
 router.get(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/(confirmlogin)/, renderConfirmLogin);

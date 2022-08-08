@@ -210,6 +210,9 @@ function pushCreateTerm(termName, termType) {
 }
 
 const widgetHandlers = {
+    "enter_login": async (detail) => {
+        document.forms.login.email.focus();
+    },
     "enter_addapitokenwidget": async (detail) => {
         document.forms.addApiToken.addEventListener('click', (e) => {
             const deleteButton = e.target.closest('x-button.delete');
@@ -755,4 +758,8 @@ window['refreshTestForm'] = async (target) => {
         .finally(() => {
             document.body.classList.remove('busy');
         });
+}
+
+window['logout'] = (e) => {
+    renderRequest('GET', '#/logout', null, updateState="replaceState");   
 }

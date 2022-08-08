@@ -70,7 +70,7 @@ app.use('/render', renderRouter.validateUiUser, renderRouter.router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    console.debug(req);
+    console.debug('404: ', req.url);
     next(createError(404));
 });
 
