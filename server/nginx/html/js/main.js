@@ -601,7 +601,7 @@ function setupNotifyListener() {
         return;
     }
 
-    notifySocket = new WebSocket('ws:' + location.hostname + '/websocket/');
+    notifySocket = new WebSocket('wss:' + location.hostname + '/websocket/');
     notifySocket.onopen = (e) => {
         console.log(e);
     }
