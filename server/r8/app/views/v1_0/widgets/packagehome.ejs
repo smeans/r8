@@ -63,6 +63,7 @@
 
 <x-page class="py-10 mode-default w-full" data-widgetid="package_home" data-csrf="<%- req.csrfToken() %>"
         data-title="<%= pageTitle %>: <%= termName %>">
+
   <script data-widgetid="update_package" id="packageJson">
     () => { return <%- JSON.stringify(pkg.json) %>; }
   </script>
@@ -90,6 +91,9 @@
         </div>
     </div>
   </header>
+  <%  if (req.errors && req.errors.length) { %>
+    <%- include('widgets/show-errors', {errors: req.errors}) %>
+  <%  } %>  
   <div class="flex flex-col items-start">
 <%
   if (pkg.undefinedTerms.size  > 0) {
