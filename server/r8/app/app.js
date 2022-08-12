@@ -63,6 +63,7 @@ app.use('/api', apiRouter.validateApiUser, apiRouter.router);
 
 app.use(function (req, res, next) {
     req.proxyScheme = req.headers['x-scheme'] || req.protocol;
+    console.log(req.proxyScheme);
     
     return next();
 });

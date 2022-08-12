@@ -426,7 +426,7 @@ async function renderLogin(req, res, next) {
         if (loginSession) {
             session.loginSessionId = loginSession.id;
 
-            const confirmUrl = `${req.proxyProtocl}://${req.hostname}?t=${loginSession.confirmSecret}#/confirmlogin`;
+            const confirmUrl = `${req.proxyScheme}://${req.hostname}?t=${loginSession.confirmSecret}#/confirmlogin`;
 
             console.debug(`user ${loginSession.user.id}: confirm url ${confirmUrl}`);
 
