@@ -763,3 +763,16 @@ window['refreshTestForm'] = async (target) => {
 window['logout'] = (e) => {
     renderRequest('GET', '#/logout', null, updateState="replaceState");   
 }
+
+window['cycleLoginMessage'] = (e) => {
+    let el = e.target;
+
+    while (el && el.parentElement.id != 'loginMessage') {
+        el = el.parentElement;
+    }
+
+    el.classList.add('hidden');
+    const nextEl = el.nextElementSibling || el.parentElement.firstElementChild;
+
+    nextEl.classList.remove('hidden');
+}

@@ -225,6 +225,25 @@ function contentEditableText(el) {
         </script>
     </template>
 
+    <template name="x-help">
+        <style>
+            :host {
+                display: inline-block;
+                height: 1em;
+                width: 1em;
+
+                line-height: 1em;
+
+            }
+        </style>
+            <x-svg src="svg/help.svg" style="fill: #0ea36f" aria-hidden="true"></x-svg>
+        <script>
+            class XHelp extends ExpressiveElement {
+
+            }
+        </script>
+    </template>
+
     <template name="x-tags">
         <style>
             :host {

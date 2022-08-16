@@ -2,15 +2,30 @@
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md flex flex-col">
       <x-svg class="mx-auto h-100 w-auto" src="/svg/raidboss-main-logo.svg" alt="raidboss software"></x-svg>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Sign in to your account
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        Or
-        <a href="#/register" class="font-medium text-indigo-600 hover:text-indigo-500">
-          register for a free trial account
-        </a>
-      </p>
+      <div id="loginMessage">
+        <div>
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+          </h2>
+          <p class="mt-2 text-center text-sm text-gray-600">
+            Or
+            <a data-action="cycleLoginMessage" class="font-medium text-indigo-600 hover:text-indigo-500">
+              register for a free trial account
+            </a>
+          </p>
+        </div>
+        <div class="hidden">
+          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Register for a free trial account
+          </h2>
+          <p class="mt-2 text-center text-sm text-gray-600">
+            Or
+            <a data-action="cycleLoginMessage" class="font-medium text-indigo-600 hover:text-indigo-500">
+              sign in
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
