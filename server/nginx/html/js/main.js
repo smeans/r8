@@ -56,9 +56,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         notifyWidgets('enter', e.detail);
         setupNotifyListener();
 
-        if (qp.get('mode') == 'edit') {
-            if ('editButton' in window) {
-                window.editButton.click();
+        const pageMode = qp.get('mode');
+        if (['edit', 'test'].indexOf(pageMode) >= 0) {
+            if (`${pageMode}Button` in window) {
+                window[`${pageMode}Button`].click();
             }
         }        
     });
