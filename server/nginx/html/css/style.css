@@ -41,6 +41,13 @@
     --fast: .5s;
 }
 
+/*
+ *  icons
+ *
+ *  https://fonts.google.com/icons?selected=Material+Icons&icon.style=Outlined
+ *  https://heroicons.com/
+ */
+
 html, body {
     background: var(--main-bg);
     font-family: "Source Serif Pro", serif;

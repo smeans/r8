@@ -216,6 +216,10 @@ function reportError(err) {
     const errorHeader = document.querySelector('#error');
 
     if (err instanceof Response) {
+        if (err.status < 500) {
+            return;
+        }
+        
         errorHeader.innerText = 'server error (' + err.status + ')';
     } else {
         errorHeader.innerText = err;

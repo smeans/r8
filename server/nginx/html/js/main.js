@@ -777,3 +777,21 @@ window['cycleLoginMessage'] = (e) => {
 
     nextEl.classList.remove('hidden');
 }
+
+window['deployPackage'] = (packageId) => {
+    const csrf = document.querySelector('x-page[data-csrf]').getAttribute('data-csrf');
+
+    renderRequest('POST', getPageHref(), {
+        '_csrf': csrf,
+        'serviceAction': 'deployPackage',
+        'packageId': packageId
+    }).then(res => {
+        if (res && res.ok) {
+            const url = new URL('', getPageHref('default'));
+            url.searchParams.delete('ts');
+            url.hash = location.hash;
+
+            renderRequest('GET', url, null, updateState="replaceState");
+        }
+    })
+}

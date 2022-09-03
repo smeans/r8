@@ -196,12 +196,41 @@ function contentEditableText(el) {
 </style>
 <ph-components>
     <template name="x-hbox">
-        <style>
-            :host {
-                display: flex;
-                flex-direction: row;
-            }
-        </style>
+<style>
+:host {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+:host-context(.top) {
+    align-items: flex-start;
+}
+
+:host-context(.middle) {
+    align-items: center;
+}
+
+:host-context(.bottom) {
+    align-items: flex-end;
+}
+
+:host-context(.stretch) {
+    align-items: stretch;
+}
+
+:host-context(.left) {
+    justify-content: flex-start;
+}
+
+:host-context(.center) {
+    justify-content: center;
+}
+
+:host-context(.right) {
+    justify-content: flex-end;
+}
+</style>
         <slot></slot>
         <script>
             class XHbox extends ExpressiveElement {
@@ -215,6 +244,34 @@ function contentEditableText(el) {
             :host {
                 display: flex;
                 flex-direction: column;
+            }
+
+            :host-context(.top) {
+                justify-content: flex-start;
+            }
+
+            :host-context(.middle) {
+                justify-content: center;
+            }
+
+            :host-context(.bottom) {
+                justify-content: flex-end;
+            }
+
+            :host-context(.stretch) {
+                align-items: stretch;
+            }
+
+            :host-context(.left) {
+                align-items: flex-start;
+            }
+
+            :host-context(.center) {
+                align-items: center;
+            }
+
+            :host-context(.right) {
+                align-items: flex-end;
             }
         </style>
         <slot></slot>
@@ -271,6 +328,8 @@ function contentEditableText(el) {
         <div id="output"></div>
         <script>
             class XDate extends ExpressiveElement {
+                static mappedAttributes = {"data-datestyle": "dateStyle"};
+
                 constructor() {
                     super();
                     this.refresh();
@@ -284,13 +343,37 @@ function contentEditableText(el) {
                     observer.observe(this, {childList: true});
                 }
 
+                get dateStyle() {
+                    return this._dateStyle || 'long';
+                }
+
+                set dateStyle(newDateStyle) {
+                    this._dateStyle = newDateStyle;
+                    this.refresh();
+                }
+
                 refresh() {
                     const date = new Date(this.textContent);
 
                     this.g.output.innerText = date.toLocaleDateString(undefined, {
-                        "dateStyle": "long"
+                        "dateStyle": this.dateStyle
                     });
                 }
+            }
+        </script>
+    </template>
+
+   <template data-name="x-spacer">
+        <style>
+            :host {
+                display: block;
+                flex-grow: 1;
+            }
+        </style>
+        <slot></slot>
+        <script>
+            class XSpacer extends ExpressiveElement {
+
             }
         </script>
     </template>

@@ -358,13 +358,22 @@ const serviceActions = {
 
         return next();
     },
-    deploy: async (req, res, next) => {
+    deployPackage: async (req, res, next) => {
+        const packageId = req.body.packageId;
         const loginSession = req.loginSession;
-        await loginSession.user.organization.deploy({
-            userId: loginSession.user.id
-        });
 
-        next();
+        console.debug(`deploying ${packageId}`);
+
+        try {
+            await loginSession.user.organization.deploy({
+                    userId: loginSession.user.id
+                }, packageId);
+        } catch (e) {
+            res.status(400);
+            req.errors.push(e);
+        }
+
+        return next();
     }
 };
 
@@ -581,6 +590,10 @@ async function renderPackageHome(req, res, next) {
     const loginSession = req.loginSession;
     const pkg = await req.organization.getPackage(packageId);
     const product = await req.organization.getProduct(pkg.productId);
+
+    console.log('pkg', pkg)
+    console.log('product', product)
+
     let termStack = req.query.ts || [];
     if (!(Array.isArray(termStack))) {
         termStack = [termStack];
