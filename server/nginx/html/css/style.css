@@ -11,6 +11,8 @@
     --accent-attention: #ff4500;
     --accent-bg: #87cefa;
     --accent-bg-lt: #87cefa94;
+    --action-bg: #4F46E5;
+    --action-bg-lt: #6366f1;
     --border: #727272;
     --menu-text: #111111;
     --menu-hilight: #dddddd;
@@ -73,6 +75,11 @@ button.round {
 }
 
 button[disabled] {
+    opacity: .5;
+}
+
+.inactive {
+    filter: grayscale(100%);
     opacity: .5;
 }
 

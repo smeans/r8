@@ -203,31 +203,31 @@ function contentEditableText(el) {
     align-items: center;
 }
 
-:host-context(.top) {
+:host(.top) {
     align-items: flex-start;
 }
 
-:host-context(.middle) {
+:host(.middle) {
     align-items: center;
 }
 
-:host-context(.bottom) {
+:host(.bottom) {
     align-items: flex-end;
 }
 
-:host-context(.stretch) {
+:host(.stretch) {
     align-items: stretch;
 }
 
-:host-context(.left) {
+:host(.left) {
     justify-content: flex-start;
 }
 
-:host-context(.center) {
+:host(.center) {
     justify-content: center;
 }
 
-:host-context(.right) {
+:host(.right) {
     justify-content: flex-end;
 }
 </style>
@@ -246,31 +246,31 @@ function contentEditableText(el) {
                 flex-direction: column;
             }
 
-            :host-context(.top) {
+            :host(.top) {
                 justify-content: flex-start;
             }
 
-            :host-context(.middle) {
+            :host(.middle) {
                 justify-content: center;
             }
 
-            :host-context(.bottom) {
+            :host(.bottom) {
                 justify-content: flex-end;
             }
 
-            :host-context(.stretch) {
+            :host(.stretch) {
                 align-items: stretch;
             }
 
-            :host-context(.left) {
+            :host(.left) {
                 align-items: flex-start;
             }
 
-            :host-context(.center) {
+            :host(.center) {
                 align-items: center;
             }
 
-            :host-context(.right) {
+            :host(.right) {
                 align-items: flex-end;
             }
         </style>
@@ -532,10 +532,21 @@ function contentEditableText(el) {
                 border-radius: 50%;
             }
 
+            :host(.action) {
+                background: var(--action-bg);
+                border-radius: .5em;
+                padding: 0 .25em;
+            }
+
             :host(.round:hover),
             :host(.sm-round:hover),
-            :host(.lg-round:hover) {
+            :host(.lg-round:hover),
+            :host(.accent:hover) {
                 background: var(--accent-bg-lt);
+            }
+
+            :host(.action:hover) {
+                background: var(--action-bg-lt);
             }
 
             :host(.sm-round) {
@@ -550,9 +561,19 @@ function contentEditableText(el) {
 
             :host(.round) button,
             :host(.sm-round) button,
-            :host(.lg-round) button {
+            :host(.lg-round) button,
+            :host(.action) button {
                 color: #fff;
                 fill: #fff;
+            }
+
+            :host(.action) button {
+                display: flex;
+                justify-content: space-evenly;
+            }
+
+            :host(.accent) ::slotted(x-svg) {
+                fill:  #fff;   
             }
         </style>
         <button id="button" type="button"><slot></slot></button>

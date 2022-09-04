@@ -137,33 +137,68 @@
   <%
          for (const package of packageLists[currentTab]) {%>
 <!-- This example requires Tailwind CSS v2.0+ -->
-<div class="w-full overflow-hidden rounded-lg bg-gray-200 p-4">
+<div class="w-full overflow-hidden rounded-lg bg-gray-200 p-4 mb-6">
   <h2 class="whitespace-nowrap py-4 text-xl font-medium">Version effective <x-date><%=package.effectiveDate%></x-date></h2>
-  <x-hbox class="">
-    <div class="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow">
+  <x-hbox>
+    <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow">
+          <h2 class="text-center text-2xl w-full p-2 font-medium bg-blue-100 text-blue-800"> development </h2>
       <x-vbox class="w-full p-2">
-        <x-hbox class="w-full items-start">
-          <span class="text-center rounded-full px-2 font-medium bg-blue-100 text-blue-800"> development </span>
-          <x-vbox class="items-start ml-2">
-            <span class="whitespace-nowrap text-sm text-gray-500">Last updated <x-date data-datestyle="short"><%=package.versionInfo.saveTs%></x-date></span>
-          </x-vbox>
-          <x-spacer class="w-full"></x-spacer>
-        </x-hbox>
-<%
+        <span class="whitespace-nowrap text-sm text-gray-500">Last updated <x-date data-datestyle="short"><%=package.versionInfo.saveTs%></x-date></span>
+
+        <ul class="flex max-w-xs flex-wrap justify-between">
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="edit"><x-svg src="svg/edit.svg"></x-svg> edit</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
+        </ul><%
             if (package.undefinedTerms.size > 0) { %>
         <span class="text-red-500"><%= package.undefinedTerms.size %> undefined term<%= package.undefinedTerms.size > 1 ? 's' : '' %></span>
 <%          } %>
-        <ul class="flex max-w-xs flex-wrap">
-          <li class="w-40"><x-button class="round" title="view"><x-svg src="svg/open.svg"></x-svg></x-button> view</li>
-          <li class="w-40"><x-button class="round" title="edit"><x-svg src="svg/edit.svg"></x-svg></x-button> edit</li>
-          <li class="w-40"><x-button class="round" title="test"><x-svg src="svg/test.svg"></x-svg></x-button> test</li>
-          <li class="w-40"><x-button class="round" title="deploy"><x-svg src="svg/deploy.svg"></x-svg></x-button> deploy</li>
-          <li class="w-40"><x-button class="round" title="clone"><x-svg src="svg/clone.svg"></x-svg></x-button> clone</li>
-        </ul>
       </x-vbox>
     </div>
 
-    <!-- More people... -->
+    <x-svg class="h-20 w-20" style="fill: #fff" src="svg/deploy.svg"></x-svg>
+<%
+  const inStaging = !!package.status.staging.versionId;
+%>
+    <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow<%= inStaging ? '' : ' inactive'%>">
+          <h2 class="text-center text-2xl w-full p-2 font-medium bg-yellow-100 text-yellow-800"> staging </h2>
+      <x-vbox class="w-full p-2"><%
+        if (inStaging) {%>
+        <span class="whitespace-nowrap text-sm text-gray-500">Last deployed <x-date data-datestyle="short"><%=package.status.staging.versionInfo.deployTs%></x-date></span>
+        <ul class="flex max-w-xs flex-wrap justify-between">
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
+        </ul>
+<%      } else {%>
+        <p class="pt-16 text-center">no deployments</p>
+<%      }%>
+      </x-vbox>
+    </div>
+
+    <x-svg class="h-20 w-20" style="fill: #fff" src="svg/deploy.svg"></x-svg>
+
+<%
+  const inProduction = !!package.status.production.versionId;
+%>
+    <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow<%= inProduction ? '' : ' inactive'%>">
+          <h2 class="text-center text-2xl w-full p-2 font-medium bg-green-100 text-green-800"> production </h2>
+      <x-vbox class="w-full p-2"><%
+        if (inProduction) {%>
+        <span class="whitespace-nowrap text-sm text-gray-500">Last deployed <x-date data-datestyle="short"><%=package.status.staging.versionInfo.deployTs%></x-date></span>
+        <ul class="flex max-w-xs flex-wrap justify-between">
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
+          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
+        </ul>
+<%      } else {%>
+        <p class="pt-16 text-center">no deployments</p>
+<%      }%>
+      </x-vbox>
+    </div>
   </x-hbox>
 </div>
  <%        } %>
