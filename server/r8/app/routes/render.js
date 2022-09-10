@@ -6,7 +6,6 @@ const multer = require('multer');
 const upload = multer();
 const { URL } = require('url');
 
-const log = require('log');
 const email = require('email');
 
 const notify = require('notify');
@@ -77,7 +76,7 @@ async function render(req, res, next) {
     const productList = loginSession && loginSession.user
             && await loginSession.user.getProductList();
 
-    log.debug('productList', productList);
+    console.debug('productList', productList);
     const sidebar = [];
 
     res.render('render/' +  templateName, {
@@ -131,7 +130,7 @@ const serviceActions = {
         const states = Array.isArray(req.body.states) ? req.body.states
                 : [req.body.states];
 
-        log.debug('createProduct', productName);
+        console.debug('createProduct', productName);
         const product = await req.organization.createProduct(productName,
                 description, states);
 
@@ -146,7 +145,7 @@ const serviceActions = {
             return next();
         }
 
-        log.debug('updateProduct', product.name);
+        console.debug('updateProduct', product.name);
         product.name = req.body.productName;
         product.description = req.body.description;
         product.states = Array.isArray(req.body.states) ? req.body.states
@@ -171,6 +170,32 @@ const serviceActions = {
         await req.organization.createPackage(product, effectiveDate, {
             userId: loginSession.user.id
         });
+
+        return next();
+    },
+    clonePackage: async (req, res, next) => {
+        const loginSession = req.loginSession;
+        const organization = req.organization;
+        const product = await organization.getProduct(req.body.productId);
+        const packageId = req.body.packageId;
+        const effectiveDate = req.body.effectiveDate;
+        const fromEnvironment = req.body.fromEnvironment;
+
+        if (!req.organization) {
+            res.status(400);
+
+            return next();
+        }
+
+        try {
+            await req.organization.clonePackage(packageId, effectiveDate, {
+                userId: loginSession.user.id
+            }, fromEnvironment);
+        } catch (e) {
+            console.error(`clonePackage: ${e}`);
+            
+            req.errors.push(e);
+        }
 
         return next();
     },
@@ -360,14 +385,13 @@ const serviceActions = {
     },
     deployPackage: async (req, res, next) => {
         const packageId = req.body.packageId;
+        const fromEnvironment = req.body.fromEnvironment;
         const loginSession = req.loginSession;
 
-        console.debug(`deploying ${packageId}`);
-
         try {
-            await loginSession.user.organization.deploy({
+            await loginSession.user.organization.deploy(packageId, {
                     userId: loginSession.user.id
-                }, packageId);
+                }, fromEnvironment);
         } catch (e) {
             res.status(400);
             req.errors.push(e);
@@ -389,8 +413,8 @@ async function processServiceAction(req, res, next) {
         try {
             return await serviceActions[serviceAction](req, res, next)
         } catch (e) {
-            log.error('processServiceAction', e);
-            log.debug(e.stack);
+            console.error('processServiceAction', e);
+            console.debug(e.stack);
             req.errors.push(e);
         }
     }
@@ -439,7 +463,6 @@ async function renderLogin(req, res, next) {
 
             console.debug(`user ${loginSession.user.id}: confirm url ${confirmUrl}`);
 
-            // !!!TBD!!! send confirmation email here
             if (!(await email.sendEmail("confirmLogin", userEmail, {
                 "confirmUrl": confirmUrl,
                 "confirmMnemonic": loginSession.confirmMnemonic
@@ -620,7 +643,7 @@ async function renderPackageHome(req, res, next) {
     });
     for (let i = 0; i < termStack.length; i++) {
         bcUrl.searchParams.append('ts', termStack[i].name);
-        // !!!TBD!!! fix icon fill by removing fill from SVG files and using CSS
+
         breadCrumbTrail.push({
             url: bcUrl.toString(),
             label: termStack[i].name,

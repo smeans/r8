@@ -21,7 +21,7 @@ function setPageEditing(page) {
 function getPageMode(page) {
     const mode = Array.from(page.classList).filter(v => v.startsWith('mode-')).pop();
 
-    return mode && mode.replace('mode-', '');
+    return mode && mode.replace('mode-', '') || 'mode-default';
 }
 
 function getPageHref(newMode) {
@@ -665,21 +665,7 @@ function _applyModalStyles(show) {
     }
 }
 
-window['hideModal'] = () => {
-    _applyModalStyles(false);
-
-    currentModal = null;
-}
-
-window['toggleModal'] = (e) => {
-    const actor = e.target.closest('*[data-action]');
-    const targetSelector = actor.getAttribute('data-target');
-    const target = document.querySelector(targetSelector);
-
-    if (!target) {
-        console.warn(`toggleModal() target "${targetSelector}" not found`);
-    }
-
+window['showModal'] = (target) => {
     const previousModal = currentModal;
 
     hideModal();
@@ -696,6 +682,24 @@ window['toggleModal'] = (e) => {
     _applyModalStyles(true);
     let af = currentModal.querySelector('[autofocus]');
     af && af.focus();
+}
+
+window['hideModal'] = () => {
+    _applyModalStyles(false);
+
+    currentModal = null;
+}
+
+window['toggleModal'] = (e) => {
+    const actor = e.target.closest('*[data-action]');
+    const targetSelector = actor.getAttribute('data-target');
+    const target = document.querySelector(targetSelector);
+
+    if (!target) {
+        console.warn(`toggleModal() target "${targetSelector}" not found`);
+    }
+
+    showModal(target);
 }
 
 window['newTermFromEvent'] = (e) => {
@@ -778,12 +782,13 @@ window['cycleLoginMessage'] = (e) => {
     nextEl.classList.remove('hidden');
 }
 
-window['deployPackage'] = (packageId) => {
+window['deployPackage'] = (packageId, fromEnvironment) => {
     const csrf = document.querySelector('x-page[data-csrf]').getAttribute('data-csrf');
 
     renderRequest('POST', getPageHref(), {
         '_csrf': csrf,
         'serviceAction': 'deployPackage',
+        'fromEnvironment': fromEnvironment,
         'packageId': packageId
     }).then(res => {
         if (res && res.ok) {
@@ -794,4 +799,15 @@ window['deployPackage'] = (packageId) => {
             renderRequest('GET', url, null, updateState="replaceState");
         }
     })
+}
+
+window['clonePackage'] = (packageId, fromEnvironment, effectiveDate) => {
+    const form = document.forms.cloneVersion;
+
+    form.packageId.value = packageId;
+    form.fromEnvironment.value = fromEnvironment;
+    form.querySelector('.environment').innerText = fromEnvironment;
+    form.querySelector('.effectiveDate').innerText = effectiveDate;
+
+    showModal(cloneVersionModal);
 }

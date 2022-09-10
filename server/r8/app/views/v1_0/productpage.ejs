@@ -79,9 +79,6 @@
     <div class="hidden sm:block w-full">
       <div class="border-b border-gray-200 mx-6 w-full">
         <nav class="-mb-px w-full flex items-center justify-center space-x-8 " aria-label="Tabs">
-          <% for (const env of organization.environments) {%>
-              <%- renderLink(env) %>
-          <%}%>
           <div class="flex-grow">&nbsp;</div>
           <div class="relative mr-6 my-2">
             <input type="search" data-searchtarget="#products tr" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Filter">
@@ -132,46 +129,46 @@
       <!-- This example requires Tailwind CSS v2.0+ -->
         <div class="max-w-7xl mx-auto py-1 px-4 sm:py-2 sm:px-6 lg:px-8 mt-8 flex flex-col">
           <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+            <div class="inline-block py-2 align-middle md:px-6 lg:px-8">
 
   <%
-         for (const package of packageLists[currentTab]) {%>
-<!-- This example requires Tailwind CSS v2.0+ -->
+         for (const package of packageLists[currentTab]) {
+            const inStaging = !!package.status.staging.versionId;
+            const inProduction = !!package.status.production.versionId;
+  %>
+
 <div class="w-full overflow-hidden rounded-lg bg-gray-200 p-4 mb-6">
-  <h2 class="whitespace-nowrap py-4 text-xl font-medium">Version effective <x-date><%=package.effectiveDate%></x-date></h2>
-  <x-hbox>
-    <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow">
+  <h2 class="whitespace-nowrap py-4 text-xl font-medium">Version effective <x-date><%= package.effectiveDate %></x-date></h2>
+  <x-hbox class="flex flex-wrap">
+    <div class="mb-3 h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow">
           <h2 class="text-center text-2xl w-full p-2 font-medium bg-blue-100 text-blue-800"> development </h2>
       <x-vbox class="w-full p-2">
-        <span class="whitespace-nowrap text-sm text-gray-500">Last updated <x-date data-datestyle="short"><%=package.versionInfo.saveTs%></x-date></span>
+        <span class="whitespace-nowrap text-sm text-gray-500">Last updated <x-date data-datestyle="short"><%= package.versionInfo.saveTs %></x-date></span>
 
         <ul class="flex max-w-xs flex-wrap justify-between">
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="edit"><x-svg src="svg/edit.svg"></x-svg> edit</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="?mode=view#/package/<%=package.packageId%>" class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="?mode=test#/package/<%=package.packageId%>" class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="?mode=edit#/package/<%=package.packageId%>" class="action w-24 text-xl" title="edit"><x-svg src="svg/edit.svg"></x-svg> edit</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="deployPackage('<%= package.packageId %>', 'development')" class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="clonePackage('<%= package.packageId %>', 'development', '<%= package.effectiveDate %>')" class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
         </ul><%
             if (package.undefinedTerms.size > 0) { %>
         <span class="text-red-500"><%= package.undefinedTerms.size %> undefined term<%= package.undefinedTerms.size > 1 ? 's' : '' %></span>
-<%          } %>
+  <%        } %>
       </x-vbox>
     </div>
 
     <x-svg class="h-20 w-20" style="fill: #fff" src="svg/deploy.svg"></x-svg>
-<%
-  const inStaging = !!package.status.staging.versionId;
-%>
     <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow<%= inStaging ? '' : ' inactive'%>">
           <h2 class="text-center text-2xl w-full p-2 font-medium bg-yellow-100 text-yellow-800"> staging </h2>
       <x-vbox class="w-full p-2"><%
-        if (inStaging) {%>
+        if (inStaging) { %>
         <span class="whitespace-nowrap text-sm text-gray-500">Last deployed <x-date data-datestyle="short"><%=package.status.staging.versionInfo.deployTs%></x-date></span>
         <ul class="flex max-w-xs flex-wrap justify-between">
           <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
           <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="clonePackage('<%= package.packageId %>', 'staging', '<%= package.effectiveDate %>')" class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="deployPackage('<%= package.packageId %>', 'staging')" class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
         </ul>
 <%      } else {%>
         <p class="pt-16 text-center">no deployments</p>
@@ -181,60 +178,28 @@
 
     <x-svg class="h-20 w-20" style="fill: #fff" src="svg/deploy.svg"></x-svg>
 
-<%
-  const inProduction = !!package.status.production.versionId;
-%>
     <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow<%= inProduction ? '' : ' inactive'%>">
           <h2 class="text-center text-2xl w-full p-2 font-medium bg-green-100 text-green-800"> production </h2>
       <x-vbox class="w-full p-2"><%
-        if (inProduction) {%>
-        <span class="whitespace-nowrap text-sm text-gray-500">Last deployed <x-date data-datestyle="short"><%=package.status.staging.versionInfo.deployTs%></x-date></span>
+        if (inProduction) { %>
+        <span class="whitespace-nowrap text-sm text-gray-500">Last deployed <x-date data-datestyle="short"><%= package.status.production.versionInfo.deployTs %></x-date></span>
         <ul class="flex max-w-xs flex-wrap justify-between">
           <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
           <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="clonePackage('<%= package.packageId %>', 'production', '<%= package.effectiveDate %>')" class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
         </ul>
-<%      } else {%>
+<%      } else { %>
         <p class="pt-16 text-center">no deployments</p>
-<%      }%>
+<%      } %>
       </x-vbox>
     </div>
   </x-hbox>
 </div>
- <%        } %>
-              <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table class="min-w-full divide-y divide-gray-300">
-                  <tbody class="divide-y divide-gray-200 bg-white">
-  <%
-         for (const package of packageLists[currentTab]) {%>
-                      <tr><td colspan="*"><pre><%= JSON.stringify(package, null, 2) %></pre></td></tr>
-                      <tr>
-                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">Effective <x-date><%=package.effectiveDate%></x-date></td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Last updated <x-date><%=package.versionInfo.saveTs%></x-date></td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%
-            if (package.undefinedTerms.size > 0) { %><span class="text-red-500"><%= package.undefinedTerms.size %> undefined term<%= package.undefinedTerms.size > 1 ? 's' : '' %></span>
-  <%        } %></td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">&nbsp;</td>
-                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                            <!-- This example requires Tailwind CSS v2.0+ -->
-                            <button data-action="?mode=view#/package/<%=package.packageId%>" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">View</button>
-  <%                          if (inDevelopmentEnv) { %>
-                            <button data-action="?mode=edit#/package/<%=package.packageId%>" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Edit</button>
-                            <%                          } %>
-                            <button data-action="?mode=test#/package/<%=package.packageId%>" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Test</button>
-  <%                          if (higherEnv) { %>
-                            <button type="button" onclick="deployPackage('<%= package.packageId %>')" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Deploy to <%=higherEnv%></button>
-  <%                          } %>
-                        </td>
-                      </tr>
-  <%   } %>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-  <% } %>
+<%    } %>
+    </div>
+  </div>
+</div>
+<%    } %>
 
   <div data-action="hideModal" data-modalin="translate-x-0" data-modalout="translate-x-full" id="product-details" class="translate-x-full transform transition ease-in-out duration-300 fixed inset-0 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
     <div class="absolute inset-0 overflow-hidden">
@@ -317,7 +282,7 @@
     </div>
   </div>
 
-  <!-- This example requires Tailwind CSS v2.0+ -->
+  <%# begin create new version modal %>
   <div data-modalin="opacity-100 pointer-events-auto" data-modalout="opacity-0 pointer-events-none" id="new-version" class="opacity-0 pointer-events-none relative z-10 transition ease-in-out duration-100" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
@@ -346,22 +311,6 @@
               </div>
             </div>
           </div>
-          <!--
-            This example requires Tailwind CSS v2.0+
-
-            This example requires some changes to your config:
-
-            ```
-            // tailwind.config.js
-            module.exports = {
-              // ...
-              plugins: [
-                // ...
-                require('@tailwindcss/forms'),
-              ],
-            }
-            ```
-          -->
           <div>
             <label for="effectiveDate" class="block text-sm font-medium text-gray-700">Effective Date</label>
             <div class="mt-1 ml-6">
@@ -376,4 +325,53 @@
       </div>
     </div>
   </div>
+  <%# end create new version modal %>
+
+  <%# begin clone version modal %>
+  <div data-modalin="opacity-100 pointer-events-auto" data-modalout="opacity-0 pointer-events-none" id="cloneVersionModal" class="opacity-0 pointer-events-none relative z-10 transition ease-in-out duration-100" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+    <div data-action="hideModal" class="fixed z-10 inset-0 overflow-y-auto">
+      <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
+        <!--
+          Modal panel, show/hide based on modal state.
+
+          Entering: "ease-out duration-300"
+            From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            To: "opacity-100 translate-y-0 sm:scale-100"
+          Leaving: "ease-in duration-200"
+            From: "opacity-100 translate-y-0 sm:scale-100"
+            To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        -->
+        <form name="cloneVersion" data-action="" class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6"
+              action="#/product/<%=product.id%>/<%=developmentEnv%>" method="POST">
+              <input type="hidden" name="_csrf" value="<%= req.csrfToken() %>"/>
+              <input type="hidden" name="serviceAction" value="clonePackage"/>
+              <input type="hidden" name="productId" value="<%=product.id%>"/>
+              <input type="hidden" name="packageId"/>
+              <input type="hidden" name="fromEnvironment"/>
+          <div>
+            <div class="mt-3 text-center sm:mt-5">
+              <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Clone a product version</h3>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500">Choose the effective date for the new version then click Create. The new version will be populated from the <span class="environment"></span> version effective <span class="effectiveDate whitespace-nowrap"></span>.</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <label for="effectiveDate" class="block text-sm font-medium text-gray-700">Effective Date</label>
+            <div class="mt-1 ml-6">
+              <input type="date" name="effectiveDate" id="effectiveDate" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block sm:text-sm border-gray-300 rounded-md" required>
+            </div>
+          </div>
+          <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm">Create</button>
+            <button data-action="hideModal" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <%# end clone new version modal %>
+
 </x-page>

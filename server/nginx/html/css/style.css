@@ -59,6 +59,14 @@ html, body, main, x-page {
     height: 100vh;
 }
 
+body {
+    overflow-y: hidden;
+}
+
+main {
+    overflow-y: scroll;
+}
+
 header x-input  {
     font-size: 4vh;
     font-weight: 500;

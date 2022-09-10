@@ -48,6 +48,12 @@ function runAction(actor, e) {
         return window[action](e);
     }
 
+    try {
+        eval(action);
+
+        return false;
+    } catch {}
+
     return routeRequest(action, actor);
 }
 
