@@ -798,7 +798,7 @@ window['deployPackage'] = (packageId, fromEnvironment) => {
 
             renderRequest('GET', url, null, updateState="replaceState");
         }
-    })
+    });
 }
 
 window['clonePackage'] = (packageId, fromEnvironment, effectiveDate) => {
@@ -810,4 +810,29 @@ window['clonePackage'] = (packageId, fromEnvironment, effectiveDate) => {
     form.querySelector('.effectiveDate').innerText = effectiveDate;
 
     showModal(cloneVersionModal);
+}
+
+window['confirmDeletePackage'] = (packageId, effectiveDate) => {
+    confirmPackageDelete.querySelector('.effectiveDate').innerText = effectiveDate;
+    confirmPackageDelete.packageId = packageId;
+
+    showModal(confirmPackageDelete);
+}
+
+window['deletePackage'] = (e) => {
+    const csrf = document.querySelector('x-page[data-csrf]').getAttribute('data-csrf');
+
+    renderRequest('POST', getPageHref(), {
+        '_csrf': csrf,
+        'serviceAction': 'deletePackage',
+        'packageId': confirmPackageDelete.packageId
+    }).then(res => {
+        if (res && res.ok) {
+            const url = new URL('', getPageHref('default'));
+            url.searchParams.delete('ts');
+            url.hash = location.hash;
+
+            renderRequest('GET', url, null, updateState="replaceState");
+        }
+    });
 }

@@ -230,6 +230,18 @@ function contentEditableText(el) {
 :host(.right) {
     justify-content: flex-end;
 }
+
+:host(.space-around) {
+    justify-content: space-around;
+}
+
+:host(.space-between) {
+    justify-content: space-between;
+}
+
+:host(.space-evenly) {
+    justify-content: space-evenly;
+}
 </style>
         <slot></slot>
         <script>
@@ -526,6 +538,11 @@ function contentEditableText(el) {
                 border: none;
             }
 
+            :host(.disabled) {
+                pointer-events: none;
+                filter: grayscale(100%);
+            }
+
             :host(.round),
             :host(.sm-round),
             :host(.lg-round) {
@@ -605,6 +622,14 @@ function contentEditableText(el) {
 
                         this._setCycleOption(this._cycleOptions[i]);
                     });
+                }
+
+                get disabled() {
+                    return this.classList.has('disabled');
+                }
+
+                set disabled(newDisabled) {
+                    this.classList.toggle('disabled', newDisabled);
                 }
 
                 get cycleOptions() {

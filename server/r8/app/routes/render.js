@@ -193,7 +193,30 @@ const serviceActions = {
             }, fromEnvironment);
         } catch (e) {
             console.error(`clonePackage: ${e}`);
-            
+
+            req.errors.push(e);
+        }
+
+        return next();
+    },
+    deletePackage: async (req, res, next) => {
+        const loginSession = req.loginSession;
+        const organization = req.organization;
+        const packageId = req.body.packageId;
+
+        if (!req.organization) {
+            res.status(400);
+
+            return next();
+        }
+
+        try {
+            await req.organization.deletePackage(packageId, {
+                userId: loginSession.user.id
+            });
+        } catch (e) {
+            console.error(`deletePackage: ${e}`);
+
             req.errors.push(e);
         }
 
