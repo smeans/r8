@@ -133,8 +133,12 @@
 
   <%
          for (const package of packageLists[currentTab]) {
+            const developmentDirty = !package.status.development.versionId.equals(package.status.staging.versionId);
             const inStaging = !!package.status.staging.versionId;
+            const stagingDirty = package.status.staging.versionId && !package.status.staging.versionId.equals(package.status.production.versionId);
             const inProduction = !!package.status.production.versionId;
+
+            console.log(package.status);
   %>
 
 <div class="w-full overflow-hidden rounded-lg bg-gray-200 p-4 mb-6">
@@ -151,7 +155,7 @@
   </x-hbox>
   <x-hbox class="flex flex-wrap">
     <div class="mb-3 h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow">
-          <h2 class="text-center text-2xl w-full p-2 font-medium bg-blue-100 text-blue-800"> development </h2>
+          <h2 class="text-center text-2xl w-full p-2 font-medium development-bg text-blue-800"> development </h2>
       <x-vbox class="w-full p-2">
         <span class="whitespace-nowrap text-sm text-gray-500">Last updated <x-date data-datestyle="short"><%= package.versionInfo.saveTs %></x-date></span>
 
@@ -159,43 +163,45 @@
           <li class="w-36 mt-1"><x-button data-action="?mode=view#/package/<%=package.packageId%>" class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
           <li class="w-36 mt-1"><x-button data-action="?mode=test#/package/<%=package.packageId%>" class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
           <li class="w-36 mt-1"><x-button data-action="?mode=edit#/package/<%=package.packageId%>" class="action w-24 text-xl" title="edit"><x-svg src="svg/edit.svg"></x-svg> edit</x-button></li>
-          <li class="w-36 mt-1"><x-button data-action="deployPackage('<%= package.packageId %>', 'development')" class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="deployPackage('<%= package.packageId %>', 'development')" class="<%= developmentDirty && package.undefinedTerms.size <= 0 ? '': 'disabled ' %>action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
           <li class="w-36 mt-1"><x-button data-action="clonePackage('<%= package.packageId %>', 'development', '<%= package.effectiveDate %>')" class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
         </ul><%
             if (package.undefinedTerms.size > 0) { %>
         <span class="text-red-500"><%= package.undefinedTerms.size %> undefined term<%= package.undefinedTerms.size > 1 ? 's' : '' %></span>
+  <%        } else if (developmentDirty) { %>
+        <x-hbox class="text-red-500 middle"><x-svg class="pt-1" style="stroke: #f00" src="svg/alert.svg"></x-svg>&nbsp;undeployed changes</x-hbox>
   <%        } %>
       </x-vbox>
     </div>
 
     <x-svg class="h-20 w-20" style="fill: #fff" src="svg/deploy.svg"></x-svg>
     <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow<%= inStaging ? '' : ' inactive'%>">
-          <h2 class="text-center text-2xl w-full p-2 font-medium bg-yellow-100 text-yellow-800"> staging </h2>
+          <h2 class="text-center text-2xl w-full p-2 font-medium staging-bg text-yellow-800"> staging </h2>
       <x-vbox class="w-full p-2"><%
         if (inStaging) { %>
         <span class="whitespace-nowrap text-sm text-gray-500">Last deployed <x-date data-datestyle="short"><%=package.status.staging.versionInfo.deployTs%></x-date></span>
         <ul class="flex max-w-xs flex-wrap justify-between">
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="?mode=view&env=staging#/package/<%=package.packageId%>" class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="?mode=test&env=staging#/package/<%=package.packageId%>" class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
           <li class="w-36 mt-1"><x-button data-action="clonePackage('<%= package.packageId %>', 'staging', '<%= package.effectiveDate %>')" class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
-          <li class="w-36 mt-1"><x-button data-action="deployPackage('<%= package.packageId %>', 'staging')" class="action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="deployPackage('<%= package.packageId %>', 'staging')" class="<%= stagingDirty ? '': 'disabled ' %>action w-24 text-xl" title="deploy"><x-svg src="svg/deploy.svg"></x-svg> deploy</x-button></li>
         </ul>
-<%      } else {%>
+<%      } else { %>
         <p class="pt-16 text-center">no deployments</p>
-<%      }%>
+<%      } %>
       </x-vbox>
     </div>
 
     <x-svg class="h-20 w-20" style="fill: #fff" src="svg/deploy.svg"></x-svg>
 
     <div class="h-56 w-80 col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow<%= inProduction ? '' : ' inactive'%>">
-          <h2 class="text-center text-2xl w-full p-2 font-medium bg-green-100 text-green-800"> production </h2>
+          <h2 class="text-center text-2xl w-full p-2 font-medium production-bg text-green-800"> production </h2>
       <x-vbox class="w-full p-2"><%
         if (inProduction) { %>
         <span class="whitespace-nowrap text-sm text-gray-500">Last deployed <x-date data-datestyle="short"><%= package.status.production.versionInfo.deployTs %></x-date></span>
         <ul class="flex max-w-xs flex-wrap justify-between">
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
-          <li class="w-36 mt-1"><x-button class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="?mode=view&env=production#/package/<%=package.packageId%>" class="action w-24 text-xl" title="view"><x-svg src="svg/open.svg"></x-svg> view</x-button></li>
+          <li class="w-36 mt-1"><x-button data-action="?mode=test&env=production#/package/<%=package.packageId%>" class="action w-24 text-xl" title="test"><x-svg src="svg/test.svg"></x-svg> test</x-button></li>
           <li class="w-36 mt-1"><x-button data-action="clonePackage('<%= package.packageId %>', 'production', '<%= package.effectiveDate %>')" class="action w-24 text-xl" title="clone"><x-svg src="svg/clone.svg"></x-svg> clone</x-button></li>
         </ul>
 <%      } else { %>

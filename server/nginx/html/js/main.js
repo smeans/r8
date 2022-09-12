@@ -395,7 +395,7 @@ const widgetHandlers = {
             }, updateState='replaceState');
         });
 
-        editButton.addEventListener('click', (e) => {
+        window['editButton'] && editButton.addEventListener('click', (e) => {
             const page = e.target.closest('x-page');
             setPageEditing(page)
 

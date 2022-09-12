@@ -38,7 +38,7 @@
             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
               <%= pageTitle %>
             </h3>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"> <%= req.organization.currentEnvironment %> </span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= req.organization.currentEnvironment %>-bg text-blue-800"> <%= req.organization.currentEnvironment %> </span>
           </div>          
 <%
   function renderTestForm(testTerm, classes) {

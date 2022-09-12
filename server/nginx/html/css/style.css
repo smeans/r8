@@ -41,6 +41,10 @@
     --fastest: .2s;
     --faster: .3s;
     --fast: .5s;
+
+    --development-bg: rgba(219, 234, 254, var(--tw-bg-opacity));
+    --staging-bg: rgba(254, 243, 199, var(--tw-bg-opacity));
+    --production-bg: rgba(209, 250, 229, var(--tw-bg-opacity));
 }
 
 /*
@@ -238,4 +242,16 @@ x-multicheck label {
 
 .term-icon {
     stroke:  white;
+}
+
+.development-bg {
+    background: var(--development-bg);
+}
+
+.staging-bg {
+    background: var(--staging-bg);
+}
+
+.production-bg {
+    background: var(--production-bg);
 }

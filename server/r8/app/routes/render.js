@@ -76,7 +76,6 @@ async function render(req, res, next) {
     const productList = loginSession && loginSession.user
             && await loginSession.user.getProductList();
 
-    console.debug('productList', productList);
     const sidebar = [];
 
     res.render('render/' +  templateName, {
@@ -634,11 +633,26 @@ async function renderProductHome(req, res, next) {
 async function renderPackageHome(req, res, next) {
     const packageId = req.params[0];
     const loginSession = req.loginSession;
+    const organization = req.organization;
+    const environment = req.query.env || organization.currentEnvironment;
+
+    try {
+        organization.currentEnvironment = environment;
+    } catch (e) {
+        console.warn(`renderPackageHome: bad environment ${environment}`);
+    }
+
     const pkg = await req.organization.getPackage(packageId);
+
+    if (!pkg) {
+        res.status(404);
+        return next();        
+    }
+
     const product = await req.organization.getProduct(pkg.productId);
 
-    console.log('pkg', pkg)
-    console.log('product', product)
+    console.debug('packageHome: pkg', pkg)
+    console.log('packageHome: product', product)
 
     let termStack = req.query.ts || [];
     if (!(Array.isArray(termStack))) {
