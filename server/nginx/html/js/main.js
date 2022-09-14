@@ -214,23 +214,6 @@ const widgetHandlers = {
     "enter_login": async (detail) => {
         document.forms.login.email.focus();
     },
-    "enter_addapitokenwidget": async (detail) => {
-        document.forms.addApiToken.addEventListener('click', (e) => {
-            const deleteButton = e.target.closest('x-button.delete');
-
-            if (deleteButton) {
-                const token = e.target.closest('tr').querySelector('td').innerText;
-                const csrf = document.querySelector('x-page').getAttribute('data-csrf');
-                const url = new URL(getPageHref('default'));
-
-                renderRequest('POST', url, {
-                    '_csrf': csrf,
-                    'serviceAction': 'revokeApiToken',
-                    'token': token
-                }, updateState='replaceState');
-            }
-        });
-    },
     "enter_dashboard": async (detail) => {
         addPackage.addEventListener('click', (e) => {
             if (packages.querySelector('x-tile.new')) {
@@ -592,6 +575,8 @@ const widgetHandlers = {
         termTable.term = focusPackage.getTerm(termName);
 
         initNewTermDialog();
+    },
+    "enter_settings_home": async (detail) => {
     }
 }
 
@@ -826,6 +811,33 @@ window['deletePackage'] = (e) => {
         '_csrf': csrf,
         'serviceAction': 'deletePackage',
         'packageId': confirmPackageDelete.packageId
+    }).then(res => {
+        if (res && res.ok) {
+            const url = new URL('', getPageHref('default'));
+            url.searchParams.delete('ts');
+            url.hash = location.hash;
+
+            renderRequest('GET', url, null, updateState="replaceState");
+        }
+    });
+}
+
+window['confirmDeleteApiToken'] = (token, record) => {
+    confirmTokenDelete.querySelector('.environment').innerText = record.environment;
+    confirmTokenDelete.querySelector('.token').innerText = token;
+    confirmTokenDelete.querySelector('.issuedTo').innerText = record.issuedTo;
+    confirmTokenDelete.token = token;
+
+    showModal(confirmTokenDelete);
+}
+
+window['deleteApiToken'] = (e) => {
+    const csrf = document.querySelector('x-page[data-csrf]').getAttribute('data-csrf');
+
+    renderRequest('POST', getPageHref(), {
+        '_csrf': csrf,
+        'serviceAction': 'revokeApiToken',
+        'token': confirmTokenDelete.token
     }).then(res => {
         if (res && res.ok) {
             const url = new URL('', getPageHref('default'));

@@ -10,7 +10,9 @@ const email = require('email');
 
 const notify = require('notify');
 
-const { User, LoginSession, Product } = require('db');
+const { Organization, User, LoginSession, Product } = require('db');
+
+const { buildOrgPostmanCollection } = require('./api');
 
 class SPAURL extends URL {
     static RELATIVE_BASE_URL = new URL('http://localhost');
@@ -86,6 +88,36 @@ async function render(req, res, next) {
         sidebar,
         next
     });
+}
+
+async function renderPostmanCollection(req, res, next) {
+    const token = req.params[0];
+
+    console.log('token', token)
+
+    const organization = await Organization.findByApiToken(token);
+
+    if (!organization) {
+        res.status(404);
+
+        return next();
+    }
+
+    req.apiMeta = {
+        mode: '_run',
+        loginSession: req.loginSession,
+        user: req.loginSession.user,
+        organization: req.organization,
+        effectiveDate: Date.now()
+    };
+
+    const postmanCollection = await buildOrgPostmanCollection(req);
+
+    delete req.apiMeta;
+
+    res.header('Content-Disposition', `attachment; filename="${postmanCollection.info.name}.postman_collection.json"`);
+
+    return res.json(postmanCollection);
 }
 
 async function renderApim(req, res, next) {
@@ -420,6 +452,16 @@ const serviceActions = {
         }
 
         return next();
+    },
+    saveProfileSettings:  async (req, res, next) => {
+        const loginSession = req.loginSession;
+        const organization = loginSession.user.organization;
+
+        organization.name = req.body.organizationName;
+
+        await organization.save();
+
+        return next();
     }
 };
 
@@ -712,6 +754,7 @@ router.all(/\/(logout)/, renderLogout);
 router.get(/\/(pendinglogin)/, renderPendingLogin);
 router.get(/\/(confirmlogin)/, renderConfirmLogin);
 router.post(/\/(confirmlogin)/, renderConfirmLogin);
+router.get(/apim\/postman\/([0-9a-f\-]+)/, renderPostmanCollection);
 router.all(/apim/, renderApim);
 router.all(/\/product\/([0-9a-f\-]+)/, renderProductHome);
 router.all(/\/package\/([0-9a-f\-]+)/, renderPackageHome);

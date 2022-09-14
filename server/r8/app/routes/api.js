@@ -81,6 +81,103 @@ async function buildOrgOpenApiJson(organization) {
     return out;
 }
 
+async function buildOrgPostmanCollection(req) {
+    const organization = req.apiMeta.organization;
+    const hostNameArray = req.hostname.split('.');
+
+    const out = {
+        "info": {
+            "name": `${organization.name} quota.ws interface - ${organization.currentEnvironment}`,
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        },
+        "item": [],
+        "auth": {
+            "type": "bearer",
+            "bearer": [
+                {
+                    "key": "token",
+                    "value": req.apiMeta.bearerToken,
+                    "type": "string"
+                }
+            ]
+        },
+        "event": [
+            {
+                "listen": "prerequest",
+                "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                        ""
+                    ]
+                }
+            },
+            {
+                "listen": "test",
+                "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                        ""
+                    ]
+                }
+            }
+        ]
+    };
+
+    const products = await organization.getProductList();
+
+    for (const product of products) {
+        const productUrlName = product.productName.toLowerCase();
+
+        for (const pkgInfo of await organization.getPackageList(product.id)) {
+            const pkg = await organization.getPackage(pkgInfo.packageId);
+
+            if (!pkg) {
+                continue;
+            }
+
+            const ratingTerm = pkg.getTerm('_rating');
+            console.assert(ratingTerm);
+
+            const requiredTerms = Array.from(pkg.getRequiredInputs(ratingTerm));
+            const queryParams = requiredTerms.map(term => term.name);
+            const queryParamString = queryParams.length ? '?' + queryParams.map(k => `${k}=`).join('&') : '';
+
+            const item = {
+                "name": `${product.productName} quote effective ${pkg.effectiveDate}`,
+                "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                        "raw": `${req.proxyScheme}://${req.hostname}/api/products/${productUrlName}${queryParamString}`,
+                        "protocol": "https",
+                        "host": hostNameArray,
+                        "path": [
+                            "api",
+                            "products",
+                            productUrlName
+                        ],
+                        "query": []
+                    }
+                },
+                "response": []
+            };
+
+            // !!!TBD!!! wsm -- this is where we can add the meta parameters
+            // like _state and _effectivedate
+            item.request.url.query = requiredTerms.map(term => {
+                return {
+                    "key": term.name,
+                    "value": ""
+                }
+            });
+
+            out.item.push(item);
+        }
+    }
+
+    return out;
+}
+
 async function validateApiUser(req, res, next) {
     const loginSessionId = req.session && req.session.loginSessionId;
 
@@ -98,7 +195,8 @@ async function validateApiUser(req, res, next) {
                 mode: req.query.mode || '_run',
                 loginSession: loginSession,
                 user: loginSession.user,
-                organization: organization
+                organization: organization,
+                effectiveDate: Date.now()
             };
 
             return next();
@@ -114,7 +212,8 @@ async function validateApiUser(req, res, next) {
             if (organization) {
                 req.apiMeta = {
                     mode: req.query.mode || '_run',
-                    organization: organization
+                    organization: organization,
+                    bearerToken: token
                 };
 
                 return next();
@@ -153,6 +252,14 @@ router.get('/openapi/:format((json|yaml))', async function(req, res, next) {
             return res.json(openApiJson);
         }
     }
+});
+
+router.get('/postman', async function(req, res, next) {
+    const postmanCollection = await buildOrgPostmanCollection(req);
+
+    res.header('Content-Disposition', `attachment; filename="${postmanCollection.info.name}.postman_collection.json"`);
+
+    return res.json(postmanCollection);
 });
 
 /**
@@ -291,5 +398,6 @@ router.route('/packages/:packageId/tables/:tableTermName/rows/:rowId')
 
 module.exports = {
     router,
-    validateApiUser
+    validateApiUser,
+    buildOrgPostmanCollection
 };

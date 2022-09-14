@@ -59,14 +59,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(upload.none());
 
-app.use('/api', apiRouter.validateApiUser, apiRouter.router);
-
 app.use(function (req, res, next) {
     req.proxyScheme = req.headers['x-scheme'] || req.protocol;
     console.log(req.proxyScheme);
     
     return next();
 });
+
+app.use('/api', apiRouter.validateApiUser, apiRouter.router);
 
 app.use(csurf({ cookie: false }));
 
