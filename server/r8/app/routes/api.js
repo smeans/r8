@@ -139,16 +139,23 @@ async function buildOrgPostmanCollection(req) {
             console.assert(ratingTerm);
 
             const requiredTerms = Array.from(pkg.getRequiredInputs(ratingTerm));
-            const queryParams = requiredTerms.map(term => term.name);
-            const queryParamString = queryParams.length ? '?' + queryParams.map(k => `${k}=`).join('&') : '';
+            const productUrl = new URL(`${req.proxyScheme}://${req.hostname}/api/products/${productUrlName}`);
+            productUrl.searchParams.append('_state', '');
+            productUrl.searchParams.append('_effectivedate', pkg.effectiveDate);
+
+            for (const term of requiredTerms) {
+                productUrl.searchParams.append(term.name, '');
+            }
+            
+            console.log('productUrl', productUrl);
 
             const item = {
-                "name": `${product.productName} quote effective ${pkg.effectiveDate}`,
+                "name":  `${product.productName} quote effective ${pkg.effectiveDate}`,
                 "request": {
                     "method": "GET",
                     "header": [],
                     "url": {
-                        "raw": `${req.proxyScheme}://${req.hostname}/api/products/${productUrlName}${queryParamString}`,
+                        "raw": productUrl.href,
                         "protocol": "https",
                         "host": hostNameArray,
                         "path": [
@@ -162,13 +169,8 @@ async function buildOrgPostmanCollection(req) {
                 "response": []
             };
 
-            // !!!TBD!!! wsm -- this is where we can add the meta parameters
-            // like _state and _effectivedate
-            item.request.url.query = requiredTerms.map(term => {
-                return {
-                    "key": term.name,
-                    "value": ""
-                }
+            productUrl.searchParams.forEach((value, key) => {
+                item.request.url.query.push({key, value});
             });
 
             out.item.push(item);
@@ -195,8 +197,7 @@ async function validateApiUser(req, res, next) {
                 mode: req.query.mode || '_run',
                 loginSession: loginSession,
                 user: loginSession.user,
-                organization: organization,
-                effectiveDate: Date.now()
+                organization: organization
             };
 
             return next();

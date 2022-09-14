@@ -114,8 +114,10 @@ async function renderPostmanCollection(req, res, next) {
     const postmanCollection = await buildOrgPostmanCollection(req);
 
     delete req.apiMeta;
+    const issuedTo = organization.apiTokens[token].issuedTo;
+    const filename = `${issuedTo} - ${postmanCollection.info.name}.postman_collection.json`;
 
-    res.header('Content-Disposition', `attachment; filename="${postmanCollection.info.name}.postman_collection.json"`);
+    res.header('Content-Disposition', `attachment; filename="${filename}"`);
 
     return res.json(postmanCollection);
 }
