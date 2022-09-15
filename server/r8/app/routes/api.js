@@ -398,8 +398,6 @@ function evalPackage(req, res, next, pkg, termName) {
         })
     }
 
-    console.log('out', out);
-
     return res.json(out);
 }
 
