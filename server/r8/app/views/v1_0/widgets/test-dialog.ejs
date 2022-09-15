@@ -39,7 +39,9 @@
               <%= pageTitle %>
             </h3>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= req.organization.currentEnvironment %>-bg text-blue-800"> <%= req.organization.currentEnvironment %> </span>
-          </div>          
+          </div>
+            <ul id="testformerrors" class="text-red-400 text-xs">
+            </ul>          
 <%
   function renderTestForm(testTerm, classes) {
     classes = classes || '';

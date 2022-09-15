@@ -723,7 +723,7 @@ window['refreshTestForm'] = async (target) => {
     const form = target.closest('form');
     const testTerm = target.closest('*[data-testterm]').getAttribute('data-testterm');
     const formData = new FormData(form);
-    const url = `/api/packages/${focusPackage.id}/products/${testTerm}?${new URLSearchParams(formData)}`;
+    const url = `/api/packages/${focusPackage.id}/term/${testTerm}?${new URLSearchParams(formData)}`;
 
     console.debug('test url', url);
 
@@ -735,7 +735,7 @@ window['refreshTestForm'] = async (target) => {
             const json = await resp.json();
 
             if (resp.ok) {
-                form[testTerm].value = json[testTerm];
+                form[testTerm].value = json.outputs && json.outputs[testTerm];
             }
 
             json.log && json.log.forEach(err => {

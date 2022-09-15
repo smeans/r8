@@ -5,7 +5,7 @@ const log = require('log');
 const router = express.Router();
 const YAML = require('yaml');
 
-const { Organization, LoginSession } = require('db');
+const { Organization, LoginSession, Product } = require('db');
 
 const R8TYPE_TO_OPENAPI = {
     undefined: "number",
@@ -18,6 +18,8 @@ const R8TYPE_TO_OPENAPI = {
 }
 
 async function buildOrgOpenApiJson(organization) {
+    // !!!TBD!!! wsm - this definition is out-of-date. Leaving for now
+    // for reference but needs to be refactored for new API layout
     const out = {
         openapi: "3.0.1",
         info: {
@@ -73,7 +75,6 @@ async function buildOrgOpenApiJson(organization) {
                 }
             };
 
-            console.log(endpoint);
             out.paths[`/api/packages/${packageName}/products/${term.name}`] = endpoint;
         }
     }
@@ -128,6 +129,11 @@ async function buildOrgPostmanCollection(req) {
     for (const product of products) {
         const productUrlName = product.productName.toLowerCase();
 
+        const folder = {
+            "name": product.productName,
+            "item": []
+        };
+
         for (const pkgInfo of await organization.getPackageList(product.id)) {
             const pkg = await organization.getPackage(pkgInfo.packageId);
 
@@ -147,8 +153,6 @@ async function buildOrgPostmanCollection(req) {
                 productUrl.searchParams.append(term.name, '');
             }
             
-            console.log('productUrl', productUrl);
-
             const item = {
                 "name":  `${product.productName} quote effective ${pkg.effectiveDate}`,
                 "request": {
@@ -173,8 +177,10 @@ async function buildOrgPostmanCollection(req) {
                 item.request.url.query.push({key, value});
             });
 
-            out.item.push(item);
+            folder.item.push(item);
         }
+
+        out.item.push(folder);
     }
 
     return out;
@@ -272,7 +278,8 @@ router.get('/packages', async function (req, res, next) {
 });
 
 router.param('packageId', async function (req, res, next, packageId) {
-    const pkg = await req.apiMeta.organization.getPackage(packageId);
+    const organization = req.apiMeta.organization;
+    const pkg = await organization.getPackage(packageId);
 
     if (!pkg) {
         res.status(404);
@@ -286,22 +293,49 @@ router.param('packageId', async function (req, res, next, packageId) {
     req.package = pkg;
     req.params.packageId = pkg.id;
 
-    next();
+    if (!req.product) {
+        req.product = await organization.getProduct(pkg.productId);
+    }
+
+    return next();
 });
 
 router.param('productName', async function (req, res, next, productName) {
-    const term = req.package.getTerm(productName);
+    const organization = req.apiMeta.organization;
 
-    if (!term) {
+    if (!req.query._state) {
+        res.status(400);
+        return res.json({
+            status: 400,
+            message: `no _state query parameter was provided`
+        });
+    }
+
+    const product = await organization.findProductByName(productName, req.query._state);
+
+    if (!product) {
         res.status(404);
 
         return res.json({
             status: 404,
-            message: `product ${req.params.productName} not found`
+            message: `product ${productName} not found for state '${req.query._state}'`
         });
     }
 
-    req.product = term;
+    req.product = product;
+
+    try {
+        req.package = await organization.getEffectivePackage(product.id, req.effectiveDate);
+    } catch (e) {
+        console.error('productName: getEffectivePackage', e);
+
+        res.status(500);
+
+        return res.json({
+            status:500,
+            message: `an internal server error occured locating product ${productName}: ${e}`
+        })
+    }
 
     next();
 });
@@ -325,44 +359,76 @@ router.param('tableTermName', async function (req, res, next, tableTermName) {
     next();
 });
 
+function evalPackage(req, res, next, pkg, termName) {
+    const out = {};
+
+    try {
+        const ec = pkg.evalTerm(termName, req.query);
+
+        out._productName = req.product.name;
+        out._productId = req.product.id;
+        out._packageVersionId = pkg.versionId;
+        out._packageEffectiveDate = pkg.effectiveDate;
+
+        out.inputs = {...req.query};
+        out.outputs = {[termName]: ec.value};
+
+        if (ec.log.length) {
+            out.log = ec.log.map(msg => {
+                return {
+                    level: msg.level,
+                    term: msg.term.name,
+                    message: msg.message
+                }
+            });
+        }
+
+        // !!!TBD!!! implement setTermValue() in all terms for tracing
+        console.debug(`evalPackage: ${req.product.name}: term values`, JSON.stringify(ec.termValues));
+    } catch (e) {
+        console.error(`evalPackage: ${req.product.name}: eval error: ${e}`, e.stack);
+
+        res.status(500);
+
+        out.log = out.log || [];
+        out.log.push({
+            level: 'error',
+            term: req.product.name,
+            message: e.toString()
+        })
+    }
+
+    console.log('out', out);
+
+    return res.json(out);
+}
+
 /**
  * Execute specific packages and return results.
  */
-router.route('/packages/:packageId/products/:productName')
+router.route('/packages/:packageId/term/:termName')
     .get(async function (req, res, next) {
-        const out = {};
-        try {
-            const ec = req.package.evalTerm(req.product, req.query);
+        res.status(200);
 
-            out[req.product.name] = ec.value;
+        return evalPackage(req, res, next, req.package, req.params.termName || '_rating');
+    });
 
-            if (ec.log.length) {
-                out.log = ec.log.map(msg => {
-                    return {
-                        level: msg.level,
-                        term: msg.term.name,
-                        message: msg.message
-                    }
-                });
-            }
+router.route('/products/:productName')
+    .get(async function (req, res, next) {
+        if (!req.package) {
+            res.status(404);
 
-            // !!!TBD!!! implement setTermValue() in all terms for tracing
-            console.debug(`${req.product.name}: term values`, JSON.stringify(ec.termValues));
-        } catch (e) {
-            console.error(`${req.product.name}: eval error: ${e}`, e.stack);
-
-            res.status(500);
-
-            out.log = out.log || [];
-            out.log.push({
-                level: 'error',
-                term: req.product.name,
-                message: e.toString()
-            })
+            return res.json({
+                status: 404,
+                message: `unable to locate a version of product ${req.params.productName} for state ${req.query._state} effective ${req.effectiveDate}`
+            });
         }
 
-        return res.json(out);
+        res.status(200);
+
+        return evalPackage(req, res, next, req.package, '_rating');
     });
+
 
 /**
  * Query and return rows for specified table term.

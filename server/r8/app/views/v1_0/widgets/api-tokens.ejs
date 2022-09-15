@@ -45,7 +45,7 @@
                     <%= record.environment %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <a href="/render/apim/postman/<%= token %>" title="download the postman collection for this token"><x-svg class="h-6 w-6" src="svg/postman-logo-icon-orange.svg"></x-svg></a>
+                    <a href="/render/apim/postman/<%= token %>" title="download the Postman collection for this token"><x-svg class="h-6 w-6" src="svg/postman-logo-icon-orange.svg"></x-svg></a>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <x-button data-action="confirmDeleteApiToken('<%= token %>', <%= JSON.stringify(record) %>)" class="delete round">

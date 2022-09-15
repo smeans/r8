@@ -93,8 +93,6 @@ async function render(req, res, next) {
 async function renderPostmanCollection(req, res, next) {
     const token = req.params[0];
 
-    console.log('token', token)
-
     const organization = await Organization.findByApiToken(token);
 
     if (!organization) {
@@ -108,7 +106,8 @@ async function renderPostmanCollection(req, res, next) {
         loginSession: req.loginSession,
         user: req.loginSession.user,
         organization: req.organization,
-        effectiveDate: Date.now()
+        effectiveDate: req.effectiveDate,
+        bearerToken: token
     };
 
     const postmanCollection = await buildOrgPostmanCollection(req);
@@ -164,10 +163,19 @@ const serviceActions = {
                 : [req.body.states];
 
         console.debug('createProduct', productName);
-        const product = await req.organization.createProduct(productName,
-                description, states);
 
-        res.render('render/redirect', {url: '#/product/' + product.id});
+        try {
+            const product = await req.organization.createProduct(productName,
+                    description, states);
+
+            res.render('render/redirect', {url: '#/product/' + product.id});
+        } catch (e) {
+            console.error(`createProduct: ${e}`);
+
+            req.errors.push(e);
+        }
+
+        return next();
     },
     updateProduct: async (req, res, next) => {
         const product = await req.organization.getProduct(req.body.productId);

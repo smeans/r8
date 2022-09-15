@@ -61,7 +61,15 @@ app.use(upload.none());
 
 app.use(function (req, res, next) {
     req.proxyScheme = req.headers['x-scheme'] || req.protocol;
-    console.log(req.proxyScheme);
+
+    if (req.query._effectivedate) {
+        req.effectiveDate = new Date(req.query._effectivedate);
+    }
+
+    if (!req.effectiveDate || !(req.effectiveDate instanceof Date)
+            || isNaN(req.effectiveDate)) {
+        req.effectiveDate = new Date();
+    }
     
     return next();
 });
