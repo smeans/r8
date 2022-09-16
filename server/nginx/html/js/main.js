@@ -282,6 +282,12 @@ const widgetHandlers = {
     "enter_package_home": async (detail) => {
         if ('cancelButton' in window)  {
             cancelButton.addEventListener('click', (e) => {
+                const page = e.target.closest('x-page');
+
+                if (page && getPageMode(page) != 'edit') {
+                    return;
+                }
+
                 if (!isPageDirty() || confirm('Abandon your changes and reload?')) {
                     const url = getPageHref();
                     url.searchParams.delete('mode');
