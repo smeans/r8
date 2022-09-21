@@ -40,8 +40,8 @@
             </h3>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= req.organization.currentEnvironment %>-bg text-blue-800"> <%= req.organization.currentEnvironment %> </span>
           </div>
-            <ul id="testformerrors" class="text-red-400 text-xs">
-            </ul>          
+          <ul id="testformerrors" class="text-red-400 text-xs">
+          </ul>
 <%
   function renderTestForm(testTerm, classes) {
     classes = classes || '';
@@ -120,7 +120,7 @@
         </div>
         <div class="hidden sm:block">
           <div class="border-b border-gray-200">
-            <nav id="testTabLinks" class="-mb-px flex space-x-8" aria-label="Tabs" data-action="handleTabs" data-tabstarget="#testForms">
+            <nav id="testTabLinks" class="-mb-px flex space-x-8" aria-label="Tabs" data-action="handleTestTabs" data-tabstarget="#testForms">
               <a class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"> Rating Algorithm </a>
 
 <%

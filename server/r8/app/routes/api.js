@@ -91,7 +91,29 @@ async function buildOrgPostmanCollection(req) {
             "name": `${organization.name} quota.ws interface - ${organization.currentEnvironment}`,
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
         },
-        "item": [],
+        "item": [
+            {
+                "name": "Current Postman Collection",
+                "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                        "raw": "https://localhost.quota.ws/api/postman",
+                        "protocol": "https",
+                        "host": [
+                            "localhost",
+                            "quota",
+                            "ws"
+                        ],
+                        "path": [
+                            "api",
+                            "postman"
+                        ]
+                    }
+                },
+                "response": []
+            }
+        ],
         "auth": {
             "type": "bearer",
             "bearer": [

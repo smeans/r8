@@ -183,6 +183,8 @@ function cancelNewTermDialog() {
 function openTestDialog(e) {
     testDialog.classList.remove('hidden');
     activateTab(testTabLinks.firstElementChild);
+
+    refreshTestForm();
 }
 
 window['closeTestDialog'] = (e) => {
@@ -255,7 +257,8 @@ const widgetHandlers = {
     },
     "enter_update_package": async (detail) => {
         const json = eval(packageJson.innerText)();
-        window.focusPackage = R8Package.fromJson(json);
+        const linter = new R8Linter(packageJson.getAttribute('data-linter'));
+        window.focusPackage = R8Package.fromJson(json, linter);
     },
     "exit_update_package": async (detail) => {
         focusPackage && delete window.focusPackage;
@@ -393,6 +396,14 @@ const widgetHandlers = {
             editor.disabled = false;
 
             editor.focus();
+        });
+
+        editor.addEventListener('dblclick', (e) => {
+            const page = e.target.closest('x-page');
+
+            if (getPageMode(page) == 'default') {
+                editButton.click();
+            }
         });
 
         initNewTermDialog();
@@ -721,9 +732,19 @@ function activateTab(tab) {
     }
 }
 
+window['handleTestTabs'] = (e) => {
+    handleTabs(e);
+
+    refreshTestForm();
+}
+
 window['refreshTestForm'] = async (target) => {
     if (target instanceof Event) {
         target = target.target;
+    }
+
+    if (!target) {
+        target = testDialog.querySelector("#testForms>:not(.hidden) form");
     }
     
     const form = target.closest('form');
@@ -853,4 +874,21 @@ window['deleteApiToken'] = (e) => {
             renderRequest('GET', url, null, updateState="replaceState");
         }
     });
+}
+
+window['confirmDeleteProduct'] = (productId, productName) => {
+    confirmProductDelete.querySelector('.productName').innerText = productName;
+    confirmProductDelete.productId = productId;
+
+    showModal(confirmProductDelete);
+}
+
+window['deleteProduct'] = (e) => {
+    const csrf = document.querySelector('x-page[data-csrf]').getAttribute('data-csrf');
+
+    renderRequest('POST', "#/", {
+        '_csrf': csrf,
+        'serviceAction': 'deleteProduct',
+        'productId': confirmProductDelete.productId
+    }, updateState="replaceState");
 }

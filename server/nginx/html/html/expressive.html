@@ -539,9 +539,8 @@ function contentEditableText(el) {
             }
 
             :host(.disabled) {
-                pointer-events: none;
                 filter: grayscale(100%);
-            }
+            }            
 
             :host(.round),
             :host(.sm-round),
@@ -556,7 +555,7 @@ function contentEditableText(el) {
                 padding: 0 .25em;
             }
 
-            :host(.round:hover),
+            :host(.round:not(.disabled):hover),
             :host(.sm-round:hover),
             :host(.lg-round:hover),
             :host(.accent:hover) {
@@ -597,6 +596,10 @@ function contentEditableText(el) {
         <button id="button" type="button"><slot></slot></button>
         <script>
             class XButton extends ExpressiveElement {
+                static mappedAttributes = {
+                    "disabled": "disabled"
+                };
+
                 constructor() {
                     super();
 
@@ -625,10 +628,13 @@ function contentEditableText(el) {
                 }
 
                 get disabled() {
-                    return this.classList.has('disabled');
+                    return this.g.button.disabled;
                 }
 
                 set disabled(newDisabled) {
+                    console.log('setting disabled')
+                    newDisabled = newDisabled.toString() != 'false';
+                    this.g.button.disabled = newDisabled;
                     this.classList.toggle('disabled', newDisabled);
                 }
 
@@ -966,7 +972,8 @@ function contentEditableText(el) {
                 color: var(--dead-text);
             }
 
-            :host(.error) {
+            :host(.error),
+            :host(.invalid) {
                 color: var(--err-text);
             }
 
@@ -1040,6 +1047,11 @@ function contentEditableText(el) {
                     this.classList.toggle('undefined',
                             this.type == 'name' && this.package
                             && !this.package.getTerm(this.value));
+
+                    const isInvalid = this.type == 'name' && this.package
+                            && !this.package.linter.validateIdentifier(this.value);
+
+                    this.classList.toggle('invalid', isInvalid);
                 }
             }
         </script>

@@ -263,6 +263,27 @@ const serviceActions = {
 
         return next();
     },
+    deleteProduct: async (req, res, next) => {
+        const loginSession = req.loginSession;
+        const organization = req.organization;
+        const productId = req.body.productId;
+
+        if (!req.organization) {
+            res.status(400);
+
+            return next();
+        }
+
+        try {
+            await req.organization.deleteProduct(productId);
+        } catch (e) {
+            console.error(`deleteProduct: ${e}`);
+
+            req.errors.push(e);
+        }
+
+        return next();
+    },
     addProductTerm: async (req, res, next) => {
         const parsedUrl = req._parsedUrl || new URL(req.url);
         const packageId = parsedUrl.pathname.split('/')[2];
@@ -680,6 +701,8 @@ async function renderProductHome(req, res, next) {
         SPAURL,
         next
     });
+
+    return next();
 }
 
 async function renderPackageHome(req, res, next) {

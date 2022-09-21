@@ -64,7 +64,7 @@
 <x-page class="py-10 mode-default w-full" data-widgetid="package_home" data-csrf="<%- req.csrfToken() %>"
         data-title="<%= pageTitle %>: <%= termName %>">
 
-  <script data-widgetid="update_package" id="packageJson">
+  <script data-widgetid="update_package" data-linter="<%=req.organization.idPolicy%>" id="packageJson">
     () => { return <%- JSON.stringify(pkg.json) %>; }
   </script>
 
