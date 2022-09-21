@@ -83,6 +83,7 @@ async function buildOrgOpenApiJson(organization) {
 }
 
 async function buildOrgPostmanCollection(req) {
+    const baseUrl = `${req.proxyScheme}://${req.hostname}`;
     const organization = req.apiMeta.organization;
     const hostNameArray = req.hostname.split('.');
 
@@ -98,13 +99,9 @@ async function buildOrgPostmanCollection(req) {
                     "method": "GET",
                     "header": [],
                     "url": {
-                        "raw": "https://localhost.quota.ws/api/postman",
+                        "raw": `${baseUrl}/api/postman`,
                         "protocol": "https",
-                        "host": [
-                            "localhost",
-                            "quota",
-                            "ws"
-                        ],
+                        "host": hostNameArray,
                         "path": [
                             "api",
                             "postman"
@@ -167,7 +164,7 @@ async function buildOrgPostmanCollection(req) {
             console.assert(ratingTerm);
 
             const requiredTerms = Array.from(pkg.getRequiredInputs(ratingTerm));
-            const productUrl = new URL(`${req.proxyScheme}://${req.hostname}/api/products/${productUrlName}`);
+            const productUrl = new URL(`${baseUrl}/api/products/${productUrlName}`);
             productUrl.searchParams.append('_state', '');
             productUrl.searchParams.append('_effectivedate', pkg.effectiveDate);
 
