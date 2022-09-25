@@ -12,7 +12,7 @@
     const higherEnv = !inProdEnv ? organization.environments[organization.environments.indexOf(currentTab)+1] : null;
     const noVersions = packageLists[developmentEnv].length == 0;
 %>
-<x-page data-csrf="<%- req.csrfToken() %>">
+<x-page data-csrf="<%- req.csrfToken() %>" data-title="<%= title %>">
   <nav>
       <%- include('widgets/navbar', {title}) %>
   </nav>

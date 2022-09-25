@@ -1446,13 +1446,13 @@ function contentEditableText(el) {
                 border-radius: 1em;
             }
 
-            x-value, -editarea {
+            x-value, x-editarea {
                 display: inline-block;
                 height: 100%;
                 width: 100%;
             }
         </style>
-        <x-value><slot></slot></x-value>
+        <x-value id="value"><slot></slot></x-value>
         <x-editarea>
             <input id="ti"/>
             <button id="save"><x-svg src="svg/save.svg"></x-svg></button>
@@ -1470,7 +1470,7 @@ function contentEditableText(el) {
                 constructor() {
                     super();
 
-                    this.addEventListener('dblclick', (e) => {
+                    this.g.value.addEventListener('click', (e) => {
                         this.startEditing();
                     });
 
@@ -1507,6 +1507,10 @@ function contentEditableText(el) {
                     this.g.ti.type = newType;
                 }
 
+                get disabled() {
+                    return !!this.closest('.disabled');
+                }
+
                 get placeholder() {
                     return this.g.ti.placeholder;
                 }
@@ -1516,7 +1520,7 @@ function contentEditableText(el) {
                 }
 
                 startEditing() {
-                    if (this.classList.contains('editing')) {
+                    if (this.disabled || this.classList.contains('editing')) {
                         return;
                     }
 
@@ -1582,6 +1586,11 @@ function contentEditableText(el) {
 
             table {
                 border-spacing: 0;
+                border: var(--thin) solid var(--border);
+            }
+
+            th {
+                text-align: left;
             }
 
             th:not(:first-child)  {
@@ -1598,6 +1607,8 @@ function contentEditableText(el) {
 
             td {
                 border-top: var(--thin) solid var(--border);
+                min-width: 15em;
+                min-height: 2.1em;
             }
 
             select:invalid {
@@ -1633,12 +1644,20 @@ function contentEditableText(el) {
             .menu:hover {
                 background: #eee;
             }
+
+            #noData td {
+                text-align: center;
+            }
+
+            table:not(.disabled) #noData {
+                display: none;
+            }
         </style>
         <table id="table">
             <thead>
                 <tr>
                     <th class="valueCol">
-                        <x-svg src="/svg/left-arrow.svg"></x-svg>
+                        <x-svg src="/svg/left-arrow.svg" title="output value column"></x-svg>
                         <x-token id="termHeader" type="name"></x-token>
                     </th>
                     <th id="addColHeader" class="addCol">
@@ -1651,6 +1670,11 @@ function contentEditableText(el) {
                 </tr>
             </thead>
             <tbody>
+                <tr id="noData" class="hidden">
+                    <td class="valueCol" colspan="1000">
+                        no data
+                    </td>
+                </tr>
                 <tr id="addRow">
                     <td class="valueCol"><input type="text" name="_value" required/></td>
                     <td class="addCol">
@@ -1875,6 +1899,8 @@ function contentEditableText(el) {
                                 for (const row of rows) {
                                     tbody.insertBefore(this._makeDataRow(row), addRow);
                                 }
+
+                                this.g.noData.hidden = rows.length > 0;
                             }
                         })
                         .finally(() => {

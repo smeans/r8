@@ -261,7 +261,7 @@ const widgetHandlers = {
         window.focusPackage = R8Package.fromJson(json, linter);
     },
     "exit_update_package": async (detail) => {
-        focusPackage && delete window.focusPackage;
+        window['focusPackage'] && delete window.focusPackage;
     },
     "enter_undefinedtermswidget": async (detail) => {
         undefinedtermswidget.querySelectorAll('x-token').forEach(el => {

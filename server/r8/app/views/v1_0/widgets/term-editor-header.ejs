@@ -21,9 +21,9 @@
           <%- include('data-type-widget', {currentDataType: focusTerm.dataType}) %>
         </div>
     </div>
-    <div class="py-4">
+    <div class="py-4 flex-grow">
         <div class="ml-2 sm:ml-4 md:ml-6">
-          <label for="email" class="block text-sm font-medium text-gray-700">Term Description</label>
+          <label for="description" class="block text-sm font-medium text-gray-700">Term Description</label>
           <div class="mt-1">
             <input type="text" id="description" disabled class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 p-1 rounded-md" required data-initialvalue="<%= focusTerm.description %>" value="<%= focusTerm.description %>">
           </div>
