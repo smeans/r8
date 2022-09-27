@@ -1059,33 +1059,36 @@ function contentEditableText(el) {
 
     <template name="x-expression">
         <style>
+            :host {
+                height: fit-content;
+                overflow-x: auto;
+            }
+
             x-workarea {
                 display: block;
                 position: relative;
-                width: 100%;
-                height: 100%;
-
-                overflow-x:auto;
+                width: 90%;
             }
 
             x-editpane, x-displaypane {
-                display: block;
+                display: inline-block;
                 position: absolute;
                 top: 0;
                 left:  0;
-                height: 100%;
                 outline: none;
                 padding: 0 .25rem;
+                white-space: pre;
             }
 
             x-editpane {
                 color: #0000;
                 caret-color: #000;
+                min-width: 100%;
+                overflow-wrap: normal;
             }
 
             x-displaypane {
                 display: block;
-                white-space: pre;
             }
 
             x-editpane:hover {
@@ -1095,7 +1098,7 @@ function contentEditableText(el) {
                 background: var(--accent-bg);
             }
         </style>
-        <x-workarea>
+        <x-workarea id="workarea">
             <x-displaypane></x-displaypane>
             <x-editpane autocorrect="false" spellcheck="false"
                   contenteditable="true"></x-editpane>
@@ -1240,6 +1243,7 @@ function contentEditableText(el) {
                     this.displaypane.appendChild(df);
 
                     this.displaypane.style.width = (this.editpane.offsetWidth + 1) + 'px';
+                    this.g.workarea.style.height =
                     this.displaypane.style.height = this.editpane.offsetHeight + 'px';
                 }
 
@@ -1533,7 +1537,10 @@ function contentEditableText(el) {
                             this.g.ti.value = this.innerText;
                         } break;
                     }
+                    
                     this.classList.add('editing');
+
+                    this.fireEvent('x.startEditing', {target: this});
                 }
 
                 commitEditing() {
@@ -1568,6 +1575,8 @@ function contentEditableText(el) {
                 endEditing() {
                     this.classList.remove('error');
                     this.classList.remove('editing');
+
+                    this.fireEvent('x.endEditing', {target: this});
                 }
             }
         </script>
@@ -1787,6 +1796,15 @@ function contentEditableText(el) {
                         } catch {
 
                         }
+                    });
+
+                    this.addEventListener('x.startEditing', (e) => {
+                        const editors = this.g.table.querySelectorAll('x-sff.editing');
+                        editors.forEach((editor) => {
+                            if (editor != e.detail.target) {
+                                editor.endEditing();
+                            }
+                        })
                     });
                 }
 

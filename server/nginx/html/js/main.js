@@ -33,6 +33,12 @@ function getPageHref(newMode) {
     return url;
 }
 
+function getFocusTerm() {
+    const url = new URL(location.href);
+
+    return url.searchParams.getAll('ts').pop();
+}
+
 function initNewTermDialog() {
     newTermDialog.addEventListener('click', (e) => {
         if (e.target.name == 'cancel'
@@ -191,7 +197,11 @@ window['closeTestDialog'] = (e) => {
     testDialog.classList.add('hidden');
 }
 
-function pushEditTerm(termName) {
+function pushEditTerm(termName) {    
+    if (getFocusTerm() == termName) {
+        return;
+    }
+    
     const url = new URL(getPageHref());
     url.searchParams.append('ts', termName);
 

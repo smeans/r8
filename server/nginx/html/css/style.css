@@ -184,7 +184,7 @@ x-expression {
 
     display: block;
     background: #eee;
-    height: 4em;
+    min-height: 4em;
     outline-style: solid;
     outline-color: var(--ltpurple);
 }
