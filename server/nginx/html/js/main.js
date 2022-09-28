@@ -387,6 +387,15 @@ const widgetHandlers = {
             const csrf = e.target.closest('x-page').getAttribute('data-csrf');
             const termName = e.target.closest('*[data-termname]').getAttribute('data-termname');
 
+            const errors = editor.errors;
+            expressionErrors.classList.toggle('hidden', errors.length <= 0);
+
+            if (errors.length) {
+                expressionErrors.innerHTML = `<li>${errors.join('</li><li>')}</li>`;
+
+                return;
+            }
+
             renderRequest('POST', getPageHref('view'), {
                 '_csrf': csrf,
                 'serviceAction': 'saveTerm',

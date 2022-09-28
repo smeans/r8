@@ -7,22 +7,24 @@
             <%- include('term-editor-header') %>
             <div class="mx-auto px-4 sm:px-6 md:px-8">
                 <x-expression id="editor" disabled class="w-full bg-white rounded-md p-1 outline-blue-500" initialvalue="<%= focusTerm.expressionSource %>"></x-expression>
-                <% if (focusTerm.undefinedTerms.size) { %>
-                <h5 class="text-xs mt-1 text-red-500"><%= focusTerm.undefinedTerms.size %> undefined term<%= focusTerm.undefinedTerms.size == 1 ? '': 's' %></h5>
-                <% } %>
+                <ul id="expressionErrors" class="hidden mt-1 ml-4 text-red-500 text-sm list-disc">
+                </ul>
             </div>
         </div>
         <div class="flex flex-wrap xl:w-64">
 <%
             if (focusTerm.package.undefinedTerms.size) { %>
         <div class="w-64 m-4">
-            <h2 class="text-xl font-bold leading-tight text-red-500 uppercase">Undefined Terms</h2>
+            <h2 class="text-xl font-bold leading-tight uppercase">Undefined Terms</h2>
             <ul>
 <%              for (const termName of Array.from(focusTerm.package.undefinedTerms)) {
                     const url = new SPAURL(req.url);
                     url.searchParams.append('ts', termName);
 %>
-                <li class="text-red-500" data-action="newTermFromEvent"><%= termName %></li>
+                <li style="
+                        color: var(--ok-text);
+                        text-decoration:  underline wavy var(--warn-attention)"
+                    data-action="newTermFromEvent"><%= termName %></li>
 <%              } %>
             </ul>
         </div>

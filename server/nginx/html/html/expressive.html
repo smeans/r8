@@ -948,7 +948,7 @@ function contentEditableText(el) {
             }
 
             :host-context(.undefined) x-value {
-                text-decoration: underline wavy var(--accent-attention);
+                text-decoration: underline wavy var(--warn-attention);
             }
 
             :host(.name) {
@@ -1198,6 +1198,24 @@ function contentEditableText(el) {
                         !!this.value : this.value != this._initialValue;
                 }
 
+                get errors() {
+                    const dp = this.displaypane;
+                    const errors = [];
+
+                    for (const token of dp.querySelectorAll('x-token.invalid')) {
+                        errors.push(`identifier '${token.innerText}' does not conform to the organization naming scheme (${this.package.linter.idPolicy})`);
+                    }
+
+                    // !!!TBD!!! wsm - show a snippet of the expression
+                    // near the error here and merge adjacent errors
+
+                    for (const token of dp.querySelectorAll('x-token.error')) {
+                        errors.push(`syntax error near '${token.innerText}'`);
+                    }
+
+                    return errors;
+                }
+
                 _handleInput(e) {
                     this._syncDisplay();
                 }
@@ -1240,6 +1258,8 @@ function contentEditableText(el) {
                         df.appendChild(nd);
                     }
 
+                    this._validateSyntax(df.children);
+
                     this.displaypane.appendChild(df);
 
                     this.displaypane.style.width = (this.editpane.offsetWidth + 1) + 'px';
@@ -1276,6 +1296,71 @@ function contentEditableText(el) {
 
                     nd.parentNode.insertBefore(tokens, nd);
                     nd.remove();
+                }
+
+                _validateSyntax(tokens) {
+                    console.debug('validating tokens')
+                    const stack = [];
+
+                    for (const token of tokens) {
+                        if (token.classList.contains('operator')) {
+                            switch (token.innerText) {
+                                case '(': {
+                                    stack.push('(');
+                                } break;
+
+                                case ')': {
+                                    if (stack.pop() != 'term' || stack.pop() != '(') {
+                                        token.classList.add('error');
+                                    } else {
+                                        while (stack.at(-1) == 'binop'
+                                                && stack.at(-2) == 'term') {
+                                            stack.pop();
+                                            stack.pop();
+                                        }
+                                        stack.push('term');
+                                    }
+                                } break;
+
+                                case '+':
+                                case '-':
+                                case '*':
+                                case '/': {
+                                    if (stack.at(-1) != 'term') {
+                                        token.classList.add('error');
+                                    }
+
+                                    stack.push('binop');
+                                } break;
+
+                                case '%': {
+                                    if (stack.pop() != 'term') {
+                                        token.classList.add('error');
+                                    }
+
+                                    stack.push('term');
+                                } break;
+                            }
+                        } else if (token.classList.contains('name')) {
+                            const peek = stack.at(-1);
+                            if (peek === undefined || peek == '(') {
+                                stack.push('term');
+
+                                continue;
+                            }
+
+                            if (peek == 'binop') {
+                                stack.pop();
+
+                                if (stack.at(-1) == 'term') {
+                                    continue;
+                                }
+                            }
+
+                            stack.push('term');
+                            token.classList.add('error');
+                        }
+                    }
                 }
             }
         </script>
