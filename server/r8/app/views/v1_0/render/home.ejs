@@ -1,2 +1,2 @@
 <% const body = loginSession.valid ? include('../widgets/dashboard') : include('../widgets/login') %>
-<%- include('../page', {title: "Dashboard", body: body}) %>
+<%- loginSession.valid ? include('../page', {title: "Dashboard", body: body}) : include('../landingpage', {title: "Login", body: body}) %>
