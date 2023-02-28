@@ -1,105 +1,103 @@
 <%
     const organization = loginSession.user.organization;
 %>
-<div data-widgetid="dashboard" class="py-10">
+<div data-widgetid="dashboard">
   <header>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
       <h1 class="text-3xl font-bold leading-tight text-gray-900">All Products</h1>
     </div>
   </header>
   <%  if (req.errors && req.errors.length) { %>
     <%- include('widgets/show-errors', {errors: req.errors}) %>
   <%  } %>
-  <main>
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="flex items-center w-full">
-          <%#<div class="sm:flex sm:items-center">
-            <div class="sm:flex-auto">
-              <h1 class="text-xl font-semibold text-gray-900">Users</h1>
-              <p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>
-              <!-- component -->
-            </div>%>
-            <div class="relative mr-6 my-2">
-              <input type="search" data-searchtarget="#products tr" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Filter">
-              <div class="absolute top-1 right-3 mt-3 mr-4 text-purple-lighter">
-              	<svg version="1.1" class="h-4 text-dark" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-            	 viewBox="0 0 52.966 52.966" style="enable-background:new 0 0 52.966 52.966;" xml:space="preserve">
-                	<path d="M51.704,51.273L36.845,35.82c3.79-3.801,6.138-9.041,6.138-14.82c0-11.58-9.42-21-21-21s-21,9.42-21,21s9.42,21,21,21
-                    c5.083,0,9.748-1.817,13.384-4.832l14.895,15.491c0.196,0.205,0.458,0.307,0.721,0.307c0.25,0,0.499-0.093,0.693-0.279
-                    C52.074,52.304,52.086,51.671,51.704,51.273z M21.983,40c-10.477,0-19-8.523-19-19s8.523-19,19-19s19,8.523,19,19
-                    S32.459,40,21.983,40z"/>
+  <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+      <div class="flex items-center w-full">
+        <%#<div class="sm:flex sm:items-center">
+          <div class="sm:flex-auto">
+            <h1 class="text-xl font-semibold text-gray-900">Users</h1>
+            <p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>
+            <!-- component -->
+          </div>%>
+          <div class="relative mr-6 my-2">
+            <input type="search" data-searchtarget="#products tr" class="bg-purple-white shadow rounded border-0 p-3" placeholder="Filter">
+            <div class="absolute top-1 right-3 mt-3 mr-4 text-purple-lighter">
+              <svg version="1.1" class="h-4 text-dark" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+              viewBox="0 0 52.966 52.966" style="enable-background:new 0 0 52.966 52.966;" xml:space="preserve">
+                <path d="M51.704,51.273L36.845,35.82c3.79-3.801,6.138-9.041,6.138-14.82c0-11.58-9.42-21-21-21s-21,9.42-21,21s9.42,21,21,21
+                  c5.083,0,9.748-1.817,13.384-4.832l14.895,15.491c0.196,0.205,0.458,0.307,0.721,0.307c0.25,0,0.499-0.093,0.693-0.279
+                  C52.074,52.304,52.086,51.671,51.704,51.273z M21.983,40c-10.477,0-19-8.523-19-19s8.523-19,19-19s19,8.523,19,19
+                  S32.459,40,21.983,40z"/>
 
-            	</svg>
+            </svg>
 
-              </div>
-            </div>
-            <div class="flex-grow">&nbsp;</div>
-            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-              <button type="button" data-action="toggleModal" data-target="#new-product" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add Product</button>
             </div>
           </div>
-          <div class="mt-2 flex flex-col">
-            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                  <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-50">
-                      <tr>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">PRODUCT NAME</th>
-                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">PRODUCT DESCRIPTION</th>
-                        <%#<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">EDITORS</th>%>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">STATES</th>
-                        <%#
-                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                          <span class="sr-only">Edit</span>
-                        </th>
-                        %>
-                      </tr>
-                    </thead>
-                    <tbody id="products" class="searchable divide-y divide-gray-200 bg-white">
-                        <% if (productList.length) {
-                             productList.forEach((product) => {%>
-                      <tr class="hover:bg-indigo-50" data-action="#/product/<%=product.id%>">
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <div class="text-gray-900"><%= product.productName %></div>
-                          <%# <div class="text-gray-500">Optimization</div> %>
-                        </td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 text-green-800"><%= product.description %></span>
-                        </td>
-                        <%#
-                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                          <div class="flex items-center">
-                            <div class="h-10 w-10 flex-shrink-0">
-                              <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                              <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
-                            </div>
+          <div class="flex-grow">&nbsp;</div>
+          <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <button type="button" data-action="toggleModal" data-target="#new-product" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add Product</button>
+          </div>
+        </div>
+        <div class="mt-2 flex flex-col">
+          <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+              <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-300">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">PRODUCT NAME</th>
+                      <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">PRODUCT DESCRIPTION</th>
+                      <%#<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">EDITORS</th>%>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">STATES</th>
+                      <%#
+                      <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                        <span class="sr-only">Edit</span>
+                      </th>
+                      %>
+                    </tr>
+                  </thead>
+                  <tbody id="products" class="searchable divide-y divide-gray-200 bg-white">
+                      <% if (productList.length) {
+                            productList.forEach((product) => {%>
+                    <tr class="hover:bg-indigo-50 cursor-pointer" data-action="#/product/<%=product.id%>">
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <div class="text-gray-900"><%= product.productName %></div>
+                        <%# <div class="text-gray-500">Optimization</div> %>
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 text-green-800"><%= product.description %></span>
+                      </td>
+                      <%#
+                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                        <div class="flex items-center">
+                          <div class="h-10 w-10 flex-shrink-0">
+                            <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                            <img class="h-10 w-10 inline-block -m-2 rounded-full" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
                           </div>
-                        </td>
-                        %>
-                        <td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><%=product.states && product.states.join(', ')%></td>
-                        <%#<td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><x-tags>< product.tags ></x-tags></td>%>
-                      </tr>
-                      <%   });
-                         } else { %>
-                              <tr>
-                                <td class="px-3 py-4 text-center align-bottom" colspan="4">
-                                    <span class="text-sm text-gray-500 whitespace-nowrap">create your first product</span><br/>
-                                    <button type="button" data-action="toggleModal" data-target="#new-product" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 mt-1 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add Product</button>
-                                </td>
-                              </tr>
-                     <% }%>
-                    </tbody>
-                  </table>
-                </div>
+                        </div>
+                      </td>
+                      %>
+                      <td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><%=product.states && product.states.join(', ')%></td>
+                      <%#<td class="whitespace-wrap px-3 py-4 text-sm text-gray-500"><x-tags>< product.tags ></x-tags></td>%>
+                    </tr>
+                    <%   });
+                        } else { %>
+                            <tr>
+                              <td class="px-3 py-4 text-center align-bottom" colspan="4">
+                                  <span class="text-sm text-gray-500 whitespace-nowrap">create your first product</span><br/>
+                                  <button type="button" data-action="toggleModal" data-target="#new-product" class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 mt-1 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">Add Product</button>
+                              </td>
+                            </tr>
+                    <% }%>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
 
-    <div data-action="hideModal" data-modalin="translate-x-0" data-modalout="translate-x-full" id="new-product" class="translate-x-full transform transition ease-in-out duration-300 fixed inset-0 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div data-action="hideModal" data-modalin="translate-x-0" data-modalout="translate-x-full" id="new-product" class="translate-x-full transform transition ease-in-out duration-300 fixed inset-0 overflow-hidden z-50" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
       <div class="absolute inset-0 overflow-hidden">
         <!-- Background overlay, show/hide based on slide-over state. -->
         <div class="absolute inset-0" aria-hidden="true"></div>
