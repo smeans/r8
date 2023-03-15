@@ -623,7 +623,7 @@ function setupNotifyListener() {
         return;
     }
 
-    notifySocket = new WebSocket('wss:' + location.hostname + '/websocket/');
+    notifySocket = new WebSocket(`wss:${location.hostname}:${location.port}/websocket/`);
     notifySocket.onopen = (e) => {
         console.log(e);
     }
@@ -797,7 +797,7 @@ window['refreshTestForm'] = async (target) => {
 }
 
 window['logout'] = (e) => {
-    renderRequest('GET', '#/logout', null, updateState="replaceState");   
+    renderRequest('GET', '#/logout', null, updateState="replaceState");
 }
 
 window['cycleLoginMessage'] = (e) => {

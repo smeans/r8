@@ -61,6 +61,7 @@ app.use(upload.none());
 
 app.use(function (req, res, next) {
     req.proxyScheme = req.headers['x-scheme'] || req.protocol;
+    req.proxyServerPort = req.headers['x-serverport'] || '443';
 
     if (req.query._effectivedate) {
         req.effectiveDate = new Date(req.query._effectivedate);

@@ -530,7 +530,10 @@ async function renderLogin(req, res, next) {
 
     if (userEmail) {
         let user = await User.findById(User.normalizeEmail(userEmail));
+
         if (!user) {
+            console.debug("user does not exist", userEmail)
+
             try {
                 user = User.create({
                     email: userEmail
@@ -554,7 +557,9 @@ async function renderLogin(req, res, next) {
         if (loginSession) {
             session.loginSessionId = loginSession.id;
 
-            const confirmUrl = `${req.proxyScheme}://${req.hostname}?t=${loginSession.confirmSecret}#/confirmlogin`;
+            const hostname = req.proxyServerPort && req.proxyServerPort != '443' ? `${req.hostname}:${req.proxyServerPort}` : req.hostname;
+
+            const confirmUrl = `${req.proxyScheme}://${hostname}?t=${loginSession.confirmSecret}#/confirmlogin`;
 
             console.debug(`user ${loginSession.user.id}: confirm url ${confirmUrl}`);
 
@@ -583,6 +588,8 @@ async function renderLogout(req, res, next) {
         console.info('logout: deleting existing loginSession: ID', loginSession.id);
 
         await loginSession.user.cancelLogin(loginSessionId);
+
+        console.debug('logout: session cancelled')
 
         delete session.loginSessionId;
     }
