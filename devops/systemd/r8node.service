@@ -1,0 +1,13 @@
+[Service]
+ExecStart=/server_files/r8/devops/runr8.sh
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=r8node
+User=r8node
+Group=r8node
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+Requires=nginx
